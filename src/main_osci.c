@@ -16,85 +16,50 @@
 #include "uti.h"
 
 
+struct Osc_Device {
+    HDWF handle;
+    double max_freq_hz;
+    int n_channels;
+    char name[32];
+    char serial_number[32];
+};
+
+void osc_print_last_error() {
+    char szError[512];
+    FDwfGetLastErrorMsg(szError);
+    printf("ERROR: WaveFormSDK error: %s\n", szError);
+}
+
+bool osc_open_device(struct Osc_Device* device) {
+    // open first device
+    // TODO handle if device is already opened by other application. see samples device_enumeration in WaveFormsSDK.
+    if (!FDwfDeviceOpen(-1, &device->handle)) return false;
+    if (!FDwfAnalogInChannelCount(device->handle, &device->n_channels)) return false;
+    if (!FDwfAnalogInFrequencyInfo(device->handle, NULL, &device->max_freq_hz)) return false;
+    if (!FDwfEnumDeviceName (0, device->name)) return false;
+    if (!FDwfEnumSN(0, device->serial_number)) return false;
+
+    printf("device name:  %s\n", device->name);
+    printf("serial nmbr:  %s\n", device->serial_number);
+    printf("max frequncy: %.0f\n", device->max_freq_hz);
+    printf("number chan:  %d\n", device->n_channels);
+
+    return true;
+}
+
 
 int main() {
 
-    int cDevice;
-    int cChannel;
-    double hzFreq;
-    char szDeviceName[32];
-    char szSN[32];
-    int fIsInUse;
-    HDWF hdwf;
-    char szError[512];
+    struct Osc_Device device = {0};
 
-    // detect connected all supported devices
-    if(!FDwfEnum(enumfilterAll, &cDevice)){
-        FDwfGetLastErrorMsg(szError);
-        printf("FDwfEnum: %s\n", szError);
-        return 0;
+    if (! osc_open_device(&device)) {
+        osc_print_last_error();
+        exit(1);
     }
-    // list information about each device
-    printf("Found %d devices:\n", cDevice);
-    for(int i = 0; i < cDevice; i++){
-        // we use 0 based indexing
-        FDwfEnumDeviceName (i, szDeviceName);
-        FDwfEnumSN(i, szSN);
-        printf("\nDevice: %d name: %s %s\n", i+1, szDeviceName, szSN);
-        // before opening, check if the device isn’t already opened by other application, like: WaveForms
-        FDwfEnumDeviceIsOpened(i, &fIsInUse);
-        if(!fIsInUse){
-            if(!FDwfDeviceOpen(i, &hdwf)){
-                FDwfGetLastErrorMsg(szError);
-                printf("FDwfDeviceOpen: %s\n", szError);
-                continue;
-            }
-            FDwfAnalogInChannelCount(hdwf, &cChannel);
-            FDwfAnalogInFrequencyInfo(hdwf, NULL, &hzFreq);
-            printf("number of analog input channels: %d maximum freq.: %.0f Hz\n", cChannel, hzFreq);
-            FDwfDeviceClose(hdwf);
-            hdwf = hdwfNone;
-        }
-    }
-    // before application exit make sure to close all opened devices by this process
+
     FDwfDeviceCloseAll();
 
     exit(0);
-    /*
-    # enable all channels
-    dwf.FDwfAnalogInChannelEnableSet(device_data.handle, ctypes.c_int(0), ctypes.c_bool(True))
-
-    # set offset voltage (in Volts)
-    dwf.FDwfAnalogInChannelOffsetSet(device_data.handle, ctypes.c_int(0), ctypes.c_double(offset))
-
-    # set range (maximum signal amplitude in Volts)
-    dwf.FDwfAnalogInChannelRangeSet(device_data.handle, ctypes.c_int(0), ctypes.c_double(amplitude_range))
-
-    # set the buffer size (data point in a recording)
-    dwf.FDwfAnalogInBufferSizeSet(device_data.handle, ctypes.c_int(buffer_size))
-
-    # set the acquisition frequency (in Hz)
-    dwf.FDwfAnalogInFrequencySet(device_data.handle, ctypes.c_double(sampling_frequency))
-
-    # disable averaging (for more info check the documentation)
-    dwf.FDwfAnalogInChannelFilterSet(device_data.handle, ctypes.c_int(-1), constants.filterDecimate)
-    data.sampling_frequency = sampling_frequency
-    data.buffer_size = buffer_size
-
-
-     # set up the instrument
-    dwf.FDwfAnalogInConfigure(device_data.handle, ctypes.c_bool(False), ctypes.c_bool(False))
-
-    # read data to an internal buffer
-    dwf.FDwfAnalogInStatus(device_data.handle, ctypes.c_bool(False), ctypes.c_int(0))
-
-    # extract data from that buffer
-    voltage = ctypes.c_double()   # variable to store the measured voltage
-    dwf.FDwfAnalogInStatusSample(device_data.handle, ctypes.c_int(channel - 1), ctypes.byref(voltage))
-
-    # store the result as float
-    voltage = voltage.value
-    */
 
     int grid_w = 18;
     int grid_h = 15;
