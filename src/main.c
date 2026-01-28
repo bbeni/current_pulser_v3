@@ -160,7 +160,7 @@ int main() {
 
             if (mui_n_status_button(&charge_button_state, "CHARGE", STATUS_COLORS, 4, cb1_status, charge_button_area)) {
                 cb1_status += 1;
-                cb1_status %= 4;
+                if (cb1_status > 2) cb1_status = READY;
             }
 
 
