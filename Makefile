@@ -2,6 +2,7 @@
 PACK_RESOURCES := 1
 
 # Resources that need be packed (yes for now we need to add all here)
+# we want the font files to bue built into the executable
 PACKED_RESOURCES = \
 	resources/font/NimbusSans-Regular.ttf \
 	resources/font/NimbusSans-Bold.ttf \
@@ -34,7 +35,7 @@ THIRDPARTY_DIR := src/thirdparty
 
 # binaries
 RESOURCE_PACKER_BINARY := $(RESOURCES_BUILD_DIR)/packer$(EXT)
-TARGET := $(BUILD_DIR)/impedancer$(EXT)
+TARGET := $(BUILD_DIR)/current_pulser$(EXT)
 
 # Resources stuff
 COUNT := $(words $(PACKED_RESOURCES))

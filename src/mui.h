@@ -206,6 +206,8 @@ void mui_textinput(Mui_Textinput_State *state, const char *hint, Mui_Rectangle p
 void mui_textinput_multiline(Mui_Textinput_Multiline_State *state, const char *hint, Mui_Rectangle place);
 void mui_text_selectable(char* text, size_t *selector1, size_t *selector2, Mui_Rectangle place);
 bool mui_collapsable_section(Mui_Collapsable_Section_State *state, char* text, Mui_Rectangle place);
+bool mui_n_status_button(Mui_Button_State *state, const char* text, const Mui_Color* status_colors_array, int status_count, int status, Mui_Rectangle place);
+void mui_n_status_label(Mui_Theme* theme, const char* text, const Mui_Color* status_colors_array, int status_count, int status, MUI_TEXT_ALIGN_FLAGS text_align_flags, Mui_Rectangle place);
 
 //
 // window API platform
