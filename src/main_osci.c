@@ -101,10 +101,6 @@ void osc_create_measurement(struct Osc_Device* device, double** data_out, int* n
     // get the samples for each channel
     for (int c = 0; c < device->n_channels; c++) {
         FDwfAnalogInStatusData(device->handle, c, data, *n_samples_out);
-        // do something with it
-        for (int i = 0; i < *n_samples_out; i++) {
-            printf("%f\n", data[i]);
-        }
     }
 
     *data_out = data;
@@ -124,9 +120,26 @@ int main() {
     int n_data;
     osc_create_measurement(&device, &data, &n_data);
 
+    printf("measured %d data_points\n", n_data);
+
+    double step = 1.0 / device.max_freq_hz;
+    double end = n_data * step;
+    double* t_data;
+    t_data = malloc(sizeof(*t_data) * n_data);
+    for (int i = 0; i < n_data; i++) {
+        t_data[i] = i * step;
+    }
+
+
+    size_t n_interpol = 2000;
+    double* t_space = malloc(sizeof(double) * n_interpol);
+    double* data_interpolated = malloc(sizeof(double) * n_interpol);
+
+    // TODO: rename x_resamples to ..._out for consistency
+    mma_spline_cubic_natural(t_data, data, n_data, data_interpolated, t_space, n_interpol);
+
     FDwfDeviceCloseAll();
 
-    exit(0);
 
     int grid_w = 18;
     int grid_h = 15;
@@ -158,7 +171,10 @@ int main() {
         mui_label(&mui_protos_theme_g, "PULSER V3 OSCILLOSCOPE", MUI_TEXT_ALIGN_DEFAULT, menu_bar_area);
 
         Mui_Rectangle scope_rect = mui_shrink(screen, grid_pixel_unit);
-        gra_xy_plot_labels_and_grid("t [s]", "A [V]", 0, 1, -1, 1, 0.1, 0.2, true, scope_rect);
+        Mui_Rectangle plot_rect = gra_xy_plot_labels_and_grid("t [s]", "A [V]", 0, end, -0.1, 0.1, end / 8, 0.02, true, scope_rect);
+
+
+        gra_xy_plot_data_points(t_space, data_interpolated, NULL, n_interpol, 0, end, -0.1, 0.1, MUI_GREEN, 2.0f, plot_rect);
 
 
         mui_end_drawing();
