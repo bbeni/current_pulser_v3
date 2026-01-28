@@ -1,0 +1,6 @@
+build/
+.vscode/
+src/thirdparty/raylib-5.5/
+src/thirdparty/raylib-5.5-linux/
+*.tar.gz
+*.zip
