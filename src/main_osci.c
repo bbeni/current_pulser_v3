@@ -59,7 +59,8 @@ bool osc_open_device(struct Osc_Device* device) {
 }
 
 
-void osc_create_measurement(struct Osc_Device* device, double* data_out, int* n_samples_out) {
+// make sure you free data_out
+void osc_create_measurement(struct Osc_Device* device, double** data_out, int* n_samples_out) {
 
     // enable channels
     for(int c = 0; c < device->n_channels; c++){
@@ -75,7 +76,8 @@ void osc_create_measurement(struct Osc_Device* device, double* data_out, int* n_
     FDwfAnalogInBufferSizeInfo(device->handle, NULL, n_samples_out);
     FDwfAnalogInBufferSizeSet(device->handle, *n_samples_out);
 
-    data_out = malloc(sizeof(*data_out) * *n_samples_out);
+    double* data;
+    data = malloc(sizeof(*data) * *n_samples_out);
 
     // configure trigger
     FDwfAnalogInTriggerSourceSet(device->handle, trigsrcDetectorAnalogIn);
@@ -98,12 +100,14 @@ void osc_create_measurement(struct Osc_Device* device, double* data_out, int* n_
 
     // get the samples for each channel
     for (int c = 0; c < device->n_channels; c++) {
-        FDwfAnalogInStatusData(device->handle, c, data_out, *n_samples_out);
+        FDwfAnalogInStatusData(device->handle, c, data, *n_samples_out);
         // do something with it
         for (int i = 0; i < *n_samples_out; i++) {
-            printf("%f\n", data_out[i]);
+            printf("%f\n", data[i]);
         }
     }
+
+    *data_out = data;
 }
 
 
@@ -115,6 +119,10 @@ int main() {
         osc_print_last_error();
         exit(1);
     }
+
+    double* data;
+    int n_data;
+    osc_create_measurement(&device, &data, &n_data);
 
     FDwfDeviceCloseAll();
 
