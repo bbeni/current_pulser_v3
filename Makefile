@@ -76,6 +76,11 @@ all: $(TARGET)
 run: $(TARGET)
 	$(TARGET) $(ARGS)
 
+.PHONY: install
+install: $(TARGET)
+# this is kinda stupid to just put it one level of directories up
+	cp $(TARGET) ..
+
 $(BUILD_DIR):
 	mkdir -p $(BUILD_DIR)
 
