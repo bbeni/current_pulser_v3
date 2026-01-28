@@ -133,6 +133,12 @@ int main() {
 
     size_t n_interpol = 2000;
     double* t_space = malloc(sizeof(double) * n_interpol);
+
+    double stretch = 1.0f;
+    double interp_step = end * stretch / n_interpol;
+    for (size_t i = 0; i < n_interpol; i++) {
+        t_space[i] = i * interp_step;
+    }
     double* data_interpolated = malloc(sizeof(double) * n_interpol);
 
     // TODO: rename x_resamples to ..._out for consistency
@@ -174,7 +180,7 @@ int main() {
         Mui_Rectangle plot_rect = gra_xy_plot_labels_and_grid("t [s]", "A [V]", 0, end, -0.1, 0.1, end / 8, 0.02, true, scope_rect);
 
 
-        gra_xy_plot_data_points(t_space, data_interpolated, NULL, n_interpol, 0, end, -0.1, 0.1, MUI_GREEN, 2.0f, plot_rect);
+        gra_xy_plot_data_points(t_space, data_interpolated, NULL, n_interpol, 0, end * stretch, -0.05, 0.05, MUI_YELLOW, 1.0f, plot_rect);
 
 
         mui_end_drawing();
