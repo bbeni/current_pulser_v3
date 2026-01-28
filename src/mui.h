@@ -162,6 +162,8 @@ Mui_Slider_State mui_slider_state();
 Mui_Collapsable_Section_State mui_collapsable_state();
 Mui_Textinput_State mui_textinput_state();
 
+
+
 //
 // mui.h utility API
 //
@@ -179,6 +181,16 @@ void mui_grid_22(Mui_Rectangle r, float factor_x, float factor_y, Mui_Rectangle 
 bool mui_is_inside_rectangle(Mui_Vector2, Mui_Rectangle);
 void mui_center_rectangle_inside_rectangle(Mui_Rectangle* inner, Mui_Rectangle outer);
 
+typedef enum {
+    MUI_TEXT_ALIGN_DEFAULT = 0x0,
+    MUI_TEXT_ALIGN_LEFT = 0x1,
+    MUI_TEXT_ALIGN_CENTER = 0x2,
+    MUI_TEXT_ALIGN_RIGHT = 0x4,
+    MUI_TEXT_ALIGN_TOP = 0x8,
+    MUI_TEXT_ALIGN_MID = 0x10,
+    MUI_TEXT_ALIGN_BOTTOM = 0x20,
+} MUI_TEXT_ALIGN_FLAGS;
+
 //
 // mui elements API
 //
@@ -188,7 +200,7 @@ bool mui_load_ttf_font_for_theme(const char *font_file, Mui_Theme* theme);
 Mui_Rectangle mui_window_decoration(float height, bool window_movable, bool closeable, bool minimizable, bool maximizable, bool to_the_right, Mui_Rectangle window_rect);
 bool mui_button(Mui_Button_State *state, const char* text, Mui_Rectangle place);
 void mui_checkbox(Mui_Checkbox_State *state, const char *text, Mui_Rectangle place);
-void mui_label(Mui_Theme *theme, char *text, Mui_Rectangle place);
+void mui_label(Mui_Theme *theme, char *text, MUI_TEXT_ALIGN_FLAGS text_align_flags, Mui_Rectangle place);
 float mui_simple_slider(Mui_Slider_State *state, bool vertical, Mui_Rectangle place);
 void mui_textinput(Mui_Textinput_State *state, const char *hint, Mui_Rectangle place);
 void mui_textinput_multiline(Mui_Textinput_Multiline_State *state, const char *hint, Mui_Rectangle place);
