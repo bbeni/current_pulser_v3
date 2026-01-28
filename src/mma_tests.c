@@ -1,5 +1,5 @@
 // Copyright (C) 2026 Benjamin Froelich
-// This file is part of https://github.com/bbeni/impedancer
+// This file is part of https://github.com/bbeni/current_pulser_v3
 // For conditions of distribution and use, see copyright notice in project root.
 #include "stdbool.h"
 #include "stdio.h"
