@@ -250,6 +250,7 @@ void mui_close_window();
 size_t mui_text_len(const char* text, size_t size);
 
 double mui_get_time();
+double mui_previous_time();
 void mui_update_core();
 
 //

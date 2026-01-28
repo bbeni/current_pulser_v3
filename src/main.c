@@ -40,9 +40,19 @@ int main() {
     const char* STATUS_NAMES[4] = {"OFF", "CHARGE", "READY", "ERROR"};
     const Mui_Color STATUS_COLORS[4] = {MUI_GRAY, MUI_ORANGE, MUI_GREEN, MUI_RED};
 
-    int ps_status = 0;
+    int standby_status = 0;
+    int charging_status = 0;
     int cb1_status = 0;
     int cb2_status = 0;
+
+    // TODO: rearm cooldonw should be 90 seconds
+    const float REARM_COOLDOWN_SECONDS = 20.0f;
+    float rearm_needed_time_stamp = -1000.0f;
+
+    const float fake_charging_time_seconds = 10.0f;
+    float fake_charging_time_stamp_cb1 = -1000.0f;
+    float fake_charging_time_stamp_cb2 = -1000.0f;
+
 
     while (!mui_window_should_close())
     {
@@ -95,6 +105,44 @@ int main() {
         top_area = mui_cut_left(top_area, 6 * grid_pixel_unit, &panel_3_area);
         top_area = mui_cut_left(top_area, 1 * grid_pixel_unit, NULL);
 
+
+        // LOGIC
+        bool rearmed = mui_get_time() > rearm_needed_time_stamp + REARM_COOLDOWN_SECONDS;
+
+        // fake simulate charging
+        float fake_cb1_cooldown = fake_charging_time_stamp_cb1 - mui_get_time() + fake_charging_time_seconds;
+        if (fake_cb1_cooldown < 0) {
+            if (cb1_status == CHARGE) {
+                cb1_status = READY;
+                cb2_status = CHARGE;
+                fake_charging_time_stamp_cb2 = mui_get_time();
+            }
+        }
+        float fake_cb2_cooldown = fake_charging_time_stamp_cb2 - mui_get_time() + fake_charging_time_seconds;
+        if (fake_cb2_cooldown < 0) {
+            if (cb1_status == READY) {
+                if (cb2_status == CHARGE) {
+                    cb2_status = READY;
+                }
+            }
+        }
+
+
+        if (cb1_status == OFF && cb2_status == OFF) {
+            charging_status = OFF;
+        } else if (cb1_status == READY && cb2_status == READY) {
+            charging_status = READY;
+        } else {
+            charging_status = CHARGE;
+        }
+
+        float rearm_cooldown = rearm_needed_time_stamp - mui_get_time() + REARM_COOLDOWN_SECONDS;
+        if (rearm_cooldown < 0 && (charging_status == OFF || charging_status == READY) ) {
+            standby_status = READY;
+        } else {
+            standby_status = OFF;
+        }
+
         //
         // panel 1
         //
@@ -102,8 +150,19 @@ int main() {
             Mui_Rectangle standby_button_area;
             Mui_Rectangle power_supply_area = mui_cut_top(panel_1_area, 1 * grid_pixel_unit, &standby_button_area);
 
-            if (mui_n_status_button(&standby_button_state, "STANDBY", STATUS_COLORS, 4, 0, standby_button_area)) {
-                cb1_status = OFF;
+            char standby_label[20];
+            if (rearm_cooldown > 0) {
+                snprintf(standby_label, 20-1, "STANDBY (%.0f s)", rearm_cooldown);
+            } else {
+                snprintf(standby_label, 20-1, "STANDBY");
+            }
+
+            if (mui_n_status_button(&standby_button_state, standby_label, STATUS_COLORS, 4, standby_status, standby_button_area)) {
+                if (charging_status == READY) {
+                    cb1_status = OFF;
+                    cb2_status = OFF;
+                    rearm_needed_time_stamp = mui_get_time();
+                }
             }
 
 
@@ -138,8 +197,29 @@ int main() {
 
             mui_draw_rectangle_lines(u_rect, MUI_BLACK, 2.0f);
             mui_draw_rectangle_lines(i_rect, MUI_BLACK, 2.0f);
-            mui_label(&mui_protos_theme_g, "1'654 V", MUI_TEXT_ALIGN_RIGHT, u_rect);
-            mui_label(&mui_protos_theme_g, "295 mA", MUI_TEXT_ALIGN_RIGHT, i_rect);
+
+            // fake power supply
+            float fake_voltage = 0;
+            float fake_current = 0;
+            if (cb1_status == CHARGE) {
+                float t = 1 - fake_cb1_cooldown / fake_charging_time_seconds;
+                mma_clampf(&t, 0.0f, 1.0f);
+                fake_voltage = 1654 * t;
+                fake_current = 296;
+            }
+            if (cb2_status == CHARGE) {
+                float t = 1 - fake_cb2_cooldown / fake_charging_time_seconds;
+                mma_clampf(&t, 0.0f, 1.0f);
+                fake_voltage = 1654 * t;
+                fake_current = 302;
+            }
+            char voltage_label[20];
+            snprintf(voltage_label, 20-1, "%.0f V", fake_voltage);
+            char current_label[20];
+            snprintf(current_label, 20-1, "%.0f mA", fake_current);
+
+            mui_label(&mui_protos_theme_g, voltage_label, MUI_TEXT_ALIGN_RIGHT, u_rect);
+            mui_label(&mui_protos_theme_g, current_label, MUI_TEXT_ALIGN_RIGHT, i_rect);
             mui_label(&mui_protos_theme_g, "U", MUI_TEXT_ALIGN_CENTER, u_label_rect);
             mui_label(&mui_protos_theme_g, "I", MUI_TEXT_ALIGN_CENTER, i_label_rect);
 
@@ -158,9 +238,13 @@ int main() {
             Mui_Rectangle charge_button_area;
             Mui_Rectangle cap_bank_1_area = mui_cut_top(panel_2_area, 1 * grid_pixel_unit, &charge_button_area);
 
-            if (mui_n_status_button(&charge_button_state, "CHARGE", STATUS_COLORS, 4, cb1_status, charge_button_area)) {
-                cb1_status += 1;
-                if (cb1_status > 2) cb1_status = READY;
+            // LOGIC
+            if (mui_n_status_button(&charge_button_state, "CHARGE", STATUS_COLORS, 4, charging_status, charge_button_area)) {
+                if (rearmed && charging_status == OFF) {
+                    cb1_status = CHARGE;
+                    fake_charging_time_stamp_cb1 = mui_get_time();
+                    assert(cb2_status == OFF);
+                }
             }
 
 
@@ -207,7 +291,7 @@ int main() {
 
             float ps_status_radius = grid_pixel_unit * 0.33333333f;
             Mui_Vector2 ps_status_center = mui_center_of_rectangle(cb1_enable_rect);
-            mui_draw_circle(ps_status_center, ps_status_radius, MUI_GREEN);
+            mui_draw_circle(ps_status_center, ps_status_radius, STATUS_COLORS[READY]);
 
             mui_cut_bot(mui_cut_bot(cb1_enable_rect, 0.33333f * grid_pixel_unit, NULL), 1 * grid_pixel_unit, &cb1_status_label_rect);
             mui_label(&mui_protos_theme_g, "EN", MUI_TEXT_ALIGN_CENTER, cb1_status_label_rect);
@@ -223,15 +307,17 @@ int main() {
             Mui_Rectangle cap_bank_2_area = mui_cut_top(panel_3_area, 1 * grid_pixel_unit, &fire_button_area);
 
 
-            // fire status
+            // LOGIC
             int fire_status = OFF;
-            if (cb1_status == READY) {
+            if (charging_status == READY) {
                 fire_status = READY;
             }
 
             if (mui_n_status_button(&fire_button_state, "FIRE", STATUS_COLORS, 4, fire_status, fire_button_area)) {
                 if (fire_status == READY) {
                     cb1_status = OFF;
+                    cb2_status = OFF;
+                    rearm_needed_time_stamp = mui_get_time();
                 }
             }
 
@@ -280,7 +366,7 @@ int main() {
 
             float ps_status_radius = grid_pixel_unit * 0.33333333f;
             Mui_Vector2 ps_status_center = mui_center_of_rectangle(cb2_enable_rect);
-            mui_draw_circle(ps_status_center, ps_status_radius, STATUS_COLORS[OFF]);
+            mui_draw_circle(ps_status_center, ps_status_radius, STATUS_COLORS[READY]);
 
             mui_cut_bot(mui_cut_bot(cb2_enable_rect, 0.33333f * grid_pixel_unit, NULL), 1 * grid_pixel_unit, &cb2_status_label_rect);
             mui_label(&mui_protos_theme_g, "EN", MUI_TEXT_ALIGN_CENTER, cb2_status_label_rect);

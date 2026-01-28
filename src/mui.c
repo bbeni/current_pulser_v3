@@ -12,14 +12,26 @@
 
 
 // globals need to be updated by calling mui_update_input()
-float mui_global_time_internal = 0.0f;
-Mui_Vector2 mui_global_mouse_position_internal = {0};
+float _internal_global_time = 0.0f;
+float _internal_global_previous_time = -0.001f;
+Mui_Vector2 _internal_global_mouse_position = {0};
 
-double mui_get_time() {return mui_global_time_internal;}
-Mui_Vector2 mui_get_mouse_position() {return mui_global_mouse_position_internal;}
+double mui_get_time() {
+    return _internal_global_time;
+}
+
+double mui_previous_time() {
+    return _internal_global_previous_time;
+}
+
+Mui_Vector2 mui_get_mouse_position() {
+    return _internal_global_mouse_position;
+}
+
 void mui_update_core() {
-    mui_global_mouse_position_internal = mui_get_mouse_position_now();
-    mui_global_time_internal = mui_get_time_now();
+    _internal_global_previous_time = _internal_global_time;
+    _internal_global_time = mui_get_time_now();
+    _internal_global_mouse_position = mui_get_mouse_position_now();
 }
 
 
