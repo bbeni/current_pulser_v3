@@ -269,7 +269,7 @@ int main() {
     double t_min_data = -t_total * 0.5f;
     double t_max_data = t_min_data + t_total;
 
-    size_t n_interpol = 2000;
+    size_t n_interpol = 3000;
 
     double* t_data;
     double* t_space;
