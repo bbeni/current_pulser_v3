@@ -274,7 +274,6 @@ int main() {
             osc_shift_screen_update(&device, data, n_data);
         } else {
             if (osc_triggered_update(&device, trigger_armed_cooldown, data, n_data)) {
-                Sleep(1000);
                 trigger_armed_cb_state.checked = false;
             }
         }
