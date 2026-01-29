@@ -238,7 +238,7 @@ bool osc_triggered_update(struct Osc_Device* device, float trigger_cooldown, dou
     return true;
 }
 
-bool osc_cleanup_data(double* data) {
+void osc_cleanup_data(double* data) {
     free(data);
 }
 
@@ -301,6 +301,8 @@ int main() {
     Mui_Checkbox_State trigger_armed_cb_state = {0};
     const float TRIGGER_ARM_COOLDOWN = 2.0f;
     float trigger_armed_timestamp = -10000.0f;
+    bool triggerd_data_aquired = false;
+
 
     while (!mui_window_should_close())
     {
@@ -309,11 +311,10 @@ int main() {
         float trigger_armed_cooldown = TRIGGER_ARM_COOLDOWN + trigger_armed_timestamp - mui_get_time();
 
         if (trigger_armed_cb_state.checked) {
-            if (osc_triggered_update(&device, trigger_armed_cooldown, data, n_data)) {
-                trigger_armed_cb_state.checked = false;
-                Wait(1);
-                osc_cleanup_data(data);
-                osc_shift_screen_setup(&device, &data, &n_data);
+            if (!triggerd_data_aquired) {
+                if (osc_triggered_update(&device, trigger_armed_cooldown, data, n_data)) {
+                    triggerd_data_aquired = true;
+                }
             }
         } else {
             osc_shift_screen_update(&device, data, n_data);
@@ -357,12 +358,18 @@ int main() {
         }
 
         if (mui_checkbox(&trigger_armed_cb_state, trigger_label_text, trigger_menu_rect)) {
+            // checkbox toggeled
             if (trigger_armed_cb_state.checked) {
+                // TRIGGERED DATA setup
                 osc_cleanup_data(data);
                 osc_triggered_setup(&device, &data, &n_data);
-                // we arm the trigger
                 osc_triggered_arm_trigger(&device, 1.0f, 0, OSC_TRIGGER_TYPE_EDGE, 2.0f, OSC_TRIGGER_CONDITION_RISING_POSITIVE);
                 trigger_armed_timestamp = mui_get_time();
+                triggerd_data_aquired = false;
+            } else {
+                // SHIFT_SCREEN DATA setup
+                osc_cleanup_data(data);
+                osc_shift_screen_setup(&device, &data, &n_data);
             }
         }
 
