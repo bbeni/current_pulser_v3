@@ -340,8 +340,8 @@ int main() {
 
         Mui_Rectangle trigger_menu_bar_rect;
         Mui_Rectangle trigger_menu_rect;
-        scope_rect = mui_cut_top(scope_rect, 1 * grid_pixel_unit, &trigger_menu_bar_rect);
-        scope_rect = mui_cut_top(scope_rect, 1 * grid_pixel_unit, NULL);
+        scope_rect = mui_cut_top(scope_rect, 0.5f * grid_pixel_unit, &trigger_menu_bar_rect);
+        scope_rect = mui_cut_top(scope_rect, 0.5f * grid_pixel_unit, NULL);
 
         mui_cut_right(trigger_menu_bar_rect, 5 * grid_pixel_unit, &trigger_menu_rect);
 
@@ -351,7 +351,7 @@ int main() {
             snprintf(trigger_label_text, 39, "TRIGGER (%.1f s)", trigger_armed_cooldown);
         } else {
             if (trigger_armed_cb_state.checked && !triggerd_data_aquired) {
-                snprintf(trigger_label_text, 39, "TRIGGER (armed / waiting)");
+                snprintf(trigger_label_text, 39, "TRIGGER (armed)");
             } else {
                 snprintf(trigger_label_text, 39, "TRIGGER");
             }
