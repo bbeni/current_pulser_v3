@@ -173,8 +173,37 @@ typedef enum {
     OSC_TRIGGER_CONDITION_FALLING_NEGATIVE = 1, //trigcondFallingNegative  = 1;
 } OSC_TRIGGER_CONDITION;
 
+
+// remember to free data_out
+void osc_triggered_setup(struct Osc_Device* device, double** data_out, int* n_samples_out) {
+
+    // enable channels
+    for(int c = 0; c < device->n_channels; c++){
+        FDwfAnalogInChannelEnableSet(device->handle, c, true);
+    }
+    // set 5V pk2pk input range for all channels
+    FDwfAnalogInChannelRangeSet(device->handle, -1, 5);
+
+    // 20MHz sample rate
+    FDwfAnalogInFrequencySet(device->handle, 20000000.0);
+
+    // get the maximum buffer size
+    FDwfAnalogInBufferSizeInfo(device->handle, NULL, n_samples_out);
+    FDwfAnalogInBufferSizeSet(device->handle, *n_samples_out);
+    FDwfAnalogInAcquisitionModeSet(device->handle, acqmodeSingle);
+
+    double* data;
+    data = malloc(sizeof(*data) * *n_samples_out);
+    memset(data, 0x0, sizeof(*data) * *n_samples_out);
+
+    *data_out = data;
+
+    // start
+    FDwfAnalogInConfigure(device->handle, 0, true);
+}
+
 // wait at least 2 seconds with Analog Discovery for the offset to stabilize, before the first reading after device open or offset/range change
-void osc_arm_trigger(struct Osc_Device* device, float time_out, int channel, OSC_TRIGGER_TYPE trigger_type, float trigger_level, OSC_TRIGGER_CONDITION trigger_condition) {
+void osc_triggered_arm_trigger(struct Osc_Device* device, float time_out, int channel, OSC_TRIGGER_TYPE trigger_type, float trigger_level, OSC_TRIGGER_CONDITION trigger_condition) {
     // configure trigger
     FDwfAnalogInTriggerSourceSet(device->handle, trigsrcDetectorAnalogIn);
     FDwfAnalogInTriggerAutoTimeoutSet(device->handle, time_out);
@@ -223,7 +252,9 @@ int main() {
     double* data;
     int n_data;
     //osc_create_measurement(&device, &data, &n_data);
-    osc_shift_screen_setup(&device, &data, &n_data);
+    //osc_shift_screen_setup(&device, &data, &n_data);
+    osc_triggered_setup(&device, &data, &n_data);
+
 
     printf("setup %d data_point measurement\n", n_data);
 
@@ -325,7 +356,7 @@ int main() {
             if (trigger_armed_cb_state.checked) {
                 // we arm the trigger
                 trigger_armed_timestamp = mui_get_time();
-                osc_arm_trigger(&device, 1.0f, 0, OSC_TRIGGER_TYPE_EDGE, 2.0f, OSC_TRIGGER_CONDITION_RISING_POSITIVE);
+                osc_triggered_arm_trigger(&device, 1.0f, 0, OSC_TRIGGER_TYPE_EDGE, 2.0f, OSC_TRIGGER_CONDITION_RISING_POSITIVE);
             }
         }
 
