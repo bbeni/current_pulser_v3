@@ -304,7 +304,9 @@ int main() {
     bool triggerd_data_aquired = false;
 
     Mui_Slider_State y_slider_state = {0};
+    y_slider_state.value = 1.0f;
     Mui_Slider_State t_slider_state = {0};
+    t_slider_state.value = 1.0f;
 
     while (!mui_window_should_close())
     {

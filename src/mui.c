@@ -818,7 +818,7 @@ float mui_simple_slider(Mui_Slider_State *state, bool vertical, Mui_Rectangle pl
 
         Mui_Rectangle wagon;
         wagon.x = place.x + 0.5f * place.width - 0.5f * theme->slider_wagon_height;
-        wagon.y = state->value * w + place.y;
+        wagon.y = (1.0f - state->value) * w + place.y;
         wagon.width = theme->slider_wagon_height;
         wagon.height = theme->slider_wagon_width;
 
