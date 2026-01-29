@@ -134,67 +134,70 @@ void osc_shift_screen_setup(struct Osc_Device* device, double** data_out, int* n
     *data_out = data;
 }
 
-void osc_shift_screen_update(struct Osc_Device* device) {
-    // scan bar
-    int bar_index;
-    FDwfDigitalInStatusIndexWrite(device->handle, &bar_index);
+void osc_shift_screen_update(struct Osc_Device* device, double* data_out, int n_samples) {
 
     // start
     FDwfAnalogInConfigure(device->handle, 0, true);
 
-    printf("Waiting for triggered or auto acquisition\n");
     do {
         FDwfAnalogInStatus(device->handle, true, &device->status);
     } while (device->status != stsDone);
 
     // get the samples for each channel
     for (int c = 0; c < device->n_channels; c++) {
-        // FDwfAnalogInStatusData(device->handle, c, data, *n_samples_out);
+        FDwfAnalogInStatusData(device->handle, c, data_out, n_samples);
     }
 
+    // scan bar
+    int bar_index;
+    FDwfDigitalInStatusIndexWrite(device->handle, &bar_index);
+
 }
+
 
 
 int main() {
 
     struct Osc_Device device = {0};
 
-    if (! osc_open_device(&device)) {
+    if (!osc_open_device(&device)) {
         osc_print_last_error();
         exit(1);
     }
 
     double* data;
     int n_data;
-    osc_create_measurement(&device, &data, &n_data);
+    //osc_create_measurement(&device, &data, &n_data);
+    osc_shift_screen_setup(&device, &data, &n_data);
 
-    printf("measured %d data_points\n", n_data);
+    printf("setup %d data_point measurement\n", n_data);
 
+    //
+    // setup arrays for data interpolation
+    //
     double step = 1.0 / device.max_freq_hz;
     double end = n_data * step;
+    size_t n_interpol = 2000;
+    double stretch = 1.0f;
+    double interp_step = end * stretch / n_interpol;
+
     double* t_data;
+    double* t_space;
+    double* data_interpolated;
+
     t_data = malloc(sizeof(*t_data) * n_data);
+    data_interpolated = malloc(sizeof(double) * n_interpol);
+    t_space = malloc(sizeof(double) * n_interpol);
+
     for (int i = 0; i < n_data; i++) {
         t_data[i] = i * step;
     }
-
-
-    size_t n_interpol = 2000;
-    double* t_space = malloc(sizeof(double) * n_interpol);
-
-    double stretch = 1.0f;
-    double interp_step = end * stretch / n_interpol;
     for (size_t i = 0; i < n_interpol; i++) {
         t_space[i] = i * interp_step;
     }
-    double* data_interpolated = malloc(sizeof(double) * n_interpol);
-
-    // TODO: rename x_resamples to ..._out for consistency
-    mma_spline_cubic_natural(t_data, data, n_data, data_interpolated, t_space, n_interpol);
-
-    FDwfDeviceCloseAll();
 
 
+    // ui stuff
     int grid_w = 18;
     int grid_h = 15;
     int grid_pixel_unit = 50;
@@ -210,6 +213,12 @@ int main() {
     while (!mui_window_should_close())
     {
         mui_update_core();
+
+
+        osc_shift_screen_update(&device, data, n_data);
+
+        // TODO: rename x_resamples to ..._out for consistency
+        mma_spline_cubic_natural(t_data, data, n_data, data_interpolated, t_space, n_interpol);
 
         w = mui_screen_width();
         h = mui_screen_height();
@@ -236,6 +245,8 @@ int main() {
     }
 
     mui_close_window();
+
+    FDwfDeviceCloseAll();
 
     return 0;
 }
