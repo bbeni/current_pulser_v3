@@ -190,16 +190,10 @@ bool osc_triggered_update(struct Osc_Device* device, float trigger_cooldown, dou
 
     if (trigger_cooldown > 0) return false;
 
-    FDwfAnalogInStatus(device->handle, false, &device->status);
-    if (device->status == stsPrefill) {
-        // arm the trigger
-        printf("reached stsPrefill\n");
-        FDwfAnalogInConfigure(device->handle, 0, true);
-        FDwfAnalogInStatus(device->handle, false, &device->status);
-        assert(device->status == stsArm);
-    }
+    // start (waiting for trigger)
+    FDwfAnalogInConfigure(device->handle, 0, true);
 
-    // wait for the data to be here
+    // read data if it is here
     FDwfAnalogInStatus(device->handle, true, &device->status);
     if (device->status != stsDone) return false;
 
@@ -280,6 +274,7 @@ int main() {
             osc_shift_screen_update(&device, data, n_data);
         } else {
             if (osc_triggered_update(&device, trigger_armed_cooldown, data, n_data)) {
+                printf("we have read data\n");
                 Wait(1);
                 trigger_armed_cb_state.checked = false;
             }
@@ -340,9 +335,8 @@ int main() {
         uti_temp_reset();
     }
 
-    mui_close_window();
-
     FDwfDeviceClose(device.handle);
+    mui_close_window();
 
     return 0;
 }
