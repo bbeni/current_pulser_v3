@@ -139,23 +139,25 @@ void osc_shift_screen_setup(struct Osc_Device* device, double** data_out, int* n
 
 void osc_shift_screen_update(struct Osc_Device* device, double* data_out, int n_samples) {
 
-    if (FDwfAnalogInStatus(device->handle, true, &device->status) == stsDone) return;
+    if (!FDwfAnalogInStatus(device->handle, true, &device->status)) return;
+    if (device->status == stsDone) return;
 
-    int n_valid_samples;
-    FDwfDigitalInStatusSamplesValid(device->handle, &n_valid_samples);
-
-    printf("number of valid samples: %d\n", n_valid_samples);
 
     // get the samples for each channel
     for (int c = 0; c < device->n_channels; c++) {
         FDwfAnalogInStatusData(device->handle, c, data_out, n_samples);
     }
 
+    /*
+    int n_valid_samples;
+    FDwfDigitalInStatusSamplesValid(device->handle, &n_valid_samples);
+    printf("number of valid samples: %d\n", n_valid_samples);
+
     // scan bar
     int bar_index;
     FDwfDigitalInStatusIndexWrite(device->handle, &bar_index);
     printf("scan bar index: %d\n", bar_index);
-
+    */
 }
 
 
