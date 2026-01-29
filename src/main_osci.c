@@ -322,8 +322,7 @@ int main() {
             osc_shift_screen_update(&device, data, n_data);
         };
 
-        // TODO: mui: rename x_resamples to ..._out for consistency
-        mma_spline_cubic_natural(t_data, data, n_data, data_interpolated, t_space, n_interpol);
+
 
         w = mui_screen_width();
         h = mui_screen_height();
@@ -385,6 +384,9 @@ int main() {
 
         mui_simple_slider(&y_slider_state, true, y_slider_rect);
         mui_simple_slider(&t_slider_state, false, t_slider_rect);
+
+        // TODO: mui: rename x_resamples to ..._out for consistency
+        mma_spline_cubic_natural(t_data, data, n_data, data_interpolated, t_space, n_interpol);
 
         Mui_Rectangle plot_rect = gra_xy_plot_labels_and_grid("t [s]", "A [V]", 0, end, -2, 2, end / 8, 0.1, true, scope_rect);
         gra_xy_plot_data_points(t_space, data_interpolated, NULL, n_interpol, 0, end, -2, 2, MUI_YELLOW, 1.0f, plot_rect);
