@@ -774,7 +774,7 @@ float mui_simple_slider(Mui_Slider_State *state, bool vertical, Mui_Rectangle pl
     if (state->grabbed) {
 
         float s;
-        if (vertical) s = fmin(fmax(0.0f, (place.y - mpos.y) / place.height), 1.0f);
+        if (vertical) s = 1.0f - fmin(fmax(0.0f, (mpos.y - place.y) / place.height), 1.0f);
         else          s = fmin(fmax(0.0f, (mpos.x - place.x) / place.width), 1.0f);
         state->value = s;
         mui_move_towards(&(state->hover_t), 1, theme->animation_speed_to_hover, dt);
