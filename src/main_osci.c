@@ -79,7 +79,6 @@ void osc_create_measurement(struct Osc_Device* device, double** data_out, int* n
     double* data;
     data = malloc(sizeof(*data) * *n_samples_out);
 
-    /*
     // configure trigger
     FDwfAnalogInTriggerSourceSet(device->handle, trigsrcDetectorAnalogIn);
     FDwfAnalogInTriggerAutoTimeoutSet(device->handle, 10.0);
@@ -90,7 +89,6 @@ void osc_create_measurement(struct Osc_Device* device, double** data_out, int* n
 
     // wait at least 2 seconds with Analog Discovery for the offset to stabilize, before the first reading after device open or offset/range change
     Wait(2);
-    */
 
     // start
     FDwfAnalogInConfigure(device->handle, 0, true);
@@ -181,6 +179,33 @@ void osc_arm_trigger(struct Osc_Device* device, float time_out, int channel, OSC
 }
 
 
+// cooldown after configuring the trigger needs to be at least 2s
+// returns true when done
+bool osc_triggered_update(struct Osc_Device* device, float trigger_cooldown, double* data_out, int n_samples) {
+
+    if (trigger_cooldown > 0) return false;
+
+    FDwfAnalogInStatus(device->handle, false, &device->status);
+    if (device->status == stsPrefill) {
+        // arm the trigger
+        FDwfAnalogInConfigure(device->handle, 0, true);
+        FDwfAnalogInStatus(device->handle, false, &device->status);
+        assert(device->status == stsArm);
+    }
+
+    // wait for the data to be here
+    FDwfAnalogInStatus(device->handle, true, &device->status);
+    if (device->status == stsNotDone) return false;
+
+    // get the samples for each channel
+    for (int c = 0; c < device->n_channels; c++) {
+        FDwfAnalogInStatusData(device->handle, c, data_out, n_samples);
+    }
+
+    return true;
+}
+
+
 
 int main() {
 
@@ -247,6 +272,11 @@ int main() {
 
         if (!trigger_armed_cb_state.checked) {
             osc_shift_screen_update(&device, data, n_data);
+        } else {
+            if (osc_triggered_update(&device, trigger_armed_cooldown, data, n_data)) {
+                Wait(20);
+                exit(0);
+            }
         }
 
         // TODO: rename x_resamples to ..._out for consistency
@@ -288,6 +318,7 @@ int main() {
             if (trigger_armed_cb_state.checked) {
                 // we arm the trigger
                 trigger_armed_timestamp = mui_get_time();
+                osc_arm_trigger(&device, 10.0f, 0, OSC_TRIGGER_TYPE_EDGE, 2.0f);
             }
         }
 
