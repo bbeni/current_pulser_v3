@@ -31,8 +31,10 @@ struct Osc_Device {
     int n_channels;
     char name[32];
     char serial_number[32];
-
     STS status;
+
+    // additional info
+    bool triggered_measurement_started;
 };
 
 void osc_print_last_error() {
@@ -180,9 +182,8 @@ void osc_arm_trigger(struct Osc_Device* device, float time_out, int channel, OSC
     FDwfAnalogInTriggerTypeSet(device->handle, trigger_type);
     FDwfAnalogInTriggerLevelSet(device->handle, trigger_level);
     FDwfAnalogInTriggerConditionSet(device->handle, trigger_condition);
-    // wait at least 2 seconds with Analog Discovery for the offset to stabilize, before the first reading after device open or offset/range change
+    device->triggered_measurement_started = false;
 }
-
 
 // cooldown after configuring the trigger needs to be at least 2s
 // returns true when done
@@ -190,8 +191,11 @@ bool osc_triggered_update(struct Osc_Device* device, float trigger_cooldown, dou
 
     if (trigger_cooldown > 0) return false;
 
-    // start (waiting for trigger)
-    FDwfAnalogInConfigure(device->handle, 0, true);
+    if (!device->triggered_measurement_started) {
+        // start (waiting for trigger)
+        FDwfAnalogInConfigure(device->handle, 0, true);
+        device->triggered_measurement_started = true;
+    }
 
     // read data if it is here
     FDwfAnalogInStatus(device->handle, true, &device->status);
