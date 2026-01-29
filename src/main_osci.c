@@ -387,11 +387,21 @@ int main() {
         mui_simple_slider(&y_slider_state, true, y_slider_rect);
         mui_simple_slider(&t_slider_state, false, t_slider_rect);
 
+        double t_min = -0.1 * t_slider_state.value;
+        double t_max = 0.1 * t_slider_state.value;
+        double y_min = -3.0 * y_slider_state.value;
+        double y_max = 3.0 * y_slider_state.value;
+        double t_step = 0.001; // 1 ms
+        double y_step = 0.01; // 10 mV
+
+        for (size_t i = 0; i < n_interpol; i++) {
+            t_space[i] = (t_max - t_min) * i / (n_interpol - 1);
+        }
         // TODO: mui: rename x_resamples to ..._out for consistency
         mma_spline_cubic_natural(t_data, data, n_data, data_interpolated, t_space, n_interpol);
 
-        Mui_Rectangle plot_rect = gra_xy_plot_labels_and_grid("t [s]", "A [V]", 0, end, -2, 2, end / 8, 0.1, true, scope_rect);
-        gra_xy_plot_data_points(t_space, data_interpolated, NULL, n_interpol, 0, end, -2, 2, MUI_YELLOW, 1.0f, plot_rect);
+        Mui_Rectangle plot_rect = gra_xy_plot_labels_and_grid("t [s]", "A [V]", t_min, t_max, y_min, y_max, t_step, y_step, true, scope_rect);
+        gra_xy_plot_data_points(t_space, data_interpolated, NULL, n_interpol, t_min, t_max, y_min, y_max, MUI_YELLOW, 1.0f, plot_rect);
 
 
         mui_end_drawing();
