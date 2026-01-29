@@ -199,7 +199,7 @@ bool mui_load_ttf_font_for_theme(const char *font_file, Mui_Theme* theme);
 // returns the rest of the space left ( to the left or right ) as a rectangle
 Mui_Rectangle mui_window_decoration(float height, bool window_movable, bool closeable, bool minimizable, bool maximizable, bool to_the_right, Mui_Rectangle window_rect);
 bool mui_button(Mui_Button_State *state, const char* text, Mui_Rectangle place);
-void mui_checkbox(Mui_Checkbox_State *state, const char *text, Mui_Rectangle place);
+bool mui_checkbox(Mui_Checkbox_State *state, const char *text, Mui_Rectangle place);
 void mui_label(Mui_Theme *theme, char *text, MUI_TEXT_ALIGN_FLAGS text_align_flags, Mui_Rectangle place);
 float mui_simple_slider(Mui_Slider_State *state, bool vertical, Mui_Rectangle place);
 void mui_textinput(Mui_Textinput_State *state, const char *hint, Mui_Rectangle place);

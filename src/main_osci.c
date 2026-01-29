@@ -108,7 +108,6 @@ void osc_create_measurement(struct Osc_Device* device, double** data_out, int* n
     *data_out = data;
 }
 
-
 // remember to free data_out
 void osc_shift_screen_setup(struct Osc_Device* device, double** data_out, int* n_samples_out) {
 
@@ -158,6 +157,27 @@ void osc_shift_screen_update(struct Osc_Device* device, double* data_out, int n_
     FDwfDigitalInStatusIndexWrite(device->handle, &bar_index);
     printf("scan bar index: %d\n", bar_index);
     */
+}
+
+
+typedef enum {
+    OSC_TRIGGER_TYPE_EDGE = 0, // trigtypeEdge,
+    OSC_TRIGGER_TYPE_PULSE = 1, // trigtypePulse,
+    OSC_TRIGGER_TYPE_TRANSITION = 2, // trigtypeTransition,
+    OSC_TRIGGER_TYPE_WINDOW = 3, // trigtypeWindow,
+} OSC_TRIGGER_TYPE;
+
+
+// wait at least 2 seconds with Analog Discovery for the offset to stabilize, before the first reading after device open or offset/range change
+void osc_arm_trigger(struct Osc_Device* device, float time_out, int channel, OSC_TRIGGER_TYPE trigger_type, float trigger_level) {
+    // configure trigger
+    FDwfAnalogInTriggerSourceSet(device->handle, trigsrcDetectorAnalogIn);
+    FDwfAnalogInTriggerAutoTimeoutSet(device->handle, time_out);
+    FDwfAnalogInTriggerChannelSet(device->handle, channel);
+    FDwfAnalogInTriggerTypeSet(device->handle, trigger_type);
+    FDwfAnalogInTriggerLevelSet(device->handle, trigger_level);
+    FDwfAnalogInTriggerConditionSet(device->handle, trigcondRisingPositive);
+    // wait at least 2 seconds with Analog Discovery for the offset to stabilize, before the first reading after device open or offset/range change
 }
 
 
@@ -216,10 +236,14 @@ int main() {
     mui_init_themes(0, 0, false, "resources/font/NimbusSans-Regular.ttf");
 
     Mui_Checkbox_State trigger_armed_cb_state = {0};
+    const float TRIGGER_ARM_COOLDOWN = 2.0f;
+    float trigger_armed_timestamp = -10000.0f;
 
     while (!mui_window_should_close())
     {
         mui_update_core();
+
+        float trigger_armed_cooldown = TRIGGER_ARM_COOLDOWN + trigger_armed_timestamp - mui_get_time();
 
         if (!trigger_armed_cb_state.checked) {
             osc_shift_screen_update(&device, data, n_data);
@@ -249,7 +273,23 @@ int main() {
         scope_rect = mui_cut_top(scope_rect, 1 * grid_pixel_unit, NULL);
 
         mui_cut_right(trigger_menu_bar_rect, 5 * grid_pixel_unit, &trigger_menu_rect);
-        mui_checkbox(&trigger_armed_cb_state, "Trigger", trigger_menu_rect);
+
+
+        char trigger_label_text[40];
+        if (trigger_armed_cooldown > 0) {
+            snprintf(trigger_label_text, 39, "TRIGGER (%.1f s)", trigger_armed_cooldown);
+        } else if (trigger_armed_cb_state.checked) {
+            snprintf(trigger_label_text, 39, "TRIGGER (armed)");
+        } else {
+            snprintf(trigger_label_text, 39, "TRIGGER");
+        }
+
+        if (mui_checkbox(&trigger_armed_cb_state, trigger_label_text, trigger_menu_rect)) {
+            if (trigger_armed_cb_state.checked) {
+                // we arm the trigger
+                trigger_armed_timestamp = mui_get_time();
+            }
+        }
 
         Mui_Rectangle plot_rect = gra_xy_plot_labels_and_grid("t [s]", "A [V]", 0, end, -0.1, 0.1, end / 8, 0.02, true, scope_rect);
 

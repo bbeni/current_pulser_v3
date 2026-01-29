@@ -701,7 +701,9 @@ bool mui_collapsable_section(Mui_Collapsable_Section_State *state, char* text, M
     return state->open;
 }
 
-void mui_checkbox(Mui_Checkbox_State *state, const char *text, Mui_Rectangle place) {
+bool mui_checkbox(Mui_Checkbox_State *state, const char *text, Mui_Rectangle place) {
+
+    bool clicked = false;
 
     Mui_Theme *theme = state->theme;
     if (theme == NULL) theme = &mui_protos_theme_g;
@@ -713,6 +715,7 @@ void mui_checkbox(Mui_Checkbox_State *state, const char *text, Mui_Rectangle pla
     if (mui_is_inside_rectangle(mui_get_mouse_position(), place)) {
         if (mui_is_mouse_button_pressed(0)) {
             state->checked = !state->checked;
+            clicked = true;
         }
         mui_move_towards(&(state->hover_t), 1, theme->animation_speed_to_hover, dt);
     } else {
@@ -743,6 +746,8 @@ void mui_checkbox(Mui_Checkbox_State *state, const char *text, Mui_Rectangle pla
     position.y = place.y + place.height / 2 - theme->font_size / 2;
     size_t l = mui_text_len(text, strlen(text));
     mui_draw_text_line(theme->font, position, 0, theme->font_size, text, text_color, 0, l);
+
+    return clicked;
 }
 
 float mui_simple_slider(Mui_Slider_State *state, bool vertical, Mui_Rectangle place) {
