@@ -265,10 +265,11 @@ int main() {
     // setup arrays for data interpolation
     //
     double step = 1.0 / device.max_freq_hz;
-    double end = n_data * step;
+    double t_total = n_data * step;
+    double t_min_data = -t_total * 0.5f;
+    double t_max_data = t_min_data + t_total;
+
     size_t n_interpol = 2000;
-    double stretch = 1.0f;
-    double interp_step = end * stretch / n_interpol;
 
     double* t_data;
     double* t_space;
@@ -279,12 +280,8 @@ int main() {
     t_space = malloc(sizeof(double) * n_interpol);
 
     for (int i = 0; i < n_data; i++) {
-        t_data[i] = i * step;
+        t_data[i] = i * step - t_total * 0.5;
     }
-    for (size_t i = 0; i < n_interpol; i++) {
-        t_space[i] = i * interp_step;
-    }
-
 
     // ui stuff
     int grid_w = 18;
@@ -387,11 +384,11 @@ int main() {
         mui_simple_slider(&y_slider_state, true, y_slider_rect);
         mui_simple_slider(&t_slider_state, false, t_slider_rect);
 
-        double t_min = -0.1 * t_slider_state.value;
-        double t_max = 0.1 * t_slider_state.value;
+        double t_min = t_min_data * t_slider_state.value;
+        double t_max = t_max_data * t_slider_state.value;
         double y_min = -3.0 * y_slider_state.value;
         double y_max = 3.0 * y_slider_state.value;
-        double t_step = 0.001; // 1 ms
+        double t_step = 0.01; // 10 ms
         double y_step = 0.01; // 10 mV
 
         for (size_t i = 0; i < n_interpol; i++) {
