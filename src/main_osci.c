@@ -238,6 +238,9 @@ bool osc_triggered_update(struct Osc_Device* device, float trigger_cooldown, dou
     return true;
 }
 
+bool osc_cleanup_data(double* data) {
+    free(data);
+}
 
 
 int main() {
@@ -252,8 +255,8 @@ int main() {
     double* data;
     int n_data;
     //osc_create_measurement(&device, &data, &n_data);
-    //osc_shift_screen_setup(&device, &data, &n_data);
-    osc_triggered_setup(&device, &data, &n_data);
+    osc_shift_screen_setup(&device, &data, &n_data);
+    //osc_triggered_setup(&device, &data, &n_data);
 
 
     printf("setup %d data_point measurement\n", n_data);
@@ -305,15 +308,16 @@ int main() {
 
         float trigger_armed_cooldown = TRIGGER_ARM_COOLDOWN + trigger_armed_timestamp - mui_get_time();
 
-        if (!trigger_armed_cb_state.checked) {
-            osc_shift_screen_update(&device, data, n_data);
-        } else {
+        if (trigger_armed_cb_state.checked) {
             if (osc_triggered_update(&device, trigger_armed_cooldown, data, n_data)) {
-                printf("we have read data\n");
-                Wait(1);
                 trigger_armed_cb_state.checked = false;
+                Wait(1);
+                osc_cleanup_data(data);
+                osc_shift_screen_setup(&device, &data, &n_data);
             }
-        }
+        } else {
+            osc_shift_screen_update(&device, data, n_data);
+        };
 
         // TODO: mui: rename x_resamples to ..._out for consistency
         mma_spline_cubic_natural(t_data, data, n_data, data_interpolated, t_space, n_interpol);
@@ -354,9 +358,11 @@ int main() {
 
         if (mui_checkbox(&trigger_armed_cb_state, trigger_label_text, trigger_menu_rect)) {
             if (trigger_armed_cb_state.checked) {
+                osc_cleanup_data(data);
+                osc_triggered_setup(&device, &data, &n_data);
                 // we arm the trigger
-                trigger_armed_timestamp = mui_get_time();
                 osc_triggered_arm_trigger(&device, 1.0f, 0, OSC_TRIGGER_TYPE_EDGE, 2.0f, OSC_TRIGGER_CONDITION_RISING_POSITIVE);
+                trigger_armed_timestamp = mui_get_time();
             }
         }
 
