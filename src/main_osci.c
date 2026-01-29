@@ -392,7 +392,7 @@ int main() {
         double y_step = 0.01; // 10 mV
 
         for (size_t i = 0; i < n_interpol; i++) {
-            t_space[i] = (t_max - t_min) * i / (n_interpol - 1);
+            t_space[i] = t_min + (t_max - t_min) * i / (n_interpol - 1);
         }
         // TODO: mui: rename x_resamples to ..._out for consistency
         mma_spline_cubic_natural(t_data, data, n_data, data_interpolated, t_space, n_interpol);
