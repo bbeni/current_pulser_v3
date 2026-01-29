@@ -402,7 +402,9 @@ int main() {
 
         Mui_Rectangle plot_rect = gra_xy_plot_labels_and_grid("t [s]", "A [V]", t_min, t_max, y_min, y_max, t_step, y_step, true, scope_rect);
         gra_xy_plot_data_points(t_space, data_interpolated, NULL, n_interpol, t_min, t_max, y_min, y_max, MUI_YELLOW, 1.0f, plot_rect);
-        gra_xy_plot_data_points(t_data, data, NULL, n_data, t_min, t_max, y_min, y_max, MUI_ORANGE, 1.0f, plot_rect);
+        if ( (t_max_data - t_min_data) / (t_max - t_min) * n_interpol / n_data > 2 ) {
+            gra_xy_plot_data_points(t_data, data, NULL, n_data, t_min, t_max, y_min, y_max, MUI_ORANGE, 1.0f, plot_rect);
+        }
 
 
         mui_end_drawing();
