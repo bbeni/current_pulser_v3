@@ -221,7 +221,7 @@ int main() {
     {
         mui_update_core();
 
-        if (trigger_armed_cb_state.checked) {
+        if (!trigger_armed_cb_state.checked) {
             osc_shift_screen_update(&device, data, n_data);
         }
 
@@ -246,7 +246,9 @@ int main() {
         Mui_Rectangle trigger_menu_bar_rect;
         Mui_Rectangle trigger_menu_rect;
         scope_rect = mui_cut_top(scope_rect, 1 * grid_pixel_unit, &trigger_menu_bar_rect);
-        mui_cut_left(trigger_menu_bar_rect, 5 * grid_pixel_unit, &trigger_menu_rect);
+        scope_rect = mui_cut_top(scope_rect, 1 * grid_pixel_unit, NULL);
+
+        mui_cut_right(trigger_menu_bar_rect, 5 * grid_pixel_unit, &trigger_menu_rect);
         mui_checkbox(&trigger_armed_cb_state, "Trigger", trigger_menu_rect);
 
         Mui_Rectangle plot_rect = gra_xy_plot_labels_and_grid("t [s]", "A [V]", 0, end, -0.1, 0.1, end / 8, 0.02, true, scope_rect);
