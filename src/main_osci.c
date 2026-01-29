@@ -166,15 +166,20 @@ typedef enum {
 } OSC_TRIGGER_TYPE;
 
 
+typedef enum {
+    OSC_TRIGGER_CONDITION_RISING_POSITIVE  = 0, //trigcondRisingPositive   = 0;
+    OSC_TRIGGER_CONDITION_FALLING_NEGATIVE = 1, //trigcondFallingNegative  = 1;
+} OSC_TRIGGER_CONDITION;
+
 // wait at least 2 seconds with Analog Discovery for the offset to stabilize, before the first reading after device open or offset/range change
-void osc_arm_trigger(struct Osc_Device* device, float time_out, int channel, OSC_TRIGGER_TYPE trigger_type, float trigger_level) {
+void osc_arm_trigger(struct Osc_Device* device, float time_out, int channel, OSC_TRIGGER_TYPE trigger_type, float trigger_level, OSC_TRIGGER_CONDITION trigger_condition) {
     // configure trigger
     FDwfAnalogInTriggerSourceSet(device->handle, trigsrcDetectorAnalogIn);
     FDwfAnalogInTriggerAutoTimeoutSet(device->handle, time_out);
     FDwfAnalogInTriggerChannelSet(device->handle, channel);
     FDwfAnalogInTriggerTypeSet(device->handle, trigger_type);
     FDwfAnalogInTriggerLevelSet(device->handle, trigger_level);
-    FDwfAnalogInTriggerConditionSet(device->handle, trigcondRisingPositive);
+    FDwfAnalogInTriggerConditionSet(device->handle, trigger_condition);
     // wait at least 2 seconds with Analog Discovery for the offset to stabilize, before the first reading after device open or offset/range change
 }
 
@@ -188,6 +193,7 @@ bool osc_triggered_update(struct Osc_Device* device, float trigger_cooldown, dou
     FDwfAnalogInStatus(device->handle, false, &device->status);
     if (device->status == stsPrefill) {
         // arm the trigger
+        printf("reached stsPrefill\n");
         FDwfAnalogInConfigure(device->handle, 0, true);
         FDwfAnalogInStatus(device->handle, false, &device->status);
         assert(device->status == stsArm);
@@ -195,7 +201,7 @@ bool osc_triggered_update(struct Osc_Device* device, float trigger_cooldown, dou
 
     // wait for the data to be here
     FDwfAnalogInStatus(device->handle, true, &device->status);
-    if (device->status == stsNotDone) return false;
+    if (device->status != stsDone) return false;
 
     // get the samples for each channel
     for (int c = 0; c < device->n_channels; c++) {
@@ -274,11 +280,12 @@ int main() {
             osc_shift_screen_update(&device, data, n_data);
         } else {
             if (osc_triggered_update(&device, trigger_armed_cooldown, data, n_data)) {
+                Wait(1);
                 trigger_armed_cb_state.checked = false;
             }
         }
 
-        // TODO: rename x_resamples to ..._out for consistency
+        // TODO: mui: rename x_resamples to ..._out for consistency
         mma_spline_cubic_natural(t_data, data, n_data, data_interpolated, t_space, n_interpol);
 
         w = mui_screen_width();
@@ -307,17 +314,19 @@ int main() {
         char trigger_label_text[40];
         if (trigger_armed_cooldown > 0) {
             snprintf(trigger_label_text, 39, "TRIGGER (%.1f s)", trigger_armed_cooldown);
-        } else if (trigger_armed_cb_state.checked) {
-            snprintf(trigger_label_text, 39, "TRIGGER (armed)");
         } else {
-            snprintf(trigger_label_text, 39, "TRIGGER");
+            if (trigger_armed_cb_state.checked) {
+                snprintf(trigger_label_text, 39, "TRIGGER (armed)");
+            } else {
+                snprintf(trigger_label_text, 39, "TRIGGER");
+            }
         }
 
         if (mui_checkbox(&trigger_armed_cb_state, trigger_label_text, trigger_menu_rect)) {
             if (trigger_armed_cb_state.checked) {
                 // we arm the trigger
                 trigger_armed_timestamp = mui_get_time();
-                osc_arm_trigger(&device, 1.0f, 0, OSC_TRIGGER_TYPE_EDGE, 2.0f);
+                osc_arm_trigger(&device, 1.0f, 0, OSC_TRIGGER_TYPE_EDGE, 2.0f, OSC_TRIGGER_CONDITION_RISING_POSITIVE);
             }
         }
 
