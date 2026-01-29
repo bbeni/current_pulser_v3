@@ -350,7 +350,7 @@ int main() {
         if (trigger_armed_cooldown > 0) {
             snprintf(trigger_label_text, 39, "TRIGGER (%.1f s)", trigger_armed_cooldown);
         } else {
-            if (trigger_armed_cb_state.checked && !triggerd_data_aquired) {
+            if (trigger_armed_cb_state.checked) {
                 if (triggerd_data_aquired)
                     snprintf(trigger_label_text, 39, "TRIGGER (aquired)");
                 else
@@ -391,8 +391,8 @@ int main() {
         double t_max = t_max_data * t_slider_state.value;
         double y_min = -1.0 * y_slider_state.value;
         double y_max = 1.0 * y_slider_state.value;
-        double t_step = 0.000001;
-        double y_step = 0.01;   // 10 mV
+        double t_step = 0.00001; // 10 us
+        double y_step = 0.1;   // 0,1 V
 
         for (size_t i = 0; i < n_interpol; i++) {
             t_space[i] = t_min + (t_max - t_min) * i / (n_interpol - 1);
