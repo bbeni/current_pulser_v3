@@ -139,7 +139,7 @@ void osc_shift_screen_setup(struct Osc_Device* device, double** data_out, int* n
 
 void osc_shift_screen_update(struct Osc_Device* device, double* data_out, int n_samples) {
 
-    if (FDwfAnalogInStatus(device->handle, true, &device->status) != stsDone) return;
+    if (FDwfAnalogInStatus(device->handle, true, &device->status) == stsDone) return;
 
     int n_valid_samples;
     FDwfDigitalInStatusSamplesValid(device->handle, &n_valid_samples);
