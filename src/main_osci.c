@@ -274,8 +274,8 @@ int main() {
             osc_shift_screen_update(&device, data, n_data);
         } else {
             if (osc_triggered_update(&device, trigger_armed_cooldown, data, n_data)) {
-                Wait(20);
-                exit(0);
+                Sleep(1000);
+                trigger_armed_cb_state.checked = false;
             }
         }
 
@@ -318,7 +318,7 @@ int main() {
             if (trigger_armed_cb_state.checked) {
                 // we arm the trigger
                 trigger_armed_timestamp = mui_get_time();
-                osc_arm_trigger(&device, 10.0f, 0, OSC_TRIGGER_TYPE_EDGE, 2.0f);
+                osc_arm_trigger(&device, 1.0f, 0, OSC_TRIGGER_TYPE_EDGE, 2.0f);
             }
         }
 
