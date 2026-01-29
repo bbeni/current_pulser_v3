@@ -303,6 +303,8 @@ int main() {
     float trigger_armed_timestamp = -10000.0f;
     bool triggerd_data_aquired = false;
 
+    Mui_Slider_State y_slider_state = {0};
+    Mui_Slider_State t_slider_state = {0};
 
     while (!mui_window_should_close())
     {
@@ -368,15 +370,24 @@ int main() {
                 triggerd_data_aquired = false;
             } else {
                 // SHIFT_SCREEN DATA setup
+                trigger_armed_timestamp = mui_get_time() - TRIGGER_ARM_COOLDOWN;
                 osc_cleanup_data(data);
                 osc_shift_screen_setup(&device, &data, &n_data);
             }
         }
 
-        Mui_Rectangle plot_rect = gra_xy_plot_labels_and_grid("t [s]", "A [V]", 0, end, -0.1, 0.1, end / 8, 0.02, true, scope_rect);
 
+        Mui_Rectangle y_slider_rect;
+        scope_rect = mui_cut_right(scope_rect, 1 * grid_pixel_unit, &y_slider_rect);
+        Mui_Rectangle t_slider_rect;
+        scope_rect = mui_cut_top(scope_rect, 1 * grid_pixel_unit, &t_slider_rect);
+        y_slider_rect = mui_cut_top(y_slider_rect, 1 * grid_pixel_unit, NULL);
 
-        gra_xy_plot_data_points(t_space, data_interpolated, NULL, n_interpol, 0, end * stretch, -0.05, 0.05, MUI_YELLOW, 1.0f, plot_rect);
+        mui_simple_slider(&y_slider_state, true, y_slider_rect);
+        mui_simple_slider(&t_slider_state, false, t_slider_rect);
+
+        Mui_Rectangle plot_rect = gra_xy_plot_labels_and_grid("t [s]", "A [V]", 0, end, -2, 2, end / 8, 0.1, true, scope_rect);
+        gra_xy_plot_data_points(t_space, data_interpolated, NULL, n_interpol, 0, end, -2, 2, MUI_YELLOW, 1.0f, plot_rect);
 
 
         mui_end_drawing();
