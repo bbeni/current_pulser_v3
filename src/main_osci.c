@@ -350,8 +350,8 @@ int main() {
         if (trigger_armed_cooldown > 0) {
             snprintf(trigger_label_text, 39, "TRIGGER (%.1f s)", trigger_armed_cooldown);
         } else {
-            if (trigger_armed_cb_state.checked) {
-                snprintf(trigger_label_text, 39, "TRIGGER (armed)");
+            if (trigger_armed_cb_state.checked && !triggerd_data_aquired) {
+                snprintf(trigger_label_text, 39, "TRIGGER (armed / waiting)");
             } else {
                 snprintf(trigger_label_text, 39, "TRIGGER");
             }
