@@ -215,13 +215,15 @@ int main() {
     mui_open_window(w, h, 500, 200, "Current Pulser V3 Controller", 1.0f, MUI_WINDOW_RESIZEABLE /* | MUI_WINDOW_UNDECORATED */, NULL);
     mui_init_themes(0, 0, false, "resources/font/NimbusSans-Regular.ttf");
 
+    Mui_Checkbox_State trigger_armed_cb_state = {0};
 
     while (!mui_window_should_close())
     {
         mui_update_core();
 
-
-        osc_shift_screen_update(&device, data, n_data);
+        if (trigger_armed_cb_state.checked) {
+            osc_shift_screen_update(&device, data, n_data);
+        }
 
         // TODO: rename x_resamples to ..._out for consistency
         mma_spline_cubic_natural(t_data, data, n_data, data_interpolated, t_space, n_interpol);
@@ -240,6 +242,13 @@ int main() {
         mui_label(&mui_protos_theme_g, "PULSER V3 OSCILLOSCOPE", MUI_TEXT_ALIGN_DEFAULT, menu_bar_area);
 
         Mui_Rectangle scope_rect = mui_shrink(screen, grid_pixel_unit);
+
+        Mui_Rectangle trigger_menu_bar_rect;
+        Mui_Rectangle trigger_menu_rect;
+        scope_rect = mui_cut_top(scope_rect, 1 * grid_pixel_unit, &trigger_menu_bar_rect);
+        mui_cut_left(trigger_menu_rect, 5 * grid_pixel_unit, &trigger_menu_rect);
+        mui_checkbox(&trigger_armed_cb_state, "Trigger", trigger_menu_rect);
+
         Mui_Rectangle plot_rect = gra_xy_plot_labels_and_grid("t [s]", "A [V]", 0, end, -0.1, 0.1, end / 8, 0.02, true, scope_rect);
 
 
@@ -252,7 +261,7 @@ int main() {
 
     mui_close_window();
 
-    FDwfDeviceCloseAll();
+    FDwfDeviceClose(device.handle);
 
     return 0;
 }
