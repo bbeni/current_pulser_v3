@@ -265,7 +265,7 @@ int main() {
     // setup arrays for data interpolation
     //
     double step = 1.0 / device.max_freq_hz;
-    double t_total = n_data * step;
+    double t_total = (n_data - 1) * step;
     double t_min_data = -t_total * 0.5f;
     double t_max_data = t_min_data + t_total;
 
@@ -280,7 +280,7 @@ int main() {
     t_space = malloc(sizeof(double) * n_interpol);
 
     for (int i = 0; i < n_data; i++) {
-        t_data[i] = i * step - t_total * 0.5;
+        t_data[i] =  t_min_data + i * step;
     }
 
     // ui stuff
@@ -388,8 +388,8 @@ int main() {
         double t_max = t_max_data * t_slider_state.value;
         double y_min = -1.0 * y_slider_state.value;
         double y_max = 1.0 * y_slider_state.value;
-        double t_step = 0.0001; // 100 ns
-        double y_step = 0.01; // 10 mV
+        double t_step = 0.0001;
+        double y_step = 0.01;   // 10 mV
 
         for (size_t i = 0; i < n_interpol; i++) {
             t_space[i] = t_min + (t_max - t_min) * i / (n_interpol - 1);
