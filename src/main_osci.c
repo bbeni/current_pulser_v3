@@ -388,7 +388,7 @@ int main() {
         double t_max = t_max_data * t_slider_state.value;
         double y_min = -1.0 * y_slider_state.value;
         double y_max = 1.0 * y_slider_state.value;
-        double t_step = 0.0001;
+        double t_step = 0.000001;
         double y_step = 0.01;   // 10 mV
 
         for (size_t i = 0; i < n_interpol; i++) {
