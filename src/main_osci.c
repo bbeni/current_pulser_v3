@@ -79,6 +79,7 @@ void osc_create_measurement(struct Osc_Device* device, double** data_out, int* n
     double* data;
     data = malloc(sizeof(*data) * *n_samples_out);
 
+    /*
     // configure trigger
     FDwfAnalogInTriggerSourceSet(device->handle, trigsrcDetectorAnalogIn);
     FDwfAnalogInTriggerAutoTimeoutSet(device->handle, 10.0);
@@ -89,6 +90,7 @@ void osc_create_measurement(struct Osc_Device* device, double** data_out, int* n
 
     // wait at least 2 seconds with Analog Discovery for the offset to stabilize, before the first reading after device open or offset/range change
     Wait(2);
+    */
 
     // start
     FDwfAnalogInConfigure(device->handle, 0, true);
@@ -104,6 +106,52 @@ void osc_create_measurement(struct Osc_Device* device, double** data_out, int* n
     }
 
     *data_out = data;
+}
+
+
+// remember to free data_out
+void osc_shift_screen_setup(struct Osc_Device* device, double** data_out, int* n_samples_out) {
+
+    // enable channels
+    for(int c = 0; c < device->n_channels; c++){
+        FDwfAnalogInChannelEnableSet(device->handle, c, true);
+    }
+    // set 5V pk2pk input range for all channels
+    FDwfAnalogInChannelRangeSet(device->handle, -1, 5);
+
+    // 20MHz sample rate
+    FDwfAnalogInFrequencySet(device->handle, 20000000.0);
+
+    // get the maximum buffer size
+    FDwfAnalogInBufferSizeInfo(device->handle, NULL, n_samples_out);
+    FDwfAnalogInBufferSizeSet(device->handle, *n_samples_out);
+    FDwfAnalogInAcquisitionModeSet(device->handle, acqmodeScanScreen);
+
+    double* data;
+    data = malloc(sizeof(*data) * *n_samples_out);
+    memset(data, 0x0, sizeof(*data) * *n_samples_out);
+
+    *data_out = data;
+}
+
+void osc_shift_screen_update(struct Osc_Device* device) {
+    // scan bar
+    int bar_index;
+    FDwfDigitalInStatusIndexWrite(device->handle, &bar_index);
+
+    // start
+    FDwfAnalogInConfigure(device->handle, 0, true);
+
+    printf("Waiting for triggered or auto acquisition\n");
+    do {
+        FDwfAnalogInStatus(device->handle, true, &device->status);
+    } while (device->status != stsDone);
+
+    // get the samples for each channel
+    for (int c = 0; c < device->n_channels; c++) {
+        // FDwfAnalogInStatusData(device->handle, c, data, *n_samples_out);
+    }
+
 }
 
 
