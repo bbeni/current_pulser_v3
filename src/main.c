@@ -13,6 +13,8 @@
 #include "gra.h"
 #include "uti.h"
 
+#include "osci_control.h"
+
 // pin 17 enable
 // pin 22 charge
 // pin 23 select
@@ -66,6 +68,25 @@ int main() {
     float fake_charging_time_stamp_cb1 = -1000.0f;
     float fake_charging_time_stamp_cb2 = -1000.0f;
 
+    // osci
+
+    struct Oscilloscope_Settings settings;
+    settings.sample_rate  = 7692300.0f;  // Hz
+    settings.v_pk_to_pk = 5.0f;          // volts
+    settings.trigger_mode = false;
+    settings.trigger_channel = 0;
+    settings.trigger_level = 0.05f;      // volts
+    settings.trigger_position = 0.0008;  // in seconds
+    settings.trigger_timeout = 1e23;     // in seconds
+    settings.trigger_type = OSC_TRIGGER_TYPE_EDGE;
+    settings.trigger_condition = OSC_TRIGGER_CONDITION_RISING_POSITIVE;
+    struct Oscilloscope_State oscilloscope_state = {0};
+    oscilloscope_setup(&oscilloscope_state, &settings);
+
+    struct Oscilloscope_Ui_Settings ui_settings;
+    struct Oscilloscope_Ui oscilloscope_ui_state = {0};
+    oscilloscope_ui_setup(&oscilloscope_ui_state, &ui_settings, grid_pixel_unit);
+
 
     while (!mui_window_should_close())
     {
@@ -98,11 +119,13 @@ int main() {
         Mui_Rectangle time_series_area = mui_cut_top(bottom_area, grid_pixel_unit, &current_pulse_title_area);
         mui_label(&mui_protos_theme_g, "CURRENT PULSE", MUI_TEXT_ALIGN_LEFT, current_pulse_title_area);
 
-        Mui_Rectangle graph_area = mui_cut_top(time_series_area, 1 * grid_pixel_unit, NULL);
-        graph_area = mui_cut_right(graph_area, 4 * grid_pixel_unit, NULL);
+        Mui_Rectangle oscilloscope_area = time_series_area;
+        mui_draw_rectangle_lines(time_series_area, mui_protos_theme_g.border, 2.0f);
+        //gra_xy_plot_labels_and_grid("t [ms]", "I [kA]", -0.2f, 1.2f, -5, 15, 0.2f, 5, true, oscilloscope_area);
 
-        mui_draw_rectangle_lines(time_series_area, mui_protos_theme_g.text_muted, 2.0f);
-        gra_xy_plot_labels_and_grid("t [ms]", "I [kA]", -0.2f, 1.2f, -5, 15, 0.2f, 5, true, graph_area);
+        oscilloscope_ui_update(&oscilloscope_ui_state, &oscilloscope_state);
+        oscilloscope_ui_draw(oscilloscope_area, grid_pixel_unit, &oscilloscope_ui_state, &oscilloscope_state, &settings);
+
 
 
         // control panels
@@ -185,7 +208,7 @@ int main() {
             power_supply_area = mui_cut_top(power_supply_area, 1 * grid_pixel_unit, &power_supply_title_area);
 
             mui_label(&mui_protos_theme_g, "POWER SUPPLY", MUI_TEXT_ALIGN_LEFT, power_supply_title_area);
-            mui_draw_rectangle_lines(power_supply_area, mui_protos_theme_g.text_muted, 2.0f);
+            mui_draw_rectangle_lines(power_supply_area, mui_protos_theme_g.border, 2.0f);
 
             // divide into 2:3:1
             Mui_Rectangle ui_label_rect;
@@ -208,8 +231,8 @@ int main() {
             Mui_Rectangle i_rect;
             ui_rect = mui_cut_top(ui_rect, 1 * grid_pixel_unit, &i_rect);
 
-            mui_draw_rectangle_lines(u_rect, MUI_BLACK, 2.0f);
-            mui_draw_rectangle_lines(i_rect, MUI_BLACK, 2.0f);
+            mui_draw_rectangle_lines(u_rect, mui_protos_theme_g.border, 2.0f);
+            mui_draw_rectangle_lines(i_rect, mui_protos_theme_g.border, 2.0f);
 
             // fake power supply
             float fake_voltage = 0;
@@ -278,7 +301,7 @@ int main() {
             cap_bank_1_area = mui_cut_top(cap_bank_1_area, 1 * grid_pixel_unit, &cb1_title_area);
 
             mui_label(&mui_protos_theme_g, "CAP BANK 1", MUI_TEXT_ALIGN_LEFT, cb1_title_area);
-            mui_draw_rectangle_lines(cap_bank_1_area, mui_protos_theme_g.text_muted, 2.0f);
+            mui_draw_rectangle_lines(cap_bank_1_area, mui_protos_theme_g.border, 2.0f);
 
             // divide into 2:3:1
             cap_bank_1_area = mui_cut_left(cap_bank_1_area, 2 * grid_pixel_unit, &cb1_labels_rect);
@@ -295,8 +318,8 @@ int main() {
             cb1_set_and_status_rect = mui_cut_top(cb1_set_and_status_rect, 0.3333333333f * grid_pixel_unit, NULL);
             cb1_set_and_status_rect = mui_cut_top(cb1_set_and_status_rect, 1 * grid_pixel_unit, &cb1_status_rect);
 
-            mui_draw_rectangle_lines(cb1_set_rect, MUI_BLACK, 2.0f);
-            mui_draw_rectangle_lines(cb1_status_rect, MUI_BLACK, 2.0f);
+            mui_draw_rectangle_lines(cb1_set_rect, mui_protos_theme_g.border, 2.0f);
+            mui_draw_rectangle_lines(cb1_status_rect, mui_protos_theme_g.border, 2.0f);
             mui_label(&mui_protos_theme_g, "1'654 V", MUI_TEXT_ALIGN_RIGHT, cb1_set_rect);
             mui_n_status_label(&mui_protos_theme_g, STATUS_NAMES[cb1_status], STATUS_COLORS, 4, cb1_status, MUI_TEXT_ALIGN_RIGHT, cb1_status_rect);
             mui_label(&mui_protos_theme_g, "SET", MUI_TEXT_ALIGN_CENTER, label_set_rect);
@@ -353,7 +376,7 @@ int main() {
             cap_bank_2_area = mui_cut_top(cap_bank_2_area, 1 * grid_pixel_unit, &cb2_title_area);
 
             mui_label(&mui_protos_theme_g, "CAP BANK 2", MUI_TEXT_ALIGN_LEFT, cb2_title_area);
-            mui_draw_rectangle_lines(cap_bank_2_area, mui_protos_theme_g.text_muted, 2.0f);
+            mui_draw_rectangle_lines(cap_bank_2_area, mui_protos_theme_g.border, 2.0f);
 
             // divide into 2:3:1
             cap_bank_2_area = mui_cut_left(cap_bank_2_area, 2 * grid_pixel_unit, &cb2_labels_rect);
@@ -370,8 +393,8 @@ int main() {
             cb2_set_and_status_rect = mui_cut_top(cb2_set_and_status_rect, 0.3333333333f * grid_pixel_unit, NULL);
             cb2_set_and_status_rect = mui_cut_top(cb2_set_and_status_rect, 1 * grid_pixel_unit, &cb2_status_rect);
 
-            mui_draw_rectangle_lines(cb2_set_rect, MUI_BLACK, 2.0f);
-            mui_draw_rectangle_lines(cb2_status_rect, MUI_BLACK, 2.0f);
+            mui_draw_rectangle_lines(cb2_set_rect, mui_protos_theme_g.border, 2.0f);
+            mui_draw_rectangle_lines(cb2_status_rect, mui_protos_theme_g.border, 2.0f);
             mui_label(&mui_protos_theme_g, "1'654 V", MUI_TEXT_ALIGN_RIGHT, cb2_set_rect);
             mui_n_status_label(&mui_protos_theme_g, STATUS_NAMES[cb2_status], STATUS_COLORS, 4, cb2_status, MUI_TEXT_ALIGN_RIGHT, cb2_status_rect);
             mui_label(&mui_protos_theme_g, "SET", MUI_TEXT_ALIGN_CENTER, label_set_rect);

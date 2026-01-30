@@ -49,6 +49,7 @@ COMMON_SRCS := $(SRC_DIR)/mui.c \
             $(SRC_DIR)/gra.c \
             $(SRC_DIR)/uti.c \
             $(SRC_DIR)/mma.c \
+            $(SRC_DIR)/osci_control.c \
             $(SRC_DIR)/mui_platform_raylib.c
 
 OBJS_MAIN := $(patsubst $(SRC_DIR)/%.c, $(BUILD_DIR)/%.o, $(SRC_DIR)/main.c $(COMMON_SRCS))

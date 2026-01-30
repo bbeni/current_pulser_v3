@@ -229,7 +229,7 @@ void _gridded_draw_tick_labels(Mui_Rectangle plot_area,
     float y = y_a + off_y;
     int count_y = (y_b - y_a) / step_y + 1;
     for (int i = 0; i < count_y && y <= y_b; i++) {
-        snprintf(buffer, 24, fmt_y, y_top + i * (y_bot - y_top) / (count_y - 1));
+        snprintf(buffer, 24, fmt_y, y_bot - i * (y_bot - y_top) / (count_y - 1));
         size_t l = mui_text_len(buffer, strlen(buffer));
         Mui_Vector2 text_measure = mui_measure_text(mui_protos_theme_g.font_small, buffer, mui_protos_theme_g.font_small_size, 0.0f, 0, l);
         Mui_Vector2 pos;
@@ -254,7 +254,9 @@ Mui_Rectangle gra_gridded_xy_base(struct Gra_Gridded_Base_Arguments* args, Mui_R
     rest = mui_cut_left(rest, args->grid_left_axis_off * to_px, &y_axis_rect);
     x_axis_rect = mui_cut_left(x_axis_rect, args->grid_left_axis_off * to_px, NULL);
 
-    _gridded_draw_grid(rest, (args->grid_skip_x + 1) * to_px, (args->grid_skip_y + 1) * to_px, 0.0f, 0.0f, 2.0f);
+
+    _gridded_draw_grid(rest, (args->grid_skip_x + 1) * to_px, (args->grid_skip_y + 1) * to_px, 0.0f, 0.0f, 1.0f);
+    mui_draw_rectangle_lines(mui_shrink(rest, -1.0f), _color_text(), 2.0f);
     _gridded_draw_small_ticks(rest, to_px, to_px, 0.0f, 0.0f, 1.0f, to_px * 0.2f);
     _gridded_draw_tick_labels(
         rest, (args->grid_skip_x + 1) * to_px, (args->grid_skip_y + 1) * to_px,  0.0f, 0.0f,

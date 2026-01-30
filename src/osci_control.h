@@ -76,8 +76,9 @@ struct Oscilloscope_State {
 
 struct Oscilloscope_Ui {
     Mui_Checkbox_State trigger_armed_cb_state;
-    Mui_Slider_State y_slider_state;
-    Mui_Slider_State t_slider_state;
+    Mui_Button_State save_csv_btn_state;
+    Mui_Button_State up_btn_state;
+    Mui_Button_State down_btn_state;
 
     float trigger_armed_timestamp;
     bool triggerd_data_aquired;

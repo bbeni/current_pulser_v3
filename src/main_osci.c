@@ -6,7 +6,7 @@
 
 int main() {
 
-    int grid_w = 18;
+    int grid_w = 22;
     int grid_h = 15;
     int grid_pixel_unit = 50;
 
@@ -14,7 +14,7 @@ int main() {
     w = grid_w * grid_pixel_unit;
     h = grid_h * grid_pixel_unit;
 
-    mui_open_window(w, h, 500, 200, "Current Pulser V3 Controller", 1.0f, MUI_WINDOW_RESIZEABLE /* | MUI_WINDOW_UNDECORATED */, NULL);
+    mui_open_window(w, h, 500, 200, "PULSER V3 OSCILLOSCOPE", 1.0f, MUI_WINDOW_RESIZEABLE /* | MUI_WINDOW_UNDECORATED */, NULL);
     mui_init_themes(0, 0, false, "resources/font/NimbusSans-Regular.ttf");
 
     struct Oscilloscope_Settings settings;

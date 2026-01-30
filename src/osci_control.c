@@ -211,8 +211,6 @@ void oscilloscope_ui_setup(struct Oscilloscope_Ui* oscilloscope_ui, struct Oscil
     oscilloscope_ui->TRIGGER_ARM_COOLDOWN = 2.0f;
     oscilloscope_ui->trigger_armed_timestamp = -10000.0f;
     oscilloscope_ui->triggerd_data_aquired = false;
-    oscilloscope_ui->y_slider_state.value = 1.0f;
-    oscilloscope_ui->t_slider_state.value = 1.0f;
 
     struct Gra_Gridded_Base_Arguments plot_args;
     plot_args.grid_unit_pixels = grid_pixels_unit;
@@ -224,8 +222,8 @@ void oscilloscope_ui_setup(struct Oscilloscope_Ui* oscilloscope_ui, struct Oscil
     plot_args.grid_skip_y = 1;
     plot_args.x_left = -0.1f;
     plot_args.x_right = 0.1f;
-    plot_args.y_bot = 2.5f;
-    plot_args.y_top = -2.5f;
+    plot_args.y_bot = 3.0f;
+    plot_args.y_top = -1.0f;
     plot_args.x_label = "t [s]";
     plot_args.y_label = "U [V]";
     plot_args.thick_y_zero = true;
@@ -243,7 +241,7 @@ void oscilloscope_change_mode(struct Oscilloscope_State* state, struct Oscillosc
         // TRIGGERED DATA setup
         osc_cleanup_data(state->data);
         osc_triggered_setup(&state->device, &state->data, &state->n_data, settings->v_pk_to_pk, settings->sample_rate);
-        osc_triggered_arm_trigger(&state->device, 1e23, 0, 0.05f, 0.0008f, OSC_TRIGGER_TYPE_EDGE, OSC_TRIGGER_CONDITION_RISING_POSITIVE);
+        osc_triggered_arm_trigger(&state->device, settings->trigger_timeout, settings->trigger_channel, settings->trigger_level, settings->trigger_position, settings->trigger_type, settings->trigger_condition);
         ui->trigger_armed_timestamp = mui_get_time();
         ui->triggerd_data_aquired = false;
     } else {
@@ -256,12 +254,28 @@ void oscilloscope_change_mode(struct Oscilloscope_State* state, struct Oscillosc
 
 void oscilloscope_ui_draw(Mui_Rectangle area, float grid_pixel_unit, struct Oscilloscope_Ui* ui, struct Oscilloscope_State* state, struct Oscilloscope_Settings* settings) {
 
-    Mui_Rectangle trigger_menu_bar_rect;
-    Mui_Rectangle trigger_menu_rect;
-    Mui_Rectangle scope_rect = mui_cut_top(area, 0.66666f * grid_pixel_unit, &trigger_menu_bar_rect);
-    scope_rect = mui_cut_top(scope_rect, 0.33333f * grid_pixel_unit, NULL);
+    Mui_Rectangle scope_settings_area;
+    Mui_Rectangle trigger_checkbox_area;
+    Mui_Rectangle save_csv_button_area;
+    Mui_Rectangle up_button_area;
+    Mui_Rectangle down_button_area;
 
-    mui_cut_right(trigger_menu_bar_rect, 5 * grid_pixel_unit, &trigger_menu_rect);
+    area = mui_cut_top(area, 1 * grid_pixel_unit, NULL);
+
+    Mui_Rectangle scope_rect = mui_cut_right(area, 5.0f * grid_pixel_unit, &scope_settings_area);
+
+    scope_settings_area = mui_cut_right(scope_settings_area, 1.0f * grid_pixel_unit, NULL);
+    scope_settings_area = mui_cut_top(scope_settings_area, 1.0f * grid_pixel_unit, &trigger_checkbox_area);
+    scope_settings_area = mui_cut_top(scope_settings_area, 1.0f * grid_pixel_unit, NULL);
+    scope_settings_area = mui_cut_top(scope_settings_area, 1.0f * grid_pixel_unit, &save_csv_button_area);
+
+    scope_settings_area = mui_cut_top(scope_settings_area, 2.5f * grid_pixel_unit, NULL);
+    scope_settings_area = mui_cut_top(scope_settings_area, 1.0f * grid_pixel_unit, &up_button_area);
+    scope_settings_area = mui_cut_top(scope_settings_area, 0.5f * grid_pixel_unit, NULL);
+    scope_settings_area = mui_cut_top(scope_settings_area, 1.0f * grid_pixel_unit, &down_button_area);
+    down_button_area = mui_cut_right(down_button_area, 2.0f * grid_pixel_unit, NULL);
+    up_button_area = mui_cut_right(up_button_area, 2.0f * grid_pixel_unit, NULL);
+
 
     float trigger_armed_cooldown = ui->TRIGGER_ARM_COOLDOWN + ui->trigger_armed_timestamp - mui_get_time();
 
@@ -279,47 +293,44 @@ void oscilloscope_ui_draw(Mui_Rectangle area, float grid_pixel_unit, struct Osci
         }
     }
 
-    if (state->device_available) {
-        if (mui_checkbox(&ui->trigger_armed_cb_state, trigger_label_text, trigger_menu_rect)) {
+    if (state->device_available || true) {
+        if (mui_checkbox(&ui->trigger_armed_cb_state, trigger_label_text, trigger_checkbox_area)) {
             // checkbox toggeled
             bool triggered = ui->trigger_armed_cb_state.checked;
             oscilloscope_change_mode(state, ui, settings, triggered);
         }
     }
 
-    Mui_Rectangle y_slider_rect;
-    scope_rect = mui_cut_right(scope_rect, 1 * grid_pixel_unit, &y_slider_rect);
-    Mui_Rectangle t_slider_rect;
-    scope_rect = mui_cut_top(scope_rect, 1 * grid_pixel_unit, &t_slider_rect);
-    y_slider_rect = mui_cut_top(y_slider_rect, 1 * grid_pixel_unit, NULL);
+    mui_button(&ui->save_csv_btn_state, "Save CSV", save_csv_button_area);
+    if (mui_button(&ui->up_btn_state, "V/div inc", up_button_area)) {
+        ui->plot_args.y_top *= 2;
+        ui->plot_args.y_bot *= 2;
+    }
+    if (mui_button(&ui->down_btn_state, "V/div dec", down_button_area)) {
+        ui->plot_args.y_top *= 0.5f;
+        ui->plot_args.y_bot *= 0.5f;
+    }
 
-    mui_simple_slider(&ui->y_slider_state, true, y_slider_rect);
-    mui_simple_slider(&ui->t_slider_state, false, t_slider_rect);
 
-    double t_min = state->t_min_data * ui->t_slider_state.value;
-    double t_max = state->t_max_data * ui->t_slider_state.value;
-    double y_min = -1.0 * ui->y_slider_state.value;
-    double y_max = 1.0 * ui->y_slider_state.value;
-    double t_step = 0.00001; // 10 us
-    double y_step = 0.1;   // 0,1 V
-
-    ui->plot_args.y_top = 1.0 * ui->y_slider_state.value;
-    ui->plot_args.y_bot = -1.0 * ui->y_slider_state.value;
-    ui->plot_args.x_left = state->t_min_data * ui->t_slider_state.value;
-    ui->plot_args.x_right = state->t_max_data * ui->t_slider_state.value;
 
     Mui_Rectangle plot_rect = gra_gridded_xy_base(&ui->plot_args, scope_rect);
 
     if (!state->device_available) return;
 
+    double t_min = ui->plot_args.x_left;
+    double t_max = ui->plot_args.x_right;
+    double y_min = ui->plot_args.y_bot;
+    double y_max = ui->plot_args.y_top;
+
     for (int i = 0; i < state->n_display_data; i++) {
         state->display_t_data[i] = t_min + (t_max - t_min) * i / (state->n_display_data - 1);
     }
     // TODO: mui: rename x_resamples to ..._out for consistency
+    // TODO: rename display to interpolated
     mma_spline_cubic_natural(state->display_t_data, state->data, state->n_data, state->display_data, state->display_t_data, state->n_display_data);
     gra_xy_plot_data_points(state->display_t_data, state->display_data, NULL, state->n_display_data, t_min, t_max, y_min, y_max, MUI_YELLOW, 2.0f, plot_rect);
     if ( (state->t_max_data - state->t_min_data) / (t_max - t_min) * state->n_display_data / state->n_data > 5 ) {
-        gra_xy_plot_data_points(state->t_data, state->data, NULL, state->n_data, t_min, t_max, y_min, y_max, MUI_RED, 2.0f, plot_rect);
+        gra_xy_plot_data_points(state->t_data, state->data, NULL, state->n_data, t_min, t_max, y_min, y_max, MUI_ORANGE, 2.0f, plot_rect);
     }
 
 }
