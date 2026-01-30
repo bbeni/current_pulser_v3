@@ -64,20 +64,23 @@ bool mui_load_ttf_font_for_theme(const char *font_file, Mui_Theme* theme) {
     }
 
     mui_font_catalog_g[mui_font_catalog_length_g    ] = mui_load_font_ttf(data, size, theme->font_size);
-    mui_font_catalog_g[mui_font_catalog_length_g + 1] = mui_load_font_ttf(data, size, theme->label_text_size);
-    mui_font_catalog_g[mui_font_catalog_length_g + 2] = mui_load_font_ttf(data, size, theme->textinput_text_size);
-    theme->font = mui_font_catalog_g[mui_font_catalog_length_g];
-    theme->label_font = mui_font_catalog_g[mui_font_catalog_length_g + 1];
-    theme->textinput_font = mui_font_catalog_g[mui_font_catalog_length_g + 2];
-    mui_font_catalog_length_g += 3;
+    mui_font_catalog_g[mui_font_catalog_length_g + 1] = mui_load_font_ttf(data, size, theme->font_small_size);
+    mui_font_catalog_g[mui_font_catalog_length_g + 2] = mui_load_font_ttf(data, size, theme->label_text_size);
+    mui_font_catalog_g[mui_font_catalog_length_g + 3] = mui_load_font_ttf(data, size, theme->textinput_text_size);
+    theme->font =           mui_font_catalog_g[mui_font_catalog_length_g];
+    theme->font_small =     mui_font_catalog_g[mui_font_catalog_length_g + 1];
+    theme->label_font =     mui_font_catalog_g[mui_font_catalog_length_g + 2];
+    theme->textinput_font = mui_font_catalog_g[mui_font_catalog_length_g + 3];
+    mui_font_catalog_length_g += 4;
 
     return true;
 }
 
 void mui_load_latest_fonts_for_theme(Mui_Theme *theme) {
-    assert(mui_font_catalog_length_g >= 3);
-    theme->font = mui_font_catalog_g[mui_font_catalog_length_g - 3];
-    theme->label_font = mui_font_catalog_g[mui_font_catalog_length_g - 2];
+    assert(mui_font_catalog_length_g >= 4);
+    theme->font =           mui_font_catalog_g[mui_font_catalog_length_g - 4];
+    theme->font_small =     mui_font_catalog_g[mui_font_catalog_length_g - 3];
+    theme->label_font =     mui_font_catalog_g[mui_font_catalog_length_g - 2];
     theme->textinput_font = mui_font_catalog_g[mui_font_catalog_length_g - 1];
 }
 
@@ -226,6 +229,7 @@ Mui_Theme mui_protos_theme_dark_generate(float bg_hue, float bg_chroma) {
 
         .border_thickness = 2.0f,
         .font_size = 32.0f,
+        .font_small_size = 20.0f,
         .label_text_size = 32.0f,
         .textinput_text_size = 32.0f,
 
@@ -255,6 +259,7 @@ Mui_Theme mui_protos_theme_light_generate(float bg_hue, float bg_chroma) {
 
         .border_thickness = 2.0f,
         .font_size = 32.0f,
+        .font_small_size = 20.0f,
         .label_text_size = 32.0f,
         .textinput_text_size = 32.0f,
 

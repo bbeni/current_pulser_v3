@@ -207,4 +207,12 @@ void mui_draw_text_line(struct Mui_Font* font, Mui_Vector2 pos, float letter_spa
     DrawTextEx(font->raylib_font, t_cstr, RV2(pos), letter_size, letter_space, RCOLOR(color));
 }
 
+void mui_draw_text_line_angle(struct Mui_Font* font, Mui_Vector2 pos, float letter_space, float letter_size, const char* text, Mui_Color color, size_t start, size_t end, float angle) {
+    char* t_cstr = uti_temp_strndup(&text[start], end - start);
+    Mui_Vector2 measure = mui_measure_text(font, text, letter_size, letter_space, start, end);
+    Mui_Vector2 center;
+    center.x = measure.x * 0.5f;
+    center.y = measure.y * 0.5f;
+    DrawTextPro(font->raylib_font, t_cstr, RV2(pos), RV2(center), angle, letter_size, letter_space, RCOLOR(color));
+}
 

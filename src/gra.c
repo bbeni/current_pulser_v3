@@ -7,6 +7,8 @@
 
 #include "gra.h"
 #include "string.h"
+#include "stdio.h"
+#include "assert.h"
 
 Mui_Color _color_bg() {return mui_protos_theme_g.bg;}
 Mui_Color _color_border() {return mui_protos_theme_g.border;}
@@ -161,3 +163,131 @@ void gra_xy_plot_data_points(double *x_data, void *y_data, double (* y_map)(size
         }
     }
 }
+
+
+void _gridded_draw_grid(Mui_Rectangle plot_area, float step_x, float step_y, float off_x, float off_y, float thickness) {
+    float x_a = plot_area.x;
+    float x_b = plot_area.x + plot_area.width;
+    float x = x_a + off_x;
+    for (int i = 0; i < 1000 && x <= x_b; i++) {
+        mui_draw_line(x, plot_area.y, x, plot_area.y + plot_area.height, thickness, _color_text());
+        x += step_x;
+    }
+
+    float y_a = plot_area.y;
+    float y_b = plot_area.y + plot_area.height;
+    float y = y_a + off_y;
+    for (int i = 0; i < 1000 && y <= y_b; i++) {
+        mui_draw_line(plot_area.x, y, plot_area.x + plot_area.width, y, thickness, _color_text());
+        y += step_y;
+    }
+}
+
+void _gridded_draw_small_ticks(Mui_Rectangle plot_area, float step_x, float step_y, float off_x, float off_y, float thickness, float length) {
+    float x_a = plot_area.x;
+    float x_b = plot_area.x + plot_area.width;
+    float x = x_a + off_x;
+    for (int i = 0; i < 1000 && x <= x_b; i++) {
+        mui_draw_line(x, plot_area.y, x, plot_area.y + length, thickness, _color_text());
+        mui_draw_line(x, plot_area.y + plot_area.height - length, x, plot_area.y + plot_area.height, thickness, _color_text());
+        x += step_x;
+    }
+
+    float y_a = plot_area.y;
+    float y_b = plot_area.y + plot_area.height;
+    float y = y_a + off_y;
+    for (int i = 0; i < 1000 && y <= y_b; i++) {
+        mui_draw_line(plot_area.x, y, plot_area.x + length, y, thickness, _color_text());
+        mui_draw_line(plot_area.x + plot_area.width - length, y, plot_area.x + plot_area.width, y, thickness, _color_text());
+        y += step_y;
+    }
+}
+
+void _gridded_draw_tick_labels(Mui_Rectangle plot_area, int count_x, int count_y,
+    float step_x, float step_y, float off_x, float off_y,
+    const char* fmt_x, const char* fmt_y, float x_left, float x_right, float y_top, float y_bot) {
+
+    assert(count_x > 1);
+    assert(count_y > 1);
+
+    char buffer[24];
+
+    float x_a = plot_area.x;
+    float x_b = plot_area.x + plot_area.width;
+    float x = x_a + off_x;
+    for (int i = 0; i < count_x && x <= x_b; i++) {
+        snprintf(buffer, 24, fmt_x, x_left + i * (x_right - x_left) / (count_x - 1));
+        size_t l = mui_text_len(buffer, strlen(buffer));
+        Mui_Vector2 text_measure = mui_measure_text(mui_protos_theme_g.font_small, buffer, mui_protos_theme_g.font_small_size, 0.0f, 0, l);
+        Mui_Vector2 pos;
+        pos.x = x - text_measure.x * 0.5f;
+        pos.y = plot_area.y + plot_area.height + text_measure.y * 0.5f;
+        mui_draw_text_line(mui_protos_theme_g.font_small, pos, 0.0f, mui_protos_theme_g.font_small_size, buffer, _color_text(), 0, l);
+        x += step_x;
+    }
+
+    float y_a = plot_area.y;
+    float y_b = plot_area.y + plot_area.height;
+    float y = y_a + off_y;
+    for (int i = 0; i < count_y && y <= y_b; i++) {
+        snprintf(buffer, 24, fmt_y, y_top + i * (y_bot - y_top) / (count_y - 1));
+        size_t l = mui_text_len(buffer, strlen(buffer));
+        Mui_Vector2 text_measure = mui_measure_text(mui_protos_theme_g.font_small, buffer, mui_protos_theme_g.font_small_size, 0.0f, 0, l);
+        Mui_Vector2 pos;
+        pos.y = y - text_measure.y * 0.5f;
+        pos.x = plot_area.x - text_measure.x - text_measure.y * 0.5f;
+        mui_draw_text_line(mui_protos_theme_g.font_small, pos, 0.0f, mui_protos_theme_g.font_small_size, buffer, _color_text(), 0, l);
+        y += step_y;
+    }
+
+}
+
+
+Mui_Rectangle gra_gridded_xy_base(struct Gra_Gridded_Base_Arguments* args, Mui_Rectangle place) {
+
+    float to_px = args->grid_unit_pixels;
+    place.width = args->grid_w * to_px;
+    place.height = args->grid_h * to_px;
+    int nx = args->grid_w - args->grid_left_axis_off;
+    int ny = args->grid_h - args->grid_bot_axis_off;
+
+    Mui_Rectangle y_axis_rect;
+    Mui_Rectangle x_axis_rect;
+    Mui_Rectangle rest = mui_cut_bot(place, args->grid_bot_axis_off * to_px, &x_axis_rect);
+    rest = mui_cut_left(rest, args->grid_left_axis_off * to_px, &y_axis_rect);
+    x_axis_rect = mui_cut_left(x_axis_rect, args->grid_left_axis_off * to_px, NULL);
+
+    _gridded_draw_grid(rest, (args->grid_skip_x + 1) * to_px, (args->grid_skip_y + 1) * to_px, 0.0f, 0.0f, 2.0f);
+    _gridded_draw_small_ticks(rest, to_px, to_px, 0.0f, 0.0f, 1.0f, to_px * 0.2f);
+    _gridded_draw_tick_labels(
+        rest, nx, ny, (args->grid_skip_x + 1) * to_px, (args->grid_skip_y + 1) * to_px,  0.0f, 0.0f,
+        args->tick_x_label_fmt, args->tick_y_label_fmt, args->x_left, args->x_right, args->y_top, args->y_bot
+    );
+
+    struct Mui_Font* font = mui_protos_theme_g.font;
+    float font_size = mui_protos_theme_g.font_size;
+    {
+        size_t l = mui_text_len(args->x_label, strlen(args->x_label));
+        Mui_Vector2 measure = mui_measure_text(font, args->x_label, font_size, 0.0f, 0, l);
+        // TODO: mui: refactor so that both functions start with the common arguments
+        Mui_Vector2 pos = mui_center_of_rectangle(x_axis_rect);
+        pos.x -= measure.x * 0.5f;
+        pos.y -= measure.y * 0.5f;
+        mui_draw_text_line(font, pos, 0.0f, font_size, args->x_label, _color_border(), 0, l);
+    }
+
+    {
+        size_t l = mui_text_len(args->y_label, strlen(args->y_label));
+        Mui_Vector2 measure = mui_measure_text(font, args->y_label, font_size, 0.0f, 0, l);
+        // TODO: mui: refactor so that both functions start with the common arguments
+        Mui_Vector2 pos = mui_center_of_rectangle(y_axis_rect);
+        pos.x -= measure.x * 0.5f;
+        pos.y -= measure.y * 0.5f;
+        mui_draw_text_line_angle(font, pos, 0.0f, font_size, args->y_label, _color_border(), 0, l, -90);
+    }
+
+
+    return rest;
+
+}
+

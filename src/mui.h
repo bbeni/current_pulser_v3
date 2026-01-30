@@ -61,10 +61,12 @@ typedef struct {
     Mui_Color primary_dark;
 
     float font_size;
+    float font_small_size;
     float label_text_size;
     float textinput_text_size;
 
     struct Mui_Font *font;
+    struct Mui_Font *font_small;
     struct Mui_Font *label_font;
     struct Mui_Font *textinput_font;
 
@@ -241,7 +243,6 @@ void mui_window_set_position(int x, int y);
 void mui_window_set_size(int width, int height);
 
 
-
 void mui_clear_background(Mui_Color color, Mui_Image* image);
 void mui_begin_drawing();
 void mui_end_drawing();
@@ -279,6 +280,7 @@ void mui_draw_rectangle_rounded_lines(Mui_Rectangle rect, float corner_radius, M
 Mui_Vector2 mui_measure_text(struct Mui_Font* font, const char *text, float font_size, float spacing, size_t start, size_t end);
 struct Mui_Font *mui_load_font_ttf(void* ttf_data, int ttf_data_size, float font_size);
 void mui_draw_text_line(struct Mui_Font* font, Mui_Vector2 pos, float letter_space, float letter_size, const char* text, Mui_Color color, size_t start, size_t end);
+void mui_draw_text_line_angle(struct Mui_Font* font, Mui_Vector2 pos, float letter_space, float letter_size, const char* text, Mui_Color color, size_t start, size_t end, float angle);
 
 #define MUI_LIGHTGRAY  (Mui_Color){ 200, 200, 200, 255 }   // Light Gray
 #define MUI_GRAY       (Mui_Color){ 130, 130, 130, 255 }   // Gray
