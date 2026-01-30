@@ -29,7 +29,7 @@
 
 #pragma once
 
-#ifndef DWFINC 
+#ifndef DWFINC
 #define DWFINC TRUE
 
 #ifndef DWFAPI
@@ -39,7 +39,7 @@
         #else
             #define    DWFAPI __declspec(dllimport)
         #endif
-    #else        
+    #else
         #if defined(__cplusplus)
             #define DWFAPI extern "C"
         #else
@@ -174,7 +174,7 @@ const TRIGLEN triglenTimeout    = 1;
 const TRIGLEN triglenMore       = 2;
 
 // error codes for the functions:
-typedef int DWFERC;                           
+typedef int DWFERC;
 const   DWFERC dwfercNoErc                  = 0;        //  No error occurred
 const   DWFERC dwfercUnknownError           = 1;        //  API waiting on pending API timed out
 const   DWFERC dwfercApiLockTimeout         = 2;        //  API waiting on pending API timed out
@@ -274,9 +274,9 @@ const DwfDigitalInClockSource DwfDigitalInClockSourceExternal2 = 2;
 
 typedef int DwfDigitalInSampleMode;
 const DwfDigitalInSampleMode DwfDigitalInSampleModeSimple   = 0;
-// alternate samples: noise|sample|noise|sample|...  
+// alternate samples: noise|sample|noise|sample|...
 // where noise is more than 1 transition between 2 samples
-const DwfDigitalInSampleMode DwfDigitalInSampleModeNoise    = 1; 
+const DwfDigitalInSampleMode DwfDigitalInSampleModeNoise    = 1;
 
 typedef int DwfDigitalOutOutput;
 const DwfDigitalOutOutput DwfDigitalOutOutputPushPull   = 0;
@@ -423,7 +423,7 @@ DWFAPI int FDwfDeviceParamGet(HDWF hdwf, DwfParam param, int *pvalue);
 
 
 // ANALOG IN INSTRUMENT FUNCTIONS
-// Control and status: 
+// Control and status:
 DWFAPI int FDwfAnalogInReset(HDWF hdwf);
 DWFAPI int FDwfAnalogInConfigure(HDWF hdwf, int fReconfigure, int fStart);
 DWFAPI int FDwfAnalogInTriggerForce(HDWF hdwf);
@@ -627,7 +627,7 @@ DWFAPI int FDwfAnalogOutNodeFunctionGet(HDWF hdwf, int idxChannel, AnalogOutNode
 DWFAPI int FDwfAnalogOutNodeFrequencyInfo(HDWF hdwf, int idxChannel, AnalogOutNode node, double *phzMin, double *phzMax);
 DWFAPI int FDwfAnalogOutNodeFrequencySet(HDWF hdwf, int idxChannel, AnalogOutNode node, double hzFrequency);
 DWFAPI int FDwfAnalogOutNodeFrequencyGet(HDWF hdwf, int idxChannel, AnalogOutNode node, double *phzFrequency);
-// Carrier Amplitude or Modulation Index 
+// Carrier Amplitude or Modulation Index
 DWFAPI int FDwfAnalogOutNodeAmplitudeInfo(HDWF hdwf, int idxChannel, AnalogOutNode node, double *pMin, double *pMax);
 DWFAPI int FDwfAnalogOutNodeAmplitudeSet(HDWF hdwf, int idxChannel, AnalogOutNode node, double vAmplitude);
 DWFAPI int FDwfAnalogOutNodeAmplitudeGet(HDWF hdwf, int idxChannel, AnalogOutNode node, double *pvAmplitude);
@@ -715,7 +715,7 @@ DWFAPI int FDwfDigitalIOInputStatus64(HDWF hdwf, unsigned long long *pfsInput);
 
 
 // DIGITAL IN INSTRUMENT FUNCTIONS
-// Control and status: 
+// Control and status:
 DWFAPI int FDwfDigitalInReset(HDWF hdwf);
 DWFAPI int FDwfDigitalInConfigure(HDWF hdwf, int fReconfigure, int fStart);
 DWFAPI int FDwfDigitalInStatus(HDWF hdwf, int fReadData, DwfState *psts);

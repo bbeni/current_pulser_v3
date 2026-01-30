@@ -203,18 +203,16 @@ void _gridded_draw_small_ticks(Mui_Rectangle plot_area, float step_x, float step
     }
 }
 
-void _gridded_draw_tick_labels(Mui_Rectangle plot_area, int count_x, int count_y,
+void _gridded_draw_tick_labels(Mui_Rectangle plot_area,
     float step_x, float step_y, float off_x, float off_y,
     const char* fmt_x, const char* fmt_y, float x_left, float x_right, float y_top, float y_bot) {
-
-    assert(count_x > 1);
-    assert(count_y > 1);
 
     char buffer[24];
 
     float x_a = plot_area.x;
     float x_b = plot_area.x + plot_area.width;
     float x = x_a + off_x;
+    int count_x = (x_b - x_a) / step_x + 1;
     for (int i = 0; i < count_x && x <= x_b; i++) {
         snprintf(buffer, 24, fmt_x, x_left + i * (x_right - x_left) / (count_x - 1));
         size_t l = mui_text_len(buffer, strlen(buffer));
@@ -229,6 +227,7 @@ void _gridded_draw_tick_labels(Mui_Rectangle plot_area, int count_x, int count_y
     float y_a = plot_area.y;
     float y_b = plot_area.y + plot_area.height;
     float y = y_a + off_y;
+    int count_y = (y_b - y_a) / step_y + 1;
     for (int i = 0; i < count_y && y <= y_b; i++) {
         snprintf(buffer, 24, fmt_y, y_top + i * (y_bot - y_top) / (count_y - 1));
         size_t l = mui_text_len(buffer, strlen(buffer));
@@ -248,8 +247,6 @@ Mui_Rectangle gra_gridded_xy_base(struct Gra_Gridded_Base_Arguments* args, Mui_R
     float to_px = args->grid_unit_pixels;
     place.width = args->grid_w * to_px;
     place.height = args->grid_h * to_px;
-    int nx = args->grid_w - args->grid_left_axis_off;
-    int ny = args->grid_h - args->grid_bot_axis_off;
 
     Mui_Rectangle y_axis_rect;
     Mui_Rectangle x_axis_rect;
@@ -260,7 +257,7 @@ Mui_Rectangle gra_gridded_xy_base(struct Gra_Gridded_Base_Arguments* args, Mui_R
     _gridded_draw_grid(rest, (args->grid_skip_x + 1) * to_px, (args->grid_skip_y + 1) * to_px, 0.0f, 0.0f, 2.0f);
     _gridded_draw_small_ticks(rest, to_px, to_px, 0.0f, 0.0f, 1.0f, to_px * 0.2f);
     _gridded_draw_tick_labels(
-        rest, nx, ny, (args->grid_skip_x + 1) * to_px, (args->grid_skip_y + 1) * to_px,  0.0f, 0.0f,
+        rest, (args->grid_skip_x + 1) * to_px, (args->grid_skip_y + 1) * to_px,  0.0f, 0.0f,
         args->tick_x_label_fmt, args->tick_y_label_fmt, args->x_left, args->x_right, args->y_top, args->y_bot
     );
 
@@ -283,11 +280,9 @@ Mui_Rectangle gra_gridded_xy_base(struct Gra_Gridded_Base_Arguments* args, Mui_R
         Mui_Vector2 pos = mui_center_of_rectangle(y_axis_rect);
         pos.x -= measure.x * 0.5f;
         pos.y -= measure.y * 0.5f;
-        mui_draw_text_line_angle(font, pos, 0.0f, font_size, args->y_label, _color_border(), 0, l, -90);
+        mui_draw_text_line_angle(font, pos, 0.0f, font_size, args->y_label, _color_border(), 0, l, -90.0f);
     }
 
-
     return rest;
-
 }
 
