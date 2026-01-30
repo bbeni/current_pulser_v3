@@ -13,6 +13,19 @@
 #include "gra.h"
 #include "uti.h"
 
+// pin 17 enable
+// pin 22 charge
+// pin 23 select
+// pin 27 fire
+
+// i v factor 4000
+// v v factor 1000
+// wenn stdby (enable off) : select selectes lrc meter
+// enable weg -> entladen
+// fire relay on - 100 ms - fire relay off -> enable off -> 90s
+// ladezeit + 1-2s -> check if sollwert von spannung erreicht vom ladegeraet -> error (entlade relay)
+// cahrge disable, HVsupply aus, spannung von HV messen wird es nach 1s kleiner? -> nein -> error (lade relay)
+
 
 int main() {
 
