@@ -15,8 +15,8 @@ typedef enum {
 
 
 typedef enum {
-    OSC_TRIGGER_CONDITION_RISING_POSITIVE  = 0, //trigcondRisingPositive   = 0;
-    OSC_TRIGGER_CONDITION_FALLING_NEGATIVE = 1, //trigcondFallingNegative  = 1;
+    OSC_TRIGGER_CONDITION_RISING_POSITIVE  = 0, // trigcondRisingPositive   = 0;
+    OSC_TRIGGER_CONDITION_FALLING_NEGATIVE = 1, // trigcondFallingNegative  = 1;
 } OSC_TRIGGER_CONDITION;
 
 

@@ -293,15 +293,15 @@ void oscilloscope_ui_draw(Mui_Rectangle area, float grid_pixel_unit, struct Osci
         }
     }
 
-    if (state->device_available || true) {
+    if (state->device_available) {
         if (mui_checkbox(&ui->trigger_armed_cb_state, trigger_label_text, trigger_checkbox_area)) {
             // checkbox toggeled
             bool triggered = ui->trigger_armed_cb_state.checked;
             oscilloscope_change_mode(state, ui, settings, triggered);
         }
+        mui_button(&ui->save_csv_btn_state, "Save CSV", save_csv_button_area);
     }
 
-    mui_button(&ui->save_csv_btn_state, "Save CSV", save_csv_button_area);
     if (mui_button(&ui->up_btn_state, "V/div inc", up_button_area)) {
         ui->plot_args.y_top *= 2;
         ui->plot_args.y_bot *= 2;
@@ -311,9 +311,20 @@ void oscilloscope_ui_draw(Mui_Rectangle area, float grid_pixel_unit, struct Osci
         ui->plot_args.y_bot *= 0.5f;
     }
 
-
-
     Mui_Rectangle plot_rect = gra_gridded_xy_base(&ui->plot_args, scope_rect);
+
+    if (!state->device_available) {
+        Mui_Vector2 pos = mui_center_of_rectangle(plot_rect);
+        char * no_device_text = "Analog discovery oscilloscope not conneted.";
+        size_t l = mui_text_len(no_device_text, strlen(no_device_text));
+        Mui_Vector2 measure = mui_measure_text(mui_protos_theme_g.label_font, no_device_text,
+             mui_protos_theme_g.label_text_size, 0.5f, 0, l);
+        pos.x -= measure.x * 0.5f;
+        pos.y -= measure.y * 0.5f;
+        mui_draw_text_line(mui_protos_theme_g.label_font, pos, 0.5f, mui_protos_theme_g.label_text_size, no_device_text, MUI_RED, 0, l);
+    }
+
+
 
     if (!state->device_available) return;
 
