@@ -271,17 +271,23 @@ void oscilloscope_change_mode(struct Oscilloscope_State* state, struct Oscillosc
 
     if (settings->trigger_mode == triggered) return;
 
+    osc_cleanup_data(state->data);
+
     if (triggered) {
         // TRIGGERED DATA setup
-        osc_cleanup_data(state->data);
-        osc_triggered_setup(&state->device, &state->data, settings->request_n_samples, &state->n_data, settings->n_channels, settings->v_pk_to_pk, settings->sample_rate);
-        osc_triggered_arm_trigger(&state->device, settings->trigger_timeout, settings->trigger_channel, settings->trigger_level, settings->trigger_position, settings->trigger_type, settings->trigger_condition);
+        if (!osc_triggered_setup(&state->device, &state->data, settings->request_n_samples, &state->n_data, settings->n_channels, settings->v_pk_to_pk, settings->sample_rate)) {
+            osc_print_last_error();
+        }
+        if (!osc_triggered_arm_trigger(&state->device, settings->trigger_timeout, settings->trigger_channel, settings->trigger_level, settings->trigger_position, settings->trigger_type, settings->trigger_condition)) {
+            osc_print_last_error();
+        }
         ui->trigger_armed_timestamp = mui_get_time();
         ui->triggerd_data_aquired = false;
     } else {
         // SHIFT_SCREEN DATA setup
-        osc_cleanup_data(state->data);
-        osc_shift_screen_setup(&state->device, &state->data, settings->request_n_samples, &state->n_data, settings->n_channels, settings->v_pk_to_pk, settings->sample_rate);
+        if (!osc_shift_screen_setup(&state->device, &state->data, settings->request_n_samples, &state->n_data, settings->n_channels, settings->v_pk_to_pk, settings->sample_rate)) {
+            osc_print_last_error();
+        }
         ui->trigger_armed_timestamp = mui_get_time() - ui->TRIGGER_ARM_COOLDOWN;
     }
 }
@@ -422,6 +428,7 @@ void oscilloscope_ui_update(struct Oscilloscope_Ui* oscilloscope_ui, struct Osci
             }
         }
     } else {
+        printf("DEBUG: %d\n", oscilloscope_state->n_channels);
         osc_shift_screen_update(&oscilloscope_state->device, oscilloscope_state->data, oscilloscope_state->n_data, oscilloscope_state->n_channels);
     };
 }
