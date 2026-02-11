@@ -181,7 +181,11 @@ bool oscilloscope_setup(struct Oscilloscope_State* state, const struct Oscillosc
             return false;
         }
     } else {
-        osc_shift_screen_setup(&state->device, &data, settings->request_n_samples, &n_data, settings->v_pk_to_pk, settings->sample_rate);
+        if (!osc_shift_screen_setup(&state->device, &data, settings->request_n_samples, &n_data, settings->v_pk_to_pk, settings->sample_rate)) {
+            osc_print_last_error();
+            state->device_available = false;
+            return false;
+        }
     }
     state->data = data;
     state->n_data = n_data;
