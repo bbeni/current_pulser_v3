@@ -166,7 +166,16 @@ bool osc_triggered_arm_trigger(struct Osc_Device* device, float time_out, int ch
 
     FDwfAnalogInTriggerLengthInfo(device->handle, &mi, &ma, &steps);
     FDwfAnalogInTriggerLengthGet(device->handle, &tlevel);
-    printf("Trigger length info: min:%f max:%f steps:%f      lenth:%f\n", mi, ma, steps, tlevel);
+    printf("Trigger length info: min:%f max:%f steps:%f      lenth:%f\n\n", mi, ma, steps, tlevel);
+
+    FILTER filter;
+
+    FDwfAnalogInTriggerFilterGet(device->handle, &filter);
+    printf("const FILTER filterDecimate = 0;\n");
+    printf("const FILTER filterAverage  = 1;\n");
+    printf("const FILTER filterMinMax   = 2;\n");
+    printf("const FILTER filterAverageFit  = 3;\n");
+    printf("got filter number %d\n", filter);
 
     printf("==================================================================\n");
 
