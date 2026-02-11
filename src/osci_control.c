@@ -219,8 +219,9 @@ bool oscilloscope_setup(struct Oscilloscope_State* state, const struct Oscillosc
 
     size_t n_interpol = 3000;
 
+    state->n_interpol = n_interpol;
     state->t_data = malloc(sizeof(*state->t_data) * n_data);
-    state->t_data_interpolated = malloc(sizeof(*state->t_data_interpolated) * n_interpol * settings->n_channels);
+    state->t_data_interpolated = malloc(sizeof(*state->t_data_interpolated) * n_interpol);
     state->y_data_interpolated = malloc(sizeof(*state->t_data_interpolated) * n_interpol * settings->n_channels);
 
     for (int i = 0; i < n_data; i++) {
@@ -387,8 +388,8 @@ void oscilloscope_ui_draw(Mui_Rectangle area, float grid_pixel_unit, struct Osci
     double y_min = ui->plot_args.y_bot;
     double y_max = ui->plot_args.y_top;
 
-    for (int i = 0; i < state->n_display_data; i++) {
-        state->t_data_interpolated[i] = t_min + (t_max - t_min) * i / (state->n_display_data - 1);
+    for (int i = 0; i < state->n_interpol; i++) {
+        state->t_data_interpolated[i] = t_min + (t_max - t_min) * i / (state->n_interpol - 1);
     }
 
 
@@ -404,12 +405,12 @@ void oscilloscope_ui_draw(Mui_Rectangle area, float grid_pixel_unit, struct Osci
 
     // TODO: mui: rename x_resamples to ..._out for consistency
     // TODO: rename display to interpolated
-    //mma_spline_cubic_natural(state->t_data, state->data, state->n_data, state->display_data, state->t_data_interpolated, state->n_display_data);
-    //mma_spline_cubic_natural(state->t_data, state->data, state->n_data, state->display_data, state->t_data_interpolated, state->n_display_data);
+    //mma_spline_cubic_natural(state->t_data, state->data, state->n_data, state->display_data, state->t_data_interpolated, state->n_interpol);
+    //mma_spline_cubic_natural(state->t_data, state->data, state->n_data, state->display_data, state->t_data_interpolated, state->n_interpol);
 
 
-    //gra_xy_plot_data_points(state->t_data_interpolated, &scaled_display_data, (void*)&internal_offset_scale_data, state->n_display_data, t_min, t_max, y_min, y_max, MUI_YELLOW, 2.0f, plot_rect);
-    //if ( (state->t_max_data - state->t_min_data) / (t_max - t_min) * state->n_display_data / state->n_data > 5 ) {
+    //gra_xy_plot_data_points(state->t_data_interpolated, &scaled_display_data, (void*)&internal_offset_scale_data, state->n_interpol, t_min, t_max, y_min, y_max, MUI_YELLOW, 2.0f, plot_rect);
+    //if ( (state->t_max_data - state->t_min_data) / (t_max - t_min) * state->n_interpol / state->n_data > 5 ) {
         gra_xy_plot_data_points(state->t_data, &scaled_data_a, (void*)&internal_offset_scale_data, state->n_data, t_min, t_max, y_min, y_max, MUI_BLUE, 2.0f, plot_rect);
         gra_xy_plot_data_points(state->t_data, &scaled_data_b, (void*)&internal_offset_scale_data, state->n_data, t_min, t_max, y_min, y_max, MUI_GREEN, 2.0f, plot_rect);
     //}

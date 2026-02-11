@@ -66,7 +66,7 @@ struct Oscilloscope_State {
 
     double* y_data_interpolated;
     double* t_data_interpolated;
-    int n_display_data;
+    int n_interpol;
 
     // derived
     double step;
