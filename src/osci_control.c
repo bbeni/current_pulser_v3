@@ -325,7 +325,7 @@ void oscilloscope_change_mode(struct Oscilloscope_State* state, struct Oscillosc
             osc_print_last_error();
         }
         if (!osc_triggered_arm_trigger(&state->device, settings->trigger_auto_timeout, settings->trigger_channel,
-            settings->trigger_level, settings->trigger_length, settings->trigger_position, settings->trigger_type,
+            settings->trigger_level, settings->trigger_position, settings->trigger_length, settings->trigger_type,
             settings->trigger_condition))
         {
             osc_print_last_error();
