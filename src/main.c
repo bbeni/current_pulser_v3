@@ -33,15 +33,15 @@
 
 int main() {
 
-    int grid_w = 22;
-    int grid_h = 21;
-    int grid_pixel_unit = 50;
+    int grid_w = 26;
+    int grid_h = 23;
+    int grid_pixel_unit = 36;
 
     int w, h;
     w = grid_w * grid_pixel_unit;
     h = grid_h * grid_pixel_unit;
 
-    mui_open_window(w, h, 500, 200, "Current Pulser V3 Controller", 1.0f, MUI_WINDOW_RESIZEABLE | MUI_WINDOW_UNDECORATED, NULL);
+    mui_open_window(w, h, 500, 0, "Current Pulser V3 Controller", 1.0f, MUI_WINDOW_RESIZEABLE | MUI_WINDOW_UNDECORATED, NULL);
     mui_init_themes(0, 0, false, "resources/font/NimbusSans-Regular.ttf");
 
 
@@ -72,11 +72,11 @@ int main() {
     // osci
 
     struct Oscilloscope_Settings settings;
-    settings.sample_rate  = 7692300.0f;  // Hz
+    settings.sample_rate  = 250000;  // Hz
     settings.v_pk_to_pk = 5.0f;          // volts
     settings.trigger_mode = false;
     settings.trigger_channel = 0;
-    settings.trigger_level = 0.05f;      // volts
+    settings.trigger_level = 0.008f;      // volts
     settings.trigger_position = 0.0008;  // in seconds
     settings.trigger_timeout = 1e23;     // in seconds
     settings.trigger_type = OSC_TRIGGER_TYPE_EDGE;
@@ -122,7 +122,7 @@ int main() {
         // current pulse time series
         Mui_Rectangle current_pulse_title_area;
         Mui_Rectangle time_series_area = mui_cut_top(bottom_area, grid_pixel_unit, &current_pulse_title_area);
-        mui_label(&mui_protos_theme_g, "CURRENT PULSE", MUI_TEXT_ALIGN_LEFT, current_pulse_title_area);
+        mui_label(&mui_protos_theme_g, "CURRENT PULSE / OSCILLOSCOPE", MUI_TEXT_ALIGN_LEFT, current_pulse_title_area);
 
         Mui_Rectangle oscilloscope_area = time_series_area;
         mui_draw_rectangle_lines(time_series_area, mui_protos_theme_g.border, 2.0f);

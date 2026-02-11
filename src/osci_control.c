@@ -17,18 +17,6 @@
 #include "osci_control.h"
 
 
-struct Osc_Device {
-    HDWF handle;
-    double max_freq_hz;
-    int n_channels;
-    char name[32];
-    char serial_number[32];
-    STS status;
-
-    // additional info
-    bool triggered_measurement_started;
-};
-
 void osc_print_last_error() {
     char szError[512];
     FDwfGetLastErrorMsg(szError);
@@ -53,21 +41,27 @@ bool osc_open_device(struct Osc_Device* device) {
 }
 
 
-// remember to free data_out
-void osc_shift_screen_setup(struct Osc_Device* device, double** data_out, int* n_samples_out, float v_pk_to_pk, float sample_rate) {
+// request_n_samples can be a number or -1 to get the maximum possible. remember to free data_out.
+bool osc_shift_screen_setup(struct Osc_Device* device, double** data_out, int request_n_samples, int* n_samples_out, float v_pk_to_pk, float sample_rate) {
 
     // enable channels
     for(int c = 0; c < device->n_channels; c++){
-        FDwfAnalogInChannelEnableSet(device->handle, c, true);
+        if (!FDwfAnalogInChannelEnableSet(device->handle, c, true)) return false;
     }
 
-    FDwfAnalogInChannelRangeSet(device->handle, -1, v_pk_to_pk);
-    FDwfAnalogInFrequencySet(device->handle, sample_rate);
+    if (!FDwfAnalogInChannelRangeSet(device->handle, -1, v_pk_to_pk)) return false;
+    if (!FDwfAnalogInFrequencySet(device->handle, sample_rate)) return false;
 
     // get the maximum buffer size
-    FDwfAnalogInBufferSizeInfo(device->handle, NULL, n_samples_out);
-    FDwfAnalogInBufferSizeSet(device->handle, *n_samples_out);
-    FDwfAnalogInAcquisitionModeSet(device->handle, acqmodeScanScreen);
+    if (request_n_samples = -1) {
+        // get the maximum buffer size
+        if (!FDwfAnalogInBufferSizeInfo(device->handle, NULL, n_samples_out)) return false;
+    } else {
+        *n_samples_out = request_n_samples;
+    }
+
+    if (!FDwfAnalogInBufferSizeSet(device->handle, *n_samples_out)) return false;
+    if (!FDwfAnalogInAcquisitionModeSet(device->handle, acqmodeScanScreen)) return false;
 
     double* data;
     data = malloc(sizeof(*data) * *n_samples_out);
@@ -76,23 +70,26 @@ void osc_shift_screen_setup(struct Osc_Device* device, double** data_out, int* n
     *data_out = data;
 
     // start
-    FDwfAnalogInConfigure(device->handle, 0, true);
+    if (!FDwfAnalogInConfigure(device->handle, 0, true)) return false;
+    return true;
 }
 
-void osc_shift_screen_update(struct Osc_Device* device, double* data_out, int n_samples) {
+bool osc_shift_screen_update(struct Osc_Device* device, double* data_out, int n_samples) {
 
-    if (!FDwfAnalogInStatus(device->handle, true, &device->status)) return;
-    if (device->status == stsDone) return;
+    if (!FDwfAnalogInStatus(device->handle, true, &device->status)) return false;
+    if (device->status == stsDone) return false;
 
     // get the samples for each channel
-    for (int c = 0; c < device->n_channels; c++) {
-        FDwfAnalogInStatusData(device->handle, c, data_out, n_samples);
-    }
+    //for (int c = 0; c < device->n_channels; c++) {
+        FDwfAnalogInStatusData(device->handle, 0, data_out, n_samples);
+    //}
+
+    return true;
 }
 
 
-// remember to free data_out
-bool osc_triggered_setup(struct Osc_Device* device, double** data_out, int* n_samples_out, float v_pk_to_pk, float sample_rate) {
+// request_n_samples can be a number or -1 to get the maximum possible. remember to free data_out.
+bool osc_triggered_setup(struct Osc_Device* device, double** data_out, int request_n_samples, int* n_samples_out, float v_pk_to_pk, float sample_rate) {
 
     // enable channels
     for(int c = 0; c < device->n_channels; c++){
@@ -103,8 +100,13 @@ bool osc_triggered_setup(struct Osc_Device* device, double** data_out, int* n_sa
     if (!FDwfAnalogInChannelRangeSet(device->handle, -1, v_pk_to_pk)) return false;
     if (!FDwfAnalogInFrequencySet(device->handle, sample_rate)) return false;
 
-    // get the maximum buffer size
-    if (!FDwfAnalogInBufferSizeInfo(device->handle, NULL, n_samples_out)) return false;
+    if (request_n_samples = -1) {
+        // get the maximum buffer size
+        if (!FDwfAnalogInBufferSizeInfo(device->handle, NULL, n_samples_out)) return false;
+    } else {
+        *n_samples_out = request_n_samples;
+    }
+
     if (!FDwfAnalogInBufferSizeSet(device->handle, *n_samples_out)) return false;
     if (!FDwfAnalogInAcquisitionModeSet(device->handle, acqmodeSingle)) return false;
 
@@ -116,7 +118,7 @@ bool osc_triggered_setup(struct Osc_Device* device, double** data_out, int* n_sa
 
     // start
     if (!FDwfAnalogInConfigure(device->handle, 0, true)) return false;
-    return false;
+    return true;
 }
 
 // wait at least 2 seconds with Analog Discovery for the offset to stabilize, before the first reading after device open or offset/range change
@@ -150,9 +152,9 @@ bool osc_triggered_update(struct Osc_Device* device, float trigger_cooldown, dou
     if (device->status != stsDone) return false;
 
     // get the samples for each channel
-    for (int c = 0; c < device->n_channels; c++) {
-        FDwfAnalogInStatusData(device->handle, c, data_out, n_samples);
-    }
+    //for (int c = 0; c < device->n_channels; c++) {
+        FDwfAnalogInStatusData(device->handle, 0, data_out, n_samples);
+    //}
 
     return true;
 }
@@ -173,13 +175,13 @@ bool oscilloscope_setup(struct Oscilloscope_State* state, const struct Oscillosc
     double* data;
     int n_data;
     if (settings->trigger_mode) {
-        if (!osc_triggered_setup(&state->device, &data, &n_data, settings->v_pk_to_pk, settings->trigger_level)) {
+        if (!osc_triggered_setup(&state->device, &data, settings->request_n_samples, &n_data, settings->v_pk_to_pk, settings->trigger_level)) {
             osc_print_last_error();
             state->device_available = false;
             return false;
         }
     } else {
-        osc_shift_screen_setup(&state->device, &data, &n_data, settings->v_pk_to_pk, settings->sample_rate);
+        osc_shift_screen_setup(&state->device, &data, settings->request_n_samples, &n_data, settings->v_pk_to_pk, settings->sample_rate);
     }
     state->data = data;
     state->n_data = n_data;
@@ -187,11 +189,12 @@ bool oscilloscope_setup(struct Oscilloscope_State* state, const struct Oscillosc
     printf("setup %d data_point measurement\n", n_data);
 
     //
-    // setup arrays for data interpolation
+    // setup time data and arrays for data interpolation
     //
     state->step = 1.0 / settings->sample_rate;
+    printf("step %.10f\n", state->step);
     state->t_total = (n_data - 1) * state->step;
-    state->t_min_data = -state->t_total  * 0.5f;
+    state->t_min_data = -(state->t_total * 0.5f) - settings->trigger_position;
     state->t_max_data = state->t_min_data + state->t_total;
 
     size_t n_interpol = 3000;
@@ -222,16 +225,16 @@ void oscilloscope_ui_setup(struct Oscilloscope_Ui* oscilloscope_ui, const struct
 
     struct Gra_Gridded_Base_Arguments plot_args;
     plot_args.grid_unit_pixels = grid_pixels_unit;
-    plot_args.grid_w = 14;
-    plot_args.grid_h = 10;
+    plot_args.grid_w = 18;
+    plot_args.grid_h = 12;
     plot_args.grid_left_axis_off = 2;
     plot_args.grid_bot_axis_off = 2;
     plot_args.grid_skip_x = 1;
     plot_args.grid_skip_y = 1;
-    plot_args.x_left = -0.1f;
-    plot_args.x_right = 0.1f;
-    plot_args.y_bot = -1.0f * pow(10.0, exponent);
-    plot_args.y_top = 3.0f * pow(10.0, exponent);
+    plot_args.x_left = -0.0002f;
+    plot_args.x_right = 0.0018f;
+    plot_args.y_bot = -0.2f * pow(10.0, exponent);
+    plot_args.y_top = 0.8f * pow(10.0, exponent);
     plot_args.x_label = "t [s]";
     plot_args.y_label = !ui_settings->do_plot_current ? "U [V]" : "I [A]";
     plot_args.thick_y_zero = true;
@@ -241,21 +244,21 @@ void oscilloscope_ui_setup(struct Oscilloscope_Ui* oscilloscope_ui, const struct
 
 }
 
-void oscilloscope_change_mode(struct Oscilloscope_State* state, struct Oscilloscope_Ui* ui, struct Oscilloscope_Settings* settings, bool triggered) {
+void oscilloscope_change_mode(struct Oscilloscope_State* state, struct Oscilloscope_Ui* ui, const struct Oscilloscope_Settings* settings, bool triggered) {
 
     if (settings->trigger_mode == triggered) return;
 
     if (triggered) {
         // TRIGGERED DATA setup
         osc_cleanup_data(state->data);
-        osc_triggered_setup(&state->device, &state->data, &state->n_data, settings->v_pk_to_pk, settings->sample_rate);
+        osc_triggered_setup(&state->device, &state->data, settings->request_n_samples, &state->n_data, settings->v_pk_to_pk, settings->sample_rate);
         osc_triggered_arm_trigger(&state->device, settings->trigger_timeout, settings->trigger_channel, settings->trigger_level, settings->trigger_position, settings->trigger_type, settings->trigger_condition);
         ui->trigger_armed_timestamp = mui_get_time();
         ui->triggerd_data_aquired = false;
     } else {
         // SHIFT_SCREEN DATA setup
         osc_cleanup_data(state->data);
-        osc_shift_screen_setup(&state->device, &state->data, &state->n_data, settings->v_pk_to_pk, settings->sample_rate);
+        osc_shift_screen_setup(&state->device, &state->data, settings->request_n_samples, &state->n_data, settings->v_pk_to_pk, settings->sample_rate);
         ui->trigger_armed_timestamp = mui_get_time() - ui->TRIGGER_ARM_COOLDOWN;
     }
 }
@@ -271,7 +274,7 @@ double internal_scale_data(size_t i, struct Internal_Scaled_Data* data) {
     return x[i] * scale;
 }
 
-void oscilloscope_ui_draw(Mui_Rectangle area, float grid_pixel_unit, struct Oscilloscope_Ui* ui, struct Oscilloscope_State* state, struct Oscilloscope_Settings* settings) {
+void oscilloscope_ui_draw(Mui_Rectangle area, float grid_pixel_unit, struct Oscilloscope_Ui* ui, struct Oscilloscope_State* state, const struct Oscilloscope_Settings* settings) {
     Mui_Rectangle scope_settings_area;
     Mui_Rectangle trigger_checkbox_area;
     Mui_Rectangle save_csv_button_area;
@@ -359,15 +362,15 @@ void oscilloscope_ui_draw(Mui_Rectangle area, float grid_pixel_unit, struct Osci
 
     // TODO: mui: rename x_resamples to ..._out for consistency
     // TODO: rename display to interpolated
-    mma_spline_cubic_natural(state->display_t_data, state->data, state->n_data, state->display_data, state->display_t_data, state->n_display_data);
+    //mma_spline_cubic_natural(state->display_t_data, state->data, state->n_data, state->display_data, state->display_t_data, state->n_display_data);
 
-    struct Internal_Scaled_Data scaled_display_data;
-    scaled_display_data.scale = ui->current_voltage_factor_chan_a;
-    scaled_display_data.x = state->display_data;
+    struct Internal_Scaled_Data scaled_data;
+    scaled_data.scale = ui->current_voltage_factor_chan_a;
+    scaled_data.x = state->data;
 
-    gra_xy_plot_data_points(state->display_t_data, &scaled_display_data, (void*)&internal_scale_data, state->n_display_data, t_min, t_max, y_min, y_max, MUI_YELLOW, 2.0f, plot_rect);
+    //gra_xy_plot_data_points(state->display_t_data, &scaled_display_data, (void*)&internal_scale_data, state->n_display_data, t_min, t_max, y_min, y_max, MUI_YELLOW, 2.0f, plot_rect);
     //if ( (state->t_max_data - state->t_min_data) / (t_max - t_min) * state->n_display_data / state->n_data > 5 ) {
-    //    gra_xy_plot_data_points(state->t_data, state->data, NULL, state->n_data, t_min, t_max, y_min, y_max, MUI_ORANGE, 2.0f, plot_rect);
+        gra_xy_plot_data_points(state->t_data, &scaled_data, (void*)&internal_scale_data, state->n_data, t_min, t_max, y_min, y_max, MUI_ORANGE, 2.0f, plot_rect);
     //}
 
 }

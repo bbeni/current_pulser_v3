@@ -2,6 +2,11 @@
 #include <assert.h>
 #include <stdio.h>
 
+#define _FONT_SMALL 20.0f
+#define _FONT_MEDIUM 24.0f
+#define _FONT_LARGE 28.0f
+#define _FONT_HUGE 32.0f
+
 #define _OKLCH(l, c, h) mui_oklch_to_rgb((l), (c), (h))
 
 Mui_Theme mui_protos_theme_dark_generate(float bg_hue, float bg_chroma) {
@@ -17,10 +22,10 @@ Mui_Theme mui_protos_theme_dark_generate(float bg_hue, float bg_chroma) {
         .primary_dark = _OKLCH(0.6f, bg_chroma + 0.1, 243 + bg_hue),
 
         .border_thickness = 2.0f,
-        .font_size = 32.0f,
-        .font_small_size = 20.0f,
-        .label_text_size = 32.0f,
-        .textinput_text_size = 24.0f,
+        .font_size = _FONT_MEDIUM,
+        .font_small_size = _FONT_SMALL,
+        .label_text_size = _FONT_MEDIUM,
+        .textinput_text_size = _FONT_MEDIUM,
 
         .slider_thickness = 8.0f,
         .slider_wagon_width = 32.0f,
@@ -47,10 +52,10 @@ Mui_Theme mui_protos_theme_light_generate(float bg_hue, float bg_chroma) {
         .primary_dark = _OKLCH(0.6f, bg_chroma+0.09, 243 + bg_hue),
 
         .border_thickness = 2.0f,
-        .font_size = 32.0f,
-        .font_small_size = 20.0f,
-        .label_text_size = 32.0f,
-        .textinput_text_size = 24.0f,
+        .font_size = _FONT_MEDIUM,
+        .font_small_size = _FONT_SMALL,
+        .label_text_size = _FONT_MEDIUM,
+        .textinput_text_size = _FONT_MEDIUM,
 
         .slider_thickness = 8.0f,
         .slider_wagon_width = 32.0f,

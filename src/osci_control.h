@@ -42,10 +42,10 @@ void osc_print_last_error();
 bool osc_open_device(struct Osc_Device* device);
 void osc_cleanup_data(double* data);
 
-void osc_shift_screen_setup(struct Osc_Device* device, double** data_out, int* n_samples_out, float v_pk_to_pk, float sample_rate);
-void osc_shift_screen_update(struct Osc_Device* device, double* data_out, int n_samples);
+bool osc_shift_screen_setup(struct Osc_Device* device, double** data_out, int request_n_samples, int* n_samples_out, float v_pk_to_pk, float sample_rate);
+bool osc_shift_screen_update(struct Osc_Device* device, double* data_out, int n_samples);
 
-bool osc_triggered_setup(struct Osc_Device* device, double** data_out, int* n_samples_out, float v_pk_to_pk, float sample_rate);
+bool osc_triggered_setup(struct Osc_Device* device, double** data_out, int request_n_samples, int* n_samples_out, float v_pk_to_pk, float sample_rate);
 bool osc_triggered_arm_trigger(struct Osc_Device* device, float time_out, int channel, float level, float position, OSC_TRIGGER_TYPE type, OSC_TRIGGER_CONDITION condition);
 bool osc_triggered_update(struct Osc_Device* device, float trigger_cooldown, double* data_out, int n_samples);
 
@@ -94,6 +94,7 @@ struct Oscilloscope_Ui {
 
 struct Oscilloscope_Settings {
     float sample_rate;
+    int request_n_samples; // -1 for maximum amount of samples
     float v_pk_to_pk;
 
     bool trigger_mode; // either that or shift window
@@ -112,8 +113,8 @@ struct Oscilloscope_Ui_Settings {
 };
 bool oscilloscope_setup(struct Oscilloscope_State* state, const struct Oscilloscope_Settings* settings);
 void oscilloscope_ui_setup(struct Oscilloscope_Ui* oscilloscope_ui, const struct Oscilloscope_Ui_Settings* ui_settings, float grid_pixels_unit);
-void oscilloscope_change_mode(struct Oscilloscope_State* state, struct Oscilloscope_Ui* ui, struct Oscilloscope_Settings* settings, bool triggered);
-void oscilloscope_ui_draw(Mui_Rectangle area, float grid_pixel_unit, struct Oscilloscope_Ui* ui, struct Oscilloscope_State* state, struct Oscilloscope_Settings* settings);
+void oscilloscope_change_mode(struct Oscilloscope_State* state, struct Oscilloscope_Ui* ui, const struct Oscilloscope_Settings* settings, bool triggered);
+void oscilloscope_ui_draw(Mui_Rectangle area, float grid_pixel_unit, struct Oscilloscope_Ui* ui, struct Oscilloscope_State* state, const struct Oscilloscope_Settings* settings);
 void oscilloscope_ui_update(struct Oscilloscope_Ui* oscilloscope_ui, struct Oscilloscope_State* oscilloscope_state);
 void oscilloscope_destroy(struct Oscilloscope_State* oscilloscope_state);
 
