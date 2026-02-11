@@ -82,6 +82,7 @@ bool osc_shift_screen_setup(struct Osc_Device* device, double** data_out, int re
     return true;
 }
 
+// return false on error
 bool osc_shift_screen_update(struct Osc_Device* device, double* data_out, int n_samples, int n_channels) {
 
     assert(n_channels <= device->n_channels);
@@ -91,7 +92,7 @@ bool osc_shift_screen_update(struct Osc_Device* device, double* data_out, int n_
 
     // get the samples for each channel
     for (int c = 0; c < n_channels; c++) {
-        FDwfAnalogInStatusData(device->handle, c, data_out + c * n_samples, n_samples);
+        if (!FDwfAnalogInStatusData(device->handle, c, data_out + c * n_samples, n_samples)) return false;
     }
 
     return true;
@@ -428,8 +429,9 @@ void oscilloscope_ui_update(struct Oscilloscope_Ui* oscilloscope_ui, struct Osci
             }
         }
     } else {
-        printf("DEBUG: %d\n", oscilloscope_state->n_channels);
-        osc_shift_screen_update(&oscilloscope_state->device, oscilloscope_state->data, oscilloscope_state->n_data, oscilloscope_state->n_channels);
+        if (!osc_shift_screen_update(&oscilloscope_state->device, oscilloscope_state->data, oscilloscope_state->n_data, oscilloscope_state->n_channels)) {
+            osc_print_last_error();
+        }
     };
 }
 
