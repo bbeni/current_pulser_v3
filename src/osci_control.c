@@ -180,13 +180,13 @@ bool oscilloscope_setup(struct Oscilloscope_State* state, const struct Oscillosc
     double* data;
     int n_data;
     if (settings->trigger_mode) {
-        if (!osc_triggered_setup(&state->device, &data, settings->request_n_samples, &n_data, settings->v_pk_to_pk, settings->trigger_level, settings->n_channels)) {
+        if (!osc_triggered_setup(&state->device, &data, settings->request_n_samples, &n_data, settings->n_channels, settings->v_pk_to_pk, settings->trigger_level)) {
             osc_print_last_error();
             state->device_available = false;
             return false;
         }
     } else {
-        if (!osc_shift_screen_setup(&state->device, &data, settings->request_n_samples, &n_data, settings->v_pk_to_pk, settings->sample_rate, settings->n_channels)) {
+        if (!osc_shift_screen_setup(&state->device, &data, settings->request_n_samples, &n_data, settings->n_channels, settings->v_pk_to_pk, settings->sample_rate)) {
             osc_print_last_error();
             state->device_available = false;
             return false;
@@ -263,14 +263,14 @@ void oscilloscope_change_mode(struct Oscilloscope_State* state, struct Oscillosc
     if (triggered) {
         // TRIGGERED DATA setup
         osc_cleanup_data(state->data);
-        osc_triggered_setup(&state->device, &state->data, settings->request_n_samples, &state->n_data, settings->v_pk_to_pk, settings->sample_rate, settings->n_channels);
+        osc_triggered_setup(&state->device, &state->data, settings->request_n_samples, &state->n_data, settings->n_channels, settings->v_pk_to_pk, settings->sample_rate);
         osc_triggered_arm_trigger(&state->device, settings->trigger_timeout, settings->trigger_channel, settings->trigger_level, settings->trigger_position, settings->trigger_type, settings->trigger_condition);
         ui->trigger_armed_timestamp = mui_get_time();
         ui->triggerd_data_aquired = false;
     } else {
         // SHIFT_SCREEN DATA setup
         osc_cleanup_data(state->data);
-        osc_shift_screen_setup(&state->device, &state->data, settings->request_n_samples, &state->n_data, settings->v_pk_to_pk, settings->sample_rate, settings->n_channels);
+        osc_shift_screen_setup(&state->device, &state->data, settings->request_n_samples, &state->n_data, settings->n_channels, settings->v_pk_to_pk, settings->sample_rate);
         ui->trigger_armed_timestamp = mui_get_time() - ui->TRIGGER_ARM_COOLDOWN;
     }
 }
