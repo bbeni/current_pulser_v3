@@ -87,7 +87,7 @@ int main() {
     oscilloscope_setup(&oscilloscope_state, &settings);
 
     struct Oscilloscope_Ui_Settings ui_settings = {0};
-    ui_settings.do_plot_current = true;
+    ui_settings.do_plot_current = false;
     ui_settings.current_voltage_factor_chan_a = CONFIG_CURRENT_VOLTAGE_FACTOR_CHANNEL_A;
     ui_settings.current_voltage_factor_chan_b = CONFIG_CURRENT_VOLTAGE_FACTOR_CHANNEL_B;
     ui_settings.voltage_offset_chan_a = CONFIG_VOLTAGE_OFFSET_CHANNEL_A;
