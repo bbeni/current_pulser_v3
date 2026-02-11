@@ -424,6 +424,7 @@ int main() {
         uti_temp_reset();
     }
 
+    oscilloscope_destroy(&oscilloscope_state);
     mui_close_window();
 
     return 0;
