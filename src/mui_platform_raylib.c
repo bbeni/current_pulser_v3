@@ -3,6 +3,7 @@
 // For conditions of distribution and use, see copyright notice in project root.
 #include "mui.h"
 #include "uti.h"
+#include <stdio.h>
 
 #include "raylib.h"
 #include "rlgl.h"
@@ -43,6 +44,9 @@ uint8_t mui_open_window(int w, int h, int pos_x, int pos_y, char* title, float o
     if (0 < (flags & MUI_WINDOW_MAXIMIZED)) {
         mui_window_maximize();
     }
+
+    Vector2 x = GetWindowScaleDPI();
+    printf("DPI SCALE: %f %f\n", x.x, x.y);
 
     return 0;
 }

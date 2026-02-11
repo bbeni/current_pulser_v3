@@ -35,13 +35,13 @@ int main() {
 
     int grid_w = 26;
     int grid_h = 23;
-    int grid_pixel_unit = 36;
+    int grid_pixel_unit = 30;
 
     int w, h;
     w = grid_w * grid_pixel_unit;
     h = grid_h * grid_pixel_unit;
 
-    mui_open_window(w, h, 500, 0, "Current Pulser V3 Controller", 1.0f, MUI_WINDOW_RESIZEABLE | MUI_WINDOW_UNDECORATED, NULL);
+    mui_open_window(w, h, 0, 0, "Current Pulser V3 Controller", 1.0f, MUI_WINDOW_RESIZEABLE | MUI_WINDOW_UNDECORATED, NULL);
     mui_init_themes(0, 0, false, "resources/font/NimbusSans-Regular.ttf");
 
 
