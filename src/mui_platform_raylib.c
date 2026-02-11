@@ -57,7 +57,7 @@ uint8_t mui_get_active_window_id() {
 
 int mui_screen_width()                  {return GetScreenWidth();}
 int mui_screen_height()                 {return GetScreenHeight();}
-bool mui_window_should_close()          {return WindowShouldClose();}
+bool mui_window_should_close_platform() {return WindowShouldClose();}
 void mui_window_restore()               {RestoreWindow();}
 void mui_window_maximize()              {MaximizeWindow();}
 void mui_window_minimize()              {MinimizeWindow();}

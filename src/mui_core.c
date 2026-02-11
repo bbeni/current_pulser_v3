@@ -188,6 +188,12 @@ size_t mui_text_len(const char* text, size_t size) {
     return size;
 }
 
+
+static bool should_close = false;
+bool mui_window_should_close() {
+    return mui_window_should_close_platform() || should_close;
+}
+
 static bool window_grabbed = false;
 static Mui_Vector2 window_grabbed_pos;
 static Mui_Vector2 window_initial_os_position;
@@ -226,8 +232,7 @@ Mui_Rectangle mui_window_decoration(float height, bool movable, bool closeable, 
     if (closeable) {
         if (mui_is_inside_rectangle(mui_get_mouse_position(), comp_rect)) {
             if (mui_is_mouse_button_pressed(0) && closeable) {
-                // TODO: kill app gracefully
-                exit(0);
+                should_close = true;
             }
             mui_move_towards(&(window_x_hover_t), 1, to_hover_speed, dt);
         } else {

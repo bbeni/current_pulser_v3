@@ -264,6 +264,7 @@ uint8_t mui_open_window(int w, int h, int pos_x, int pos_y, char* title, float o
 uint8_t mui_get_active_window_id();
 int mui_screen_width();
 int mui_screen_height();
+bool mui_window_should_close_platform();
 bool mui_window_should_close();
 void mui_window_restore();
 void mui_window_maximize();

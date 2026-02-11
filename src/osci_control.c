@@ -439,7 +439,6 @@ void oscilloscope_ui_update(struct Oscilloscope_Ui* oscilloscope_ui, struct Osci
 
 void oscilloscope_destroy(struct Oscilloscope_State* oscilloscope_state) {
     if (oscilloscope_state->device_available) {
-        FDwfAnalogInConfigure(oscilloscope_state->device.handle, false, false);
         FDwfDeviceClose(oscilloscope_state->device.handle);
 
         free(oscilloscope_state->data);
@@ -447,7 +446,6 @@ void oscilloscope_destroy(struct Oscilloscope_State* oscilloscope_state) {
         free(oscilloscope_state->y_data_interpolated);
         free(oscilloscope_state->t_data_interpolated);
     }
-
 
     memset(oscilloscope_state, 0xCD, sizeof(*oscilloscope_state));
 }
