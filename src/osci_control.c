@@ -270,6 +270,7 @@ void oscilloscope_ui_setup(struct Oscilloscope_Ui* oscilloscope_ui, const struct
 
 void oscilloscope_change_mode(struct Oscilloscope_State* state, struct Oscilloscope_Ui* ui, const struct Oscilloscope_Settings* settings, bool triggered) {
 
+    if (!state->device_available) return;
     osc_cleanup_data(state->data);
 
     if (triggered) {
