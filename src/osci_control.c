@@ -147,6 +147,11 @@ bool osc_triggered_arm_trigger(struct Osc_Device* device, float time_out, int ch
     if (!FDwfAnalogInTriggerConditionSet(device->handle, condition)) return false;
     if (!FDwfAnalogInTriggerPositionSet(device->handle, position)) return false;
     device->triggered_measurement_started = false;
+
+    double mi, ma, steps;
+    FDwfAnalogInTriggerLevelInfo(device->handle, &mi, &ma, &steps);
+    printf("Trigger Info: min:%f max:%f steps:%f\n", mi, ma, steps);
+
     return true;
 }
 
@@ -190,7 +195,7 @@ bool oscilloscope_setup(struct Oscilloscope_State* state, const struct Oscillosc
     double* data;
     int n_data;
     if (settings->trigger_mode) {
-        if (!osc_triggered_setup(&state->device, &data, settings->request_n_samples, &n_data, settings->n_channels, settings->v_pk_to_pk, settings->trigger_level)) {
+        if (!osc_triggered_setup(&state->device, &data, settings->request_n_samples, &n_data, settings->n_channels, settings->v_pk_to_pk, settings->sample_rate)) {
             osc_print_last_error();
             state->device_available = false;
             return false;

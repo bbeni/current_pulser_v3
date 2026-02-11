@@ -72,15 +72,15 @@ int main() {
     // osci
 
     struct Oscilloscope_Settings settings;
-    settings.sample_rate  = 250000;  // Hz
-    settings.v_pk_to_pk = 5.0f;          // volts
-    settings.trigger_mode = false;
-    settings.trigger_channel = 0;
-    settings.trigger_level = 0.008f;      // volts
-    settings.trigger_position = 0.0008;  // in seconds
-    settings.trigger_timeout = 10;     // in seconds
     settings.request_n_samples = 512;
     settings.n_channels = 2;
+    settings.sample_rate  = 250000;       // Hz
+    settings.v_pk_to_pk = 5.0f;           // volts
+    settings.trigger_mode = false;        // start in shift screen mode
+    settings.trigger_channel = 0;         // the first one
+    settings.trigger_level = 0.008f;      // volts
+    settings.trigger_position = 0.0008;   // in seconds
+    settings.trigger_timeout = 1e23;      // in seconds
     settings.trigger_type = OSC_TRIGGER_TYPE_EDGE;
     settings.trigger_condition = OSC_TRIGGER_CONDITION_RISING_POSITIVE;
     struct Oscilloscope_State oscilloscope_state = {0};
