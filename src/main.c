@@ -289,6 +289,7 @@ int main() {
                     cb1_status = CHARGE;
                     fake_charging_time_stamp_cb1 = mui_get_time();
                     assert(cb2_status == OFF);
+                    oscilloscope_ui_state.trigger_armed_cb_state.checked = true;
                 }
             }
 

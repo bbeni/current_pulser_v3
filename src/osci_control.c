@@ -419,6 +419,8 @@ void oscilloscope_ui_draw(Mui_Rectangle area, float grid_pixel_unit, struct Osci
 void oscilloscope_ui_update(struct Oscilloscope_Ui* oscilloscope_ui, struct Oscilloscope_State* oscilloscope_state) {
     float trigger_armed_cooldown = oscilloscope_ui->TRIGGER_ARM_COOLDOWN + oscilloscope_ui->trigger_armed_timestamp - mui_get_time();
 
+    if (!oscilloscope_state->device_available) return;
+
     if (oscilloscope_ui->trigger_armed_cb_state.checked) {
         if (!oscilloscope_ui->triggerd_data_aquired) {
             // TODO: use settings inted of state for n_channels etc..
