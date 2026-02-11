@@ -156,14 +156,18 @@ bool osc_triggered_arm_trigger(struct Osc_Device* device, float time_out, int ch
     device->triggered_measurement_started = false;
 
     printf("==================================================================\n");
+    double auto_timeout;
+    FDwfAnalogInTriggerAutoTimeoutGet(device->handle, &auto_timeout);
+    printf("Auto timeout: %f\n", auto_timeout);
+
     double mi, ma, steps, tlevel;
     FDwfAnalogInTriggerLevelInfo(device->handle, &mi, &ma, &steps);
     FDwfAnalogInTriggerLevelGet(device->handle, &tlevel);
-    printf("Trigger info: min:%f max:%f steps:%f             level:%f\n", mi, ma, steps, tlevel);
+    printf("Trigger info: min: %f max: %f steps: %f             level: %f\n", mi, ma, steps, tlevel);
 
     FDwfAnalogInTriggerHysteresisInfo(device->handle, &mi, &ma, &steps);
     FDwfAnalogInTriggerHysteresisGet(device->handle, &tlevel);
-    printf("Trigger hysteresis info: min:%f max:%f steps:%f  level:%f\n", mi, ma, steps, tlevel);
+    printf("Trigger hysteresis info: min: %f max: %f steps: %f  level: %f\n", mi, ma, steps, tlevel);
 
     int triglencond;
     TRIGLEN triglen;
@@ -173,7 +177,7 @@ bool osc_triggered_arm_trigger(struct Osc_Device* device, float time_out, int ch
 
     FDwfAnalogInTriggerLengthInfo(device->handle, &mi, &ma, &steps);
     FDwfAnalogInTriggerLengthGet(device->handle, &tlevel);
-    printf("Trigger length info: min:%f max:%f steps:%f      lenth:%f\n\n", mi, ma, steps, tlevel);
+    printf("Trigger length info: min: %f max: %f steps: %f      lenth: %f\n\n", mi, ma, steps, tlevel);
 
     FILTER filter;
 
