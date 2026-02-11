@@ -64,8 +64,8 @@ struct Oscilloscope_State {
     int n_data;
     int n_channels;
 
-    double* display_data;
-    double* display_t_data;
+    double* y_data_interpolated;
+    double* t_data_interpolated;
     int n_display_data;
 
     // derived

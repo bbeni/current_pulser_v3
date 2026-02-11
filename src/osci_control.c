@@ -222,8 +222,8 @@ bool oscilloscope_setup(struct Oscilloscope_State* state, const struct Oscillosc
     size_t n_interpol = 3000;
 
     state->t_data = malloc(sizeof(*state->t_data) * n_data);
-    state->display_t_data = malloc(sizeof(*state->display_t_data) * n_interpol * settings->n_channels);
-    state->display_data = malloc(sizeof(*state->display_t_data) * n_interpol * settings->n_channels);
+    state->t_data_interpolated = malloc(sizeof(*state->t_data_interpolated) * n_interpol * settings->n_channels);
+    state->y_data_interpolated = malloc(sizeof(*state->t_data_interpolated) * n_interpol * settings->n_channels);
 
     for (int i = 0; i < n_data; i++) {
         state->t_data[i] = state->t_min_data + i * state->step;
@@ -388,7 +388,7 @@ void oscilloscope_ui_draw(Mui_Rectangle area, float grid_pixel_unit, struct Osci
     double y_max = ui->plot_args.y_top;
 
     for (int i = 0; i < state->n_display_data; i++) {
-        state->display_t_data[i] = t_min + (t_max - t_min) * i / (state->n_display_data - 1);
+        state->t_data_interpolated[i] = t_min + (t_max - t_min) * i / (state->n_display_data - 1);
     }
 
 
@@ -404,11 +404,11 @@ void oscilloscope_ui_draw(Mui_Rectangle area, float grid_pixel_unit, struct Osci
 
     // TODO: mui: rename x_resamples to ..._out for consistency
     // TODO: rename display to interpolated
-    //mma_spline_cubic_natural(state->t_data, state->data, state->n_data, state->display_data, state->display_t_data, state->n_display_data);
-    //mma_spline_cubic_natural(state->t_data, state->data, state->n_data, state->display_data, state->display_t_data, state->n_display_data);
+    //mma_spline_cubic_natural(state->t_data, state->data, state->n_data, state->display_data, state->t_data_interpolated, state->n_display_data);
+    //mma_spline_cubic_natural(state->t_data, state->data, state->n_data, state->display_data, state->t_data_interpolated, state->n_display_data);
 
 
-    //gra_xy_plot_data_points(state->display_t_data, &scaled_display_data, (void*)&internal_offset_scale_data, state->n_display_data, t_min, t_max, y_min, y_max, MUI_YELLOW, 2.0f, plot_rect);
+    //gra_xy_plot_data_points(state->t_data_interpolated, &scaled_display_data, (void*)&internal_offset_scale_data, state->n_display_data, t_min, t_max, y_min, y_max, MUI_YELLOW, 2.0f, plot_rect);
     //if ( (state->t_max_data - state->t_min_data) / (t_max - t_min) * state->n_display_data / state->n_data > 5 ) {
         gra_xy_plot_data_points(state->t_data, &scaled_data_a, (void*)&internal_offset_scale_data, state->n_data, t_min, t_max, y_min, y_max, MUI_BLUE, 2.0f, plot_rect);
         gra_xy_plot_data_points(state->t_data, &scaled_data_b, (void*)&internal_offset_scale_data, state->n_data, t_min, t_max, y_min, y_max, MUI_GREEN, 2.0f, plot_rect);
@@ -439,4 +439,11 @@ void oscilloscope_ui_update(struct Oscilloscope_Ui* oscilloscope_ui, struct Osci
 void oscilloscope_destroy(struct Oscilloscope_State* oscilloscope_state) {
     if (oscilloscope_state->device_available)
         FDwfDeviceClose(oscilloscope_state->device.handle);
+
+    free(oscilloscope_state->data);
+    free(oscilloscope_state->t_data);
+    free(oscilloscope_state->y_data_interpolated);
+    free(oscilloscope_state->t_data_interpolated);
+
+    memset(oscilloscope_state, 0xCD, sizeof(*oscilloscope_state));
 }
