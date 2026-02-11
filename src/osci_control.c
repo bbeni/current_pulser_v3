@@ -66,18 +66,17 @@ bool osc_shift_screen_setup(struct Osc_Device* device, double** data_out, int re
     if (!FDwfAnalogInBufferSizeSet(device->handle, *n_samples_out)) return false;
     if (!FDwfAnalogInAcquisitionModeSet(device->handle, acqmodeScanScreen)) return false;
 
+    // start
+    if (!FDwfAnalogInConfigure(device->handle, 0, true)) {
+        return false;
+    }
+
+
     double* data;
     data = malloc(sizeof(*data) * *n_samples_out * n_channels);
     if (!data) return false;
     memset(data, 0x0, sizeof(*data) * *n_samples_out * n_channels);
-
     *data_out = data;
-
-    // start
-    if (!FDwfAnalogInConfigure(device->handle, 0, true)) {
-        free(data);
-        return false;
-    }
 
     return true;
 }
@@ -122,18 +121,17 @@ bool osc_triggered_setup(struct Osc_Device* device, double** data_out, int reque
     if (!FDwfAnalogInBufferSizeSet(device->handle, *n_samples_out)) return false;
     if (!FDwfAnalogInAcquisitionModeSet(device->handle, acqmodeSingle)) return false;
 
+    // start
+    if (!FDwfAnalogInConfigure(device->handle, 0, true)) {
+        return false;
+    }
+
     double* data;
     data = malloc(sizeof(*data) * *n_samples_out * n_channels);
     if (!data) return false;
     memset(data, 0x0, sizeof(*data) * *n_samples_out * n_channels);
 
     *data_out = data;
-
-    // start
-    if (!FDwfAnalogInConfigure(device->handle, 0, true)) {
-        free(data);
-        return false;
-    }
 
     return true;
 }
@@ -276,6 +274,7 @@ void oscilloscope_change_mode(struct Oscilloscope_State* state, struct Oscillosc
     if (triggered) {
         // TRIGGERED DATA setup
         if (!osc_triggered_setup(&state->device, &state->data, settings->request_n_samples, &state->n_data, settings->n_channels, settings->v_pk_to_pk, settings->sample_rate)) {
+            state->device_available = false;
             osc_print_last_error();
         }
         if (!osc_triggered_arm_trigger(&state->device, settings->trigger_timeout, settings->trigger_channel, settings->trigger_level, settings->trigger_position, settings->trigger_type, settings->trigger_condition)) {
@@ -286,6 +285,7 @@ void oscilloscope_change_mode(struct Oscilloscope_State* state, struct Oscillosc
     } else {
         // SHIFT_SCREEN DATA setup
         if (!osc_shift_screen_setup(&state->device, &state->data, settings->request_n_samples, &state->n_data, settings->n_channels, settings->v_pk_to_pk, settings->sample_rate)) {
+            state->device_available = false;
             osc_print_last_error();
         }
         ui->trigger_armed_timestamp = mui_get_time() - ui->TRIGGER_ARM_COOLDOWN;
@@ -437,13 +437,16 @@ void oscilloscope_ui_update(struct Oscilloscope_Ui* oscilloscope_ui, struct Osci
 }
 
 void oscilloscope_destroy(struct Oscilloscope_State* oscilloscope_state) {
-    if (oscilloscope_state->device_available)
+    if (oscilloscope_state->device_available) {
+        FDwfAnalogInConfigure(oscilloscope_state->device.handle, false, false);
         FDwfDeviceClose(oscilloscope_state->device.handle);
 
-    free(oscilloscope_state->data);
-    free(oscilloscope_state->t_data);
-    free(oscilloscope_state->y_data_interpolated);
-    free(oscilloscope_state->t_data_interpolated);
+        free(oscilloscope_state->data);
+        free(oscilloscope_state->t_data);
+        free(oscilloscope_state->y_data_interpolated);
+        free(oscilloscope_state->t_data_interpolated);
+    }
+
 
     memset(oscilloscope_state, 0xCD, sizeof(*oscilloscope_state));
 }
