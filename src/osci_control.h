@@ -42,12 +42,13 @@ void osc_print_last_error();
 bool osc_open_device(struct Osc_Device* device);
 void osc_cleanup_data(double* data);
 
-bool osc_shift_screen_setup(struct Osc_Device* device, double** data_out, int request_n_samples, int* n_samples_out, float v_pk_to_pk, float sample_rate);
-bool osc_shift_screen_update(struct Osc_Device* device, double* data_out, int n_samples);
 
-bool osc_triggered_setup(struct Osc_Device* device, double** data_out, int request_n_samples, int* n_samples_out, float v_pk_to_pk, float sample_rate);
+bool osc_shift_screen_setup(struct Osc_Device* device, double** data_out, int request_n_samples, int* n_samples_out, int n_channels, float v_pk_to_pk, float sample_rate);
+bool osc_shift_screen_update(struct Osc_Device* device, double* data_out, int n_samples, int n_channels);
+
+bool osc_triggered_setup(struct Osc_Device* device, double** data_out, int request_n_samples, int* n_samples_out, int n_channels, float v_pk_to_pk, float sample_rate);
 bool osc_triggered_arm_trigger(struct Osc_Device* device, float time_out, int channel, float level, float position, OSC_TRIGGER_TYPE type, OSC_TRIGGER_CONDITION condition);
-bool osc_triggered_update(struct Osc_Device* device, float trigger_cooldown, double* data_out, int n_samples);
+bool osc_triggered_update(struct Osc_Device* device, float trigger_cooldown, double* data_out, int n_samples, int n_channels);
 
 //
 // Higher level API
@@ -58,10 +59,10 @@ struct Oscilloscope_State {
     struct Osc_Device device;
     bool device_available;
 
-    // TODO: multi channel support
     double* data;
     double* t_data;
     int n_data;
+    int n_channels;
 
     double* display_data;
     double* display_t_data;
@@ -90,11 +91,14 @@ struct Oscilloscope_Ui {
     bool do_plot_current;
     double current_voltage_factor_chan_a;
     double current_voltage_factor_chan_b;
+    double voltage_offset_chan_a;
+    double voltage_offset_chan_b;
 };
 
 struct Oscilloscope_Settings {
     float sample_rate;
     int request_n_samples; // -1 for maximum amount of samples
+    int n_channels;
     float v_pk_to_pk;
 
     bool trigger_mode; // either that or shift window
@@ -110,7 +114,11 @@ struct Oscilloscope_Ui_Settings {
     bool do_plot_current;
     double current_voltage_factor_chan_a;
     double current_voltage_factor_chan_b;
+    double voltage_offset_chan_a;
+    double voltage_offset_chan_b;
 };
+
+
 bool oscilloscope_setup(struct Oscilloscope_State* state, const struct Oscilloscope_Settings* settings);
 void oscilloscope_ui_setup(struct Oscilloscope_Ui* oscilloscope_ui, const struct Oscilloscope_Ui_Settings* ui_settings, float grid_pixels_unit);
 void oscilloscope_change_mode(struct Oscilloscope_State* state, struct Oscilloscope_Ui* ui, const struct Oscilloscope_Settings* settings, bool triggered);

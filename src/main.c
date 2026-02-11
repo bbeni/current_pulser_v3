@@ -80,6 +80,7 @@ int main() {
     settings.trigger_position = 0.0008;  // in seconds
     settings.trigger_timeout = 1e23;     // in seconds
     settings.request_n_samples = 512;
+    settings.n_channels = 2;
     settings.trigger_type = OSC_TRIGGER_TYPE_EDGE;
     settings.trigger_condition = OSC_TRIGGER_CONDITION_RISING_POSITIVE;
     struct Oscilloscope_State oscilloscope_state = {0};
@@ -89,6 +90,8 @@ int main() {
     ui_settings.do_plot_current = true;
     ui_settings.current_voltage_factor_chan_a = CONFIG_CURRENT_VOLTAGE_FACTOR_CHANNEL_A;
     ui_settings.current_voltage_factor_chan_b = CONFIG_CURRENT_VOLTAGE_FACTOR_CHANNEL_B;
+    ui_settings.voltage_offset_chan_a = CONFIG_VOLTAGE_OFFSET_CHANNEL_A;
+    ui_settings.voltage_offset_chan_b = CONFIG_VOLTAGE_OFFSET_CHANNEL_B;
 
     struct Oscilloscope_Ui oscilloscope_ui_state = {0};
     oscilloscope_ui_setup(&oscilloscope_ui_state, &ui_settings, grid_pixel_unit);
