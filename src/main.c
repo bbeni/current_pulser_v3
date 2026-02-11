@@ -80,8 +80,9 @@ int main() {
     settings.trigger_channel = 0;         // the first one
     settings.trigger_level = 0.008f;      // volts
     settings.trigger_position = 0.0008;   // in seconds
-    settings.trigger_timeout = 999999999; // in seconds
+    settings.trigger_auto_timeout = 999999999; // in seconds
     settings.trigger_type = OSC_TRIGGER_TYPE_TRANSITION;
+    settings.trigger_length = 0.000001f;  // in seconds
     settings.trigger_condition = OSC_TRIGGER_CONDITION_RISING_POSITIVE;
     struct Oscilloscope_State oscilloscope_state = {0};
     oscilloscope_setup(&oscilloscope_state, &settings);

@@ -43,7 +43,7 @@ bool osc_open_device(struct Osc_Device* device) {
 
 // data_out will me a flat array of size n_channels * n_sampels_out * sizeof(double)
 // request_n_samples can be a number or -1 to get the maximum possible. remember to free data_out.
-bool osc_shift_screen_setup(struct Osc_Device* device, double** data_out, int request_n_samples, int* n_samples_out, int n_channels, float v_pk_to_pk, float sample_rate) {
+bool osc_shift_screen_setup(struct Osc_Device* device, double** data_out, int request_n_samples, int* n_samples_out, int n_channels, double v_pk_to_pk, double sample_rate) {
 
     assert(n_channels <= device->n_channels);
 
@@ -99,7 +99,7 @@ bool osc_shift_screen_update(struct Osc_Device* device, double* data_out, int n_
 
 
 // request_n_samples can be a number or -1 to get the maximum possible. remember to free data_out.
-bool osc_triggered_setup(struct Osc_Device* device, double** data_out, int request_n_samples, int* n_samples_out, int n_channels, float v_pk_to_pk, float sample_rate) {
+bool osc_triggered_setup(struct Osc_Device* device, double** data_out, int request_n_samples, int* n_samples_out, int n_channels, double v_pk_to_pk, double sample_rate) {
 
     assert(n_channels <= device->n_channels);
 
@@ -137,7 +137,7 @@ bool osc_triggered_setup(struct Osc_Device* device, double** data_out, int reque
 }
 
 // wait at least 2 seconds with Analog Discovery for the offset to stabilize, before the first reading after device open or offset/range change
-bool osc_triggered_arm_trigger(struct Osc_Device* device, float time_out, int channel, float level, float position, OSC_TRIGGER_TYPE type, OSC_TRIGGER_CONDITION condition) {
+bool osc_triggered_arm_trigger(struct Osc_Device* device, double time_out, int channel, double level, double position, OSC_TRIGGER_TYPE type, OSC_TRIGGER_CONDITION condition) {
     // configure trigger
     if (!FDwfAnalogInTriggerSourceSet(device->handle, trigsrcDetectorAnalogIn)) return false;
     if (!FDwfAnalogInTriggerAutoTimeoutSet(device->handle, time_out)) return false;
@@ -321,7 +321,7 @@ void oscilloscope_change_mode(struct Oscilloscope_State* state, struct Oscillosc
             state->device_available = false;
             osc_print_last_error();
         }
-        if (!osc_triggered_arm_trigger(&state->device, settings->trigger_timeout, settings->trigger_channel, settings->trigger_level, settings->trigger_position, settings->trigger_type, settings->trigger_condition)) {
+        if (!osc_triggered_arm_trigger(&state->device, settings->trigger_auto_timeout, settings->trigger_channel, settings->trigger_level, settings->trigger_position, settings->trigger_type, settings->trigger_condition)) {
             osc_print_last_error();
         }
         ui->trigger_armed_timestamp = mui_get_time();

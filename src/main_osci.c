@@ -24,7 +24,7 @@ int main() {
     settings.trigger_channel = 0;
     settings.trigger_level = 0.05f;      // volts
     settings.trigger_position = 0.0008;  // in seconds
-    settings.trigger_timeout = 1e23;     // in seconds
+    settings.trigger_auto_timeout = 1e23;     // in seconds
     settings.trigger_type = OSC_TRIGGER_TYPE_EDGE;
     settings.trigger_condition = OSC_TRIGGER_CONDITION_RISING_POSITIVE;
     struct Oscilloscope_State oscilloscope_state = {0};

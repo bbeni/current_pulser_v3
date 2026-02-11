@@ -43,11 +43,11 @@ bool osc_open_device(struct Osc_Device* device);
 void osc_cleanup_data(double* data);
 
 
-bool osc_shift_screen_setup(struct Osc_Device* device, double** data_out, int request_n_samples, int* n_samples_out, int n_channels, float v_pk_to_pk, float sample_rate);
+bool osc_shift_screen_setup(struct Osc_Device* device, double** data_out, int request_n_samples, int* n_samples_out, int n_channels, double v_pk_to_pk, double sample_rate);
 bool osc_shift_screen_update(struct Osc_Device* device, double* data_out, int n_samples, int n_channels);
 
-bool osc_triggered_setup(struct Osc_Device* device, double** data_out, int request_n_samples, int* n_samples_out, int n_channels, float v_pk_to_pk, float sample_rate);
-bool osc_triggered_arm_trigger(struct Osc_Device* device, float time_out, int channel, float level, float position, OSC_TRIGGER_TYPE type, OSC_TRIGGER_CONDITION condition);
+bool osc_triggered_setup(struct Osc_Device* device, double** data_out, int request_n_samples, int* n_samples_out, int n_channels, double v_pk_to_pk, double sample_rate);
+bool osc_triggered_arm_trigger(struct Osc_Device* device, double time_out, int channel, double level, double position, OSC_TRIGGER_TYPE type, OSC_TRIGGER_CONDITION condition);
 bool osc_triggered_update(struct Osc_Device* device, float trigger_cooldown, double* data_out, int n_samples, int n_channels);
 
 //
@@ -96,16 +96,17 @@ struct Oscilloscope_Ui {
 };
 
 struct Oscilloscope_Settings {
-    float sample_rate;
+    double sample_rate;
     int request_n_samples; // -1 for maximum amount of samples
     int n_channels;
-    float v_pk_to_pk;
+    double v_pk_to_pk;
 
     bool trigger_mode; // either that or shift window
     int trigger_channel;
-    float trigger_level; // volts
-    float trigger_position; // in seconds
-    float trigger_timeout; // in seconds
+    double trigger_level; // volts
+    double trigger_position; // in seconds
+    double trigger_auto_timeout; // in seconds
+    double trigger_length; // in seconds
     OSC_TRIGGER_TYPE trigger_type;
     OSC_TRIGGER_CONDITION trigger_condition;
 };
