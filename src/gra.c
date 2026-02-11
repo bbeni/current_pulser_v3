@@ -1,5 +1,5 @@
 // Copyright (C) 2026 Benjamin Froelich
-// This file is part of https://github.com/bbeni/current_pulser_v3
+// This file is part of https://github.com/bbeni/impedancer
 // For conditions of distribution and use, see copyright notice in project root.
 //
 // Graphing Functions
@@ -164,6 +164,31 @@ void gra_xy_plot_data_points(double *x_data, void *y_data, double (* y_map)(size
     }
 }
 
+void gra_xy_plot_line(double x1, double y1, double x2, double y2,
+                 double x_min, double x_max, double y_min, double y_max,
+                 Mui_Color color, float line_thickness, Mui_Rectangle plot_area) {
+
+    Mui_Vector2 screen_coords_1;
+    Mui_Vector2 screen_coords_2;
+    {
+        float norm_x = (x1 - x_min) / (x_max - x_min);
+        float norm_y = (y1 - y_min) / (y_max - y_min);
+        screen_coords_1.x = norm_x * plot_area.width + plot_area.x;
+        screen_coords_1.y = (1 - norm_y) * plot_area.height + plot_area.y;
+    }
+
+    {
+        float norm_x = (x2 - x_min) / (x_max - x_min);
+        float norm_y = (y2 - y_min) / (y_max - y_min);
+        screen_coords_2.x = norm_x * plot_area.width + plot_area.x;
+        screen_coords_2.y = (1 - norm_y) * plot_area.height + plot_area.y;
+    }
+
+    mui_draw_line(screen_coords_1.x, screen_coords_1.y, screen_coords_2.x, screen_coords_2.y, line_thickness, color);
+
+}
+
+
 
 void _gridded_draw_grid(Mui_Rectangle plot_area, float step_x, float step_y, float off_x, float off_y, float thickness) {
     float x_a = plot_area.x;
@@ -229,7 +254,7 @@ void _gridded_draw_tick_labels(Mui_Rectangle plot_area,
     float y = y_a + off_y;
     int count_y = (y_b - y_a) / step_y + 1;
     for (int i = 0; i < count_y && y <= y_b; i++) {
-        snprintf(buffer, 24, fmt_y, y_bot - i * (y_bot - y_top) / (count_y - 1));
+        snprintf(buffer, 24, fmt_y, y_top - i * (y_top - y_bot) / (count_y - 1));
         size_t l = mui_text_len(buffer, strlen(buffer));
         Mui_Vector2 text_measure = mui_measure_text(mui_protos_theme_g.font_small, buffer, mui_protos_theme_g.font_small_size, 0.0f, 0, l);
         Mui_Vector2 pos;
@@ -280,8 +305,7 @@ Mui_Rectangle gra_gridded_xy_base(struct Gra_Gridded_Base_Arguments* args, Mui_R
         Mui_Vector2 measure = mui_measure_text(font, args->y_label, font_size, 0.0f, 0, l);
         // TODO: mui: refactor so that both functions start with the common arguments
         Mui_Vector2 pos = mui_center_of_rectangle(y_axis_rect);
-        pos.x -= measure.x * 0.5f;
-        pos.y -= measure.y * 0.5f;
+        pos.x -= y_axis_rect.width * 0.5f - measure.y * 0.5f;
         mui_draw_text_line_angle(font, pos, 0.0f, font_size, args->y_label, _color_border(), 0, l, -90.0f);
     }
 

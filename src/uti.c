@@ -1,5 +1,5 @@
 // Copyright (C) 2026 Benjamin Froelich
-// This file is part of https://github.com/bbeni/current_pulser_v3
+// This file is part of https://github.com/bbeni/impedancer
 // For conditions of distribution and use, see copyright notice in project root.
 #define _GNU_SOURCE
 #include <string.h>
@@ -12,6 +12,89 @@
 #include <ctype.h>
 
 #include "uti.h"
+
+
+void uti_render_postfix_number(char* buffer, const size_t max_char_count, double number) {
+    double abs_number = number > 0.0 ? number : -number;
+
+    // if it is almost 0 just let it be
+    if (abs_number < 1e-18) {
+        snprintf(buffer, max_char_count, "%.2f", number);
+    } else if (abs_number < 1e-15) {
+        snprintf(buffer, max_char_count, "%.2fa", number * 1e18);
+    } else if (abs_number < 1e-12) {
+        snprintf(buffer, max_char_count, "%.2ff", number * 1e15);
+    } else if (abs_number < 1e-9) {
+        snprintf(buffer, max_char_count, "%.2fp", number * 1e12);
+    } else if (abs_number < 1e-6) {
+        snprintf(buffer, max_char_count, "%.2fn", number * 1e9);
+    } else if (abs_number < 1e-3) {
+        snprintf(buffer, max_char_count, "%.2fu", number * 1e6);
+    } else if (abs_number < 1e0) {
+        snprintf(buffer, max_char_count, "%.2fm", number * 1e3);
+    } else if (abs_number < 1e3) {
+        snprintf(buffer, max_char_count, "%.2f", number * 1e0);
+    } else if (abs_number < 1e6) {
+        snprintf(buffer, max_char_count, "%.2fk", number * 1e-3);
+    } else if (abs_number < 1e9) {
+        snprintf(buffer, max_char_count, "%.2fM", number * 1e-6);
+    } else if (abs_number < 1e12) {
+        snprintf(buffer, max_char_count, "%.2fG", number * 1e-9);
+    } else {
+        snprintf(buffer, max_char_count, "%.2fT", number * 1e-12);
+    }
+}
+
+// TODO: also implement postfix parsing
+bool uti_parse_number(char* input, const size_t max_char_count, double* output) {
+    char* end;
+    double result = strtod(input, &end);
+    if (end == input) {
+        printf("ERROR: parsing '%s' as double is not possible\n", input);
+        printf("                ^\n");
+        return false;
+    }
+    size_t l = strlen(input);
+    if (l == 0) {
+        printf("ERROR: parsing empty string as double is not possible\n");
+        return false;
+    }
+    assert(l < max_char_count);
+    while (l - (end - input) > 0) {
+        if (!isspace(*end)) {
+            printf("ERROR: parsing '%s' as double is not possible\n", input);
+            printf("                ");
+            for (int i = 0; i < end - input && i < 100; i++) {
+                printf(" ");
+            }
+            printf("^\n");
+            return false;
+        }
+        end++;
+    }
+
+    *output = result;
+    return true;
+}
+
+char* uti_ltrim(char* s)
+{
+    while(isspace(*s)) s++;
+    return s;
+}
+
+char* uti_rtrim(char* s)
+{
+    char* back = s + strlen(s);
+    while(isspace(*--back));
+    *(back + 1) = '\0';
+    return s;
+}
+
+char* uti_trim(char *s)
+{
+    return uti_rtrim(uti_ltrim(s));
+}
 
 
 #ifdef _WIN32

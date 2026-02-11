@@ -1,5 +1,5 @@
 // Copyright (C) 2026 Benjamin Froelich
-// This file is part of https://github.com/bbeni/current_pulser_v3
+// This file is part of https://github.com/bbeni/impedancer
 // For conditions of distribution and use, see copyright notice in project root.
 //
 // Graphing Functions
@@ -26,6 +26,10 @@ Mui_Rectangle gra_xy_plot_labels_and_grid( char* x_label, char* y_label, double 
 void gra_xy_plot_data_points(double *x_data, void *y_data, double (* y_map)(size_t i, void *x), size_t data_length,
                  double x_min, double x_max, double y_min, double y_max,
                  Mui_Color color, float pt_radius, Mui_Rectangle plot_area);
+// draw a line
+void gra_xy_plot_line(double x1, double y1, double x2, double y2,
+                 double x_min, double x_max, double y_min, double y_max,
+                 Mui_Color color, float line_thickness, Mui_Rectangle plot_area);
 // draw the legend last
 void gra_xy_legend(char **labels, Mui_Color *colors, bool *mask, size_t n_labels_, Mui_Rectangle plot_area);
 

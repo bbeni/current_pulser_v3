@@ -1,5 +1,5 @@
 // Copyright (C) 2026 Benjamin Froelich
-// This file is part of https://github.com/bbeni/current_pulser_v3
+// This file is part of https://github.com/bbeni/impedancer
 // For conditions of distribution and use, see copyright notice in project root.
 #ifndef MMA_H_
 #define MMA_H_
@@ -42,6 +42,9 @@ struct Complex {
 extern const struct Mat4f mat4f_unit;
 
 struct Complex mma_complex(double r, double i);
+struct Complex mma_complex_conjugate(struct Complex c);
+double mma_complex_absolute(struct Complex c);
+double mma_complex_absolute_squared(struct Complex c);
 struct Complex mma_complex_negate(struct Complex c1);
 struct Complex mma_complex_mult(struct Complex a, struct Complex b);
 struct Complex mma_complex_divide_or_zero(struct Complex a, struct Complex b);

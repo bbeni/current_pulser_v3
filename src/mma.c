@@ -1,5 +1,5 @@
 // Copyright (C) 2026 Benjamin Froelich
-// This file is part of https://github.com/bbeni/current_pulser_v3
+// This file is part of https://github.com/bbeni/impedancer
 // For conditions of distribution and use, see copyright notice in project root.
 
 #include "mma.h"
@@ -565,6 +565,21 @@ struct Complex mma_complex(double r, double i) {
 	c.r = r;
 	c.i = i;
 	return c;
+}
+
+struct Complex mma_complex_conjugate(struct Complex c) {
+	struct Complex c1;
+	c1.r = c.r;
+	c1.i = -c.i;
+	return c1;
+}
+
+double mma_complex_absolute(struct Complex c) {
+	return sqrt(c.r * c.r + c.i * c.i);
+}
+
+double mma_complex_absolute_squared(struct Complex c) {
+	return c.r * c.r + c.i * c.i;
 }
 
 struct Complex mma_complex_negate(struct Complex c1) {

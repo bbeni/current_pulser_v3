@@ -45,12 +45,15 @@ RES_O_FILES := $(patsubst %, $(RESOURCES_BUILD_DIR)/data_%.o, $(RES_SEQ))
 RESOURCE_PACKER_C := resources/resource_packer.c
 
 # Files
-COMMON_SRCS := $(SRC_DIR)/mui.c \
-            $(SRC_DIR)/gra.c \
-            $(SRC_DIR)/uti.c \
-            $(SRC_DIR)/mma.c \
-            $(SRC_DIR)/osci_control.c \
-            $(SRC_DIR)/mui_platform_raylib.c
+COMMON_SRCS := \
+    $(SRC_DIR)/gra.c \
+    $(SRC_DIR)/uti.c \
+    $(SRC_DIR)/mma.c \
+    $(SRC_DIR)/osci_control.c \
+    $(SRC_DIR)/mui_core.c \
+    $(SRC_DIR)/mui_looks.c \
+    $(SRC_DIR)/mui_elements.c \
+    $(SRC_DIR)/mui_platform_raylib.c
 
 OBJS_MAIN := $(patsubst $(SRC_DIR)/%.c, $(BUILD_DIR)/%.o, $(SRC_DIR)/main.c $(COMMON_SRCS))
 OBJS_OSCI := $(patsubst $(SRC_DIR)/%.c, $(BUILD_DIR)/%.o, $(SRC_DIR)/main_osci.c $(COMMON_SRCS))

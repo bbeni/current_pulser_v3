@@ -1,5 +1,5 @@
 // Copyright (C) 2026 Benjamin Froelich
-// This file is part of https://github.com/bbeni/current_pulser_v3
+// This file is part of https://github.com/bbeni/impedancer
 // For conditions of distribution and use, see copyright notice in project root.
 #include "mui.h"
 #include "uti.h"
@@ -9,9 +9,6 @@
 #include "assert.h"
 #include "string.h"
 #include "stdlib.h"
-
-
-
 
 uint8_t mui_open_window(int w, int h, int pos_x, int pos_y, char* title, float opacity, MUI_WINDOW_FLAGS flags, Mui_Image* icon) {
 
