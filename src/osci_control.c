@@ -78,7 +78,7 @@ bool osc_shift_screen_setup(struct Osc_Device* device, double** data_out, int re
 
 bool osc_shift_screen_update(struct Osc_Device* device, double* data_out, int n_samples, int n_channels) {
 
-    assert(n_samples <= device->n_channels);
+    assert(n_channels <= device->n_channels);
 
     if (!FDwfAnalogInStatus(device->handle, true, &device->status)) return false;
     if (device->status == stsDone) return false;
@@ -158,7 +158,7 @@ bool osc_triggered_update(struct Osc_Device* device, float trigger_cooldown, dou
 
     // get the samples for each channel
     for (int c = 0; c < n_channels; c++) {
-        FDwfAnalogInStatusData(device->handle, c, data_out + c * n_samples, n_samples);
+        FDwfAnalogInStatusData(device->handle, c, data_out + c * n_samples , n_samples);
     }
 
     return true;
@@ -384,9 +384,9 @@ void oscilloscope_ui_draw(Mui_Rectangle area, float grid_pixel_unit, struct Osci
     scaled_data_a.x = state->data;
 
     struct Internal_Scaled_Offsetted_Data scaled_data_b;
-    scaled_data_a.scale = ui->current_voltage_factor_chan_a;
-    scaled_data_a.offset = ui->voltage_offset_chan_a;
-    scaled_data_a.x = state->data + state->n_data;
+    scaled_data_b.scale = ui->current_voltage_factor_chan_b;
+    scaled_data_b.offset = ui->voltage_offset_chan_b;
+    scaled_data_b.x = state->data + state->n_data;
 
 
     //gra_xy_plot_data_points(state->display_t_data, &scaled_display_data, (void*)&internal_scale_data, state->n_display_data, t_min, t_max, y_min, y_max, MUI_YELLOW, 2.0f, plot_rect);
