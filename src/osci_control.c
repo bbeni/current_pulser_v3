@@ -161,7 +161,7 @@ void osc_cleanup_data(double* data) {
     free(data);
 }
 
-bool oscilloscope_setup(struct Oscilloscope_State* state, struct Oscilloscope_Settings* settings) {
+bool oscilloscope_setup(struct Oscilloscope_State* state, const struct Oscilloscope_Settings* settings) {
 
     if (!osc_open_device(&state->device)) {
         osc_print_last_error();
@@ -207,10 +207,18 @@ bool oscilloscope_setup(struct Oscilloscope_State* state, struct Oscilloscope_Se
     return true;
 }
 
-void oscilloscope_ui_setup(struct Oscilloscope_Ui* oscilloscope_ui, struct Oscilloscope_Ui_Settings* ui_settings, float grid_pixels_unit) {
+void oscilloscope_ui_setup(struct Oscilloscope_Ui* oscilloscope_ui, const struct Oscilloscope_Ui_Settings* ui_settings, float grid_pixels_unit) {
     oscilloscope_ui->TRIGGER_ARM_COOLDOWN = 2.0f;
     oscilloscope_ui->trigger_armed_timestamp = -10000.0f;
     oscilloscope_ui->triggerd_data_aquired = false;
+
+    oscilloscope_ui->current_voltage_factor_chan_a = ui_settings->current_voltage_factor_chan_a;
+    oscilloscope_ui->current_voltage_factor_chan_b = ui_settings->current_voltage_factor_chan_b;
+    oscilloscope_ui->do_plot_current = ui_settings->do_plot_current;
+
+    double a_exp = ceil(log10(ui_settings->current_voltage_factor_chan_a));
+    double b_exp = ceil(log10(ui_settings->current_voltage_factor_chan_b));
+    double exponent = max(a_exp, b_exp);
 
     struct Gra_Gridded_Base_Arguments plot_args;
     plot_args.grid_unit_pixels = grid_pixels_unit;
@@ -222,15 +230,15 @@ void oscilloscope_ui_setup(struct Oscilloscope_Ui* oscilloscope_ui, struct Oscil
     plot_args.grid_skip_y = 1;
     plot_args.x_left = -0.1f;
     plot_args.x_right = 0.1f;
-    plot_args.y_bot = 3.0f;
-    plot_args.y_top = -1.0f;
+    plot_args.y_bot = -1.0f * pow(10.0, exponent);
+    plot_args.y_top = 3.0f * pow(10.0, exponent);
     plot_args.x_label = "t [s]";
-    plot_args.y_label = "U [V]";
+    plot_args.y_label = !ui_settings->do_plot_current ? "U [V]" : "I [A]";
     plot_args.thick_y_zero = true;
     plot_args.tick_x_label_fmt = "%.6f";
     plot_args.tick_y_label_fmt = "%.2f";
-
     oscilloscope_ui->plot_args = plot_args;
+
 }
 
 void oscilloscope_change_mode(struct Oscilloscope_State* state, struct Oscilloscope_Ui* ui, struct Oscilloscope_Settings* settings, bool triggered) {
@@ -252,8 +260,18 @@ void oscilloscope_change_mode(struct Oscilloscope_State* state, struct Oscillosc
     }
 }
 
-void oscilloscope_ui_draw(Mui_Rectangle area, float grid_pixel_unit, struct Oscilloscope_Ui* ui, struct Oscilloscope_State* state, struct Oscilloscope_Settings* settings) {
+struct Internal_Scaled_Data {
+    double scale;
+    double* x;
+};
 
+double internal_scale_data(size_t i, struct Internal_Scaled_Data* data) {
+    double scale = data->scale;
+    double *x = data->x;
+    return x[i] * scale;
+}
+
+void oscilloscope_ui_draw(Mui_Rectangle area, float grid_pixel_unit, struct Oscilloscope_Ui* ui, struct Oscilloscope_State* state, struct Oscilloscope_Settings* settings) {
     Mui_Rectangle scope_settings_area;
     Mui_Rectangle trigger_checkbox_area;
     Mui_Rectangle save_csv_button_area;
@@ -293,7 +311,7 @@ void oscilloscope_ui_draw(Mui_Rectangle area, float grid_pixel_unit, struct Osci
         }
     }
 
-    if (state->device_available) {
+    if (state->device_available || true) {
         if (mui_checkbox(&ui->trigger_armed_cb_state, trigger_label_text, trigger_checkbox_area)) {
             // checkbox toggeled
             bool triggered = ui->trigger_armed_cb_state.checked;
@@ -302,11 +320,14 @@ void oscilloscope_ui_draw(Mui_Rectangle area, float grid_pixel_unit, struct Osci
         mui_button(&ui->save_csv_btn_state, "Save CSV", save_csv_button_area);
     }
 
-    if (mui_button(&ui->up_btn_state, "V/div inc", up_button_area)) {
+    char* label_inc = ui->do_plot_current?  "A/div inc" : "V/div inc";
+    char* label_dec = ui->do_plot_current?  "A/div dec" : "V/div dec";
+
+    if (mui_button(&ui->up_btn_state, label_inc, up_button_area)) {
         ui->plot_args.y_top *= 2;
         ui->plot_args.y_bot *= 2;
     }
-    if (mui_button(&ui->down_btn_state, "V/div dec", down_button_area)) {
+    if (mui_button(&ui->down_btn_state, label_dec, down_button_area)) {
         ui->plot_args.y_top *= 0.5f;
         ui->plot_args.y_bot *= 0.5f;
     }
@@ -325,7 +346,6 @@ void oscilloscope_ui_draw(Mui_Rectangle area, float grid_pixel_unit, struct Osci
     }
 
 
-
     if (!state->device_available) return;
 
     double t_min = ui->plot_args.x_left;
@@ -336,13 +356,19 @@ void oscilloscope_ui_draw(Mui_Rectangle area, float grid_pixel_unit, struct Osci
     for (int i = 0; i < state->n_display_data; i++) {
         state->display_t_data[i] = t_min + (t_max - t_min) * i / (state->n_display_data - 1);
     }
+
     // TODO: mui: rename x_resamples to ..._out for consistency
     // TODO: rename display to interpolated
     mma_spline_cubic_natural(state->display_t_data, state->data, state->n_data, state->display_data, state->display_t_data, state->n_display_data);
-    gra_xy_plot_data_points(state->display_t_data, state->display_data, NULL, state->n_display_data, t_min, t_max, y_min, y_max, MUI_YELLOW, 2.0f, plot_rect);
-    if ( (state->t_max_data - state->t_min_data) / (t_max - t_min) * state->n_display_data / state->n_data > 5 ) {
-        gra_xy_plot_data_points(state->t_data, state->data, NULL, state->n_data, t_min, t_max, y_min, y_max, MUI_ORANGE, 2.0f, plot_rect);
-    }
+
+    struct Internal_Scaled_Data scaled_display_data;
+    scaled_display_data.scale = ui->current_voltage_factor_chan_a;
+    scaled_display_data.x = state->display_data;
+
+    gra_xy_plot_data_points(state->display_t_data, &scaled_display_data, (void*)&internal_scale_data, state->n_display_data, t_min, t_max, y_min, y_max, MUI_YELLOW, 2.0f, plot_rect);
+    //if ( (state->t_max_data - state->t_min_data) / (t_max - t_min) * state->n_display_data / state->n_data > 5 ) {
+    //    gra_xy_plot_data_points(state->t_data, state->data, NULL, state->n_data, t_min, t_max, y_min, y_max, MUI_ORANGE, 2.0f, plot_rect);
+    //}
 
 }
 

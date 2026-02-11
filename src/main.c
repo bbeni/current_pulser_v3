@@ -15,6 +15,8 @@
 
 #include "osci_control.h"
 
+#include "config.h"
+
 // pin 17 enable
 // pin 22 charge
 // pin 23 select
@@ -60,8 +62,7 @@ int main() {
     int cb1_status = 0;
     int cb2_status = 0;
 
-    // TODO: rearm cooldonw should be 90 seconds
-    const float REARM_COOLDOWN_SECONDS = 20.0f;
+    const float REARM_COOLDOWN_SECONDS = CONFIG_REARM_COOLDOWN_SECONDS;
     float rearm_needed_time_stamp = -1000.0f;
 
     const float fake_charging_time_seconds = 10.0f;
@@ -83,7 +84,11 @@ int main() {
     struct Oscilloscope_State oscilloscope_state = {0};
     oscilloscope_setup(&oscilloscope_state, &settings);
 
-    struct Oscilloscope_Ui_Settings ui_settings;
+    struct Oscilloscope_Ui_Settings ui_settings = {0};
+    ui_settings.do_plot_current = true;
+    ui_settings.current_voltage_factor_chan_a = CONFIG_CURRENT_VOLTAGE_FACTOR_CHANNEL_A;
+    ui_settings.current_voltage_factor_chan_b = CONFIG_CURRENT_VOLTAGE_FACTOR_CHANNEL_B;
+
     struct Oscilloscope_Ui oscilloscope_ui_state = {0};
     oscilloscope_ui_setup(&oscilloscope_ui_state, &ui_settings, grid_pixel_unit);
 

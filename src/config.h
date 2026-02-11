@@ -1,0 +1,11 @@
+#ifndef CONFIG_H_
+#define CONFIG_H_
+
+const double CONFIG_CURRENT_VOLTAGE_FACTOR_CHANNEL_A = 6072.0;
+const double CONFIG_CURRENT_VOLTAGE_FACTOR_CHANNEL_B = 6048.0;
+const float CONFIG_REARM_COOLDOWN_SECONDS = 90.0f;
+
+
+
+
+#endif // CONFIG_H_

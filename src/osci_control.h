@@ -86,6 +86,10 @@ struct Oscilloscope_Ui {
     float TRIGGER_ARM_COOLDOWN;
 
     struct Gra_Gridded_Base_Arguments plot_args;
+
+    bool do_plot_current;
+    double current_voltage_factor_chan_a;
+    double current_voltage_factor_chan_b;
 };
 
 struct Oscilloscope_Settings {
@@ -102,11 +106,12 @@ struct Oscilloscope_Settings {
 };
 
 struct Oscilloscope_Ui_Settings {
-    float x;
+    bool do_plot_current;
+    double current_voltage_factor_chan_a;
+    double current_voltage_factor_chan_b;
 };
-
-bool oscilloscope_setup(struct Oscilloscope_State* state, struct Oscilloscope_Settings* settings);
-void oscilloscope_ui_setup(struct Oscilloscope_Ui* oscilloscope_ui, struct Oscilloscope_Ui_Settings* ui_settings, float grid_pixels_unit);
+bool oscilloscope_setup(struct Oscilloscope_State* state, const struct Oscilloscope_Settings* settings);
+void oscilloscope_ui_setup(struct Oscilloscope_Ui* oscilloscope_ui, const struct Oscilloscope_Ui_Settings* ui_settings, float grid_pixels_unit);
 void oscilloscope_change_mode(struct Oscilloscope_State* state, struct Oscilloscope_Ui* ui, struct Oscilloscope_Settings* settings, bool triggered);
 void oscilloscope_ui_draw(Mui_Rectangle area, float grid_pixel_unit, struct Oscilloscope_Ui* ui, struct Oscilloscope_State* state, struct Oscilloscope_Settings* settings);
 void oscilloscope_ui_update(struct Oscilloscope_Ui* oscilloscope_ui, struct Oscilloscope_State* oscilloscope_state);
