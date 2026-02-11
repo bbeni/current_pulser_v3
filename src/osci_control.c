@@ -428,12 +428,12 @@ void oscilloscope_ui_draw(Mui_Rectangle area, float grid_pixel_unit, struct Osci
 
 
     struct Internal_Scaled_Offsetted_Data scaled_data_a;
-    scaled_data_a.scale = ui->current_voltage_factor_chan_a;
+    scaled_data_a.scale = ui->do_plot_current ? ui->current_voltage_factor_chan_a : 1.0;
     scaled_data_a.offset = ui->voltage_offset_chan_a;
     scaled_data_a.x = state->data;
 
     struct Internal_Scaled_Offsetted_Data scaled_data_b;
-    scaled_data_b.scale = ui->current_voltage_factor_chan_b;
+    scaled_data_b.scale = ui->do_plot_current ? ui->current_voltage_factor_chan_b : 1.0;
     scaled_data_b.offset = ui->voltage_offset_chan_b;
     scaled_data_b.x = state->data + state->n_data;
 
