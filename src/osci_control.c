@@ -53,7 +53,7 @@ bool osc_shift_screen_setup(struct Osc_Device* device, double** data_out, int re
     if (!FDwfAnalogInFrequencySet(device->handle, sample_rate)) return false;
 
     // get the maximum buffer size
-    if (request_n_samples = -1) {
+    if (request_n_samples == -1) {
         // get the maximum buffer size
         if (!FDwfAnalogInBufferSizeInfo(device->handle, NULL, n_samples_out)) return false;
     } else {
@@ -100,7 +100,7 @@ bool osc_triggered_setup(struct Osc_Device* device, double** data_out, int reque
     if (!FDwfAnalogInChannelRangeSet(device->handle, -1, v_pk_to_pk)) return false;
     if (!FDwfAnalogInFrequencySet(device->handle, sample_rate)) return false;
 
-    if (request_n_samples = -1) {
+    if (request_n_samples == -1) {
         // get the maximum buffer size
         if (!FDwfAnalogInBufferSizeInfo(device->handle, NULL, n_samples_out)) return false;
     } else {
