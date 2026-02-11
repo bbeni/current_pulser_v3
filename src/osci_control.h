@@ -47,7 +47,7 @@ bool osc_shift_screen_setup(struct Osc_Device* device, double** data_out, int re
 bool osc_shift_screen_update(struct Osc_Device* device, double* data_out, int n_samples, int n_channels);
 
 bool osc_triggered_setup(struct Osc_Device* device, double** data_out, int request_n_samples, int* n_samples_out, int n_channels, double v_pk_to_pk, double sample_rate);
-bool osc_triggered_arm_trigger(struct Osc_Device* device, double time_out, int channel, double level, double position, OSC_TRIGGER_TYPE type, OSC_TRIGGER_CONDITION condition);
+bool osc_triggered_arm_trigger(struct Osc_Device* device, double auto_time_out, int channel, double level, double position, double trig_length, OSC_TRIGGER_TYPE type, OSC_TRIGGER_CONDITION condition);
 bool osc_triggered_update(struct Osc_Device* device, float trigger_cooldown, double* data_out, int n_samples, int n_channels);
 
 //

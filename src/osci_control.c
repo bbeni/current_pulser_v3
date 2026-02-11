@@ -137,10 +137,11 @@ bool osc_triggered_setup(struct Osc_Device* device, double** data_out, int reque
 }
 
 // wait at least 2 seconds with Analog Discovery for the offset to stabilize, before the first reading after device open or offset/range change
-bool osc_triggered_arm_trigger(struct Osc_Device* device, double time_out, int channel, double level, double position, OSC_TRIGGER_TYPE type, OSC_TRIGGER_CONDITION condition) {
+// with auto_time_out set to 0.0 the timeout is disabled
+bool osc_triggered_arm_trigger(struct Osc_Device* device, double auto_time_out, int channel, double level, double position, double trig_length, OSC_TRIGGER_TYPE type, OSC_TRIGGER_CONDITION condition) {
     // configure trigger
     if (!FDwfAnalogInTriggerSourceSet(device->handle, trigsrcDetectorAnalogIn)) return false;
-    if (!FDwfAnalogInTriggerAutoTimeoutSet(device->handle, time_out)) return false;
+    if (!FDwfAnalogInTriggerAutoTimeoutSet(device->handle, auto_time_out)) return false;
     if (!FDwfAnalogInTriggerChannelSet(device->handle, channel)) return false;
     if (!FDwfAnalogInTriggerTypeSet(device->handle, type)) return false;
     if (!FDwfAnalogInTriggerLevelSet(device->handle, level)) return false;
@@ -148,7 +149,7 @@ bool osc_triggered_arm_trigger(struct Osc_Device* device, double time_out, int c
     if (!FDwfAnalogInTriggerPositionSet(device->handle, position)) return false;
 
     if (!FDwfAnalogInTriggerLengthConditionSet(device->handle, triglenTimeout)) return false;
-    if (!FDwfAnalogInTriggerLengthSet(device->handle, 0.00005)) return false;
+    if (!FDwfAnalogInTriggerLengthSet(device->handle, trig_length)) return false;
 
 
     //if (!FDwfAnalogInTriggerFilterSet(device->handle, filterAverage)) return false;
@@ -317,11 +318,16 @@ void oscilloscope_change_mode(struct Oscilloscope_State* state, struct Oscillosc
 
     if (triggered) {
         // TRIGGERED DATA setup
-        if (!osc_triggered_setup(&state->device, &state->data, settings->request_n_samples, &state->n_data, settings->n_channels, settings->v_pk_to_pk, settings->sample_rate)) {
+        if (!osc_triggered_setup(&state->device, &state->data, settings->request_n_samples, &state->n_data,
+            settings->n_channels, settings->v_pk_to_pk, settings->sample_rate))
+        {
             state->device_available = false;
             osc_print_last_error();
         }
-        if (!osc_triggered_arm_trigger(&state->device, settings->trigger_auto_timeout, settings->trigger_channel, settings->trigger_level, settings->trigger_position, settings->trigger_type, settings->trigger_condition)) {
+        if (!osc_triggered_arm_trigger(&state->device, settings->trigger_auto_timeout, settings->trigger_channel,
+            settings->trigger_level, settings->trigger_length, settings->trigger_position, settings->trigger_type,
+            settings->trigger_condition))
+        {
             osc_print_last_error();
         }
         ui->trigger_armed_timestamp = mui_get_time();
