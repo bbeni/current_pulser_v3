@@ -146,6 +146,11 @@ bool osc_triggered_arm_trigger(struct Osc_Device* device, float time_out, int ch
     if (!FDwfAnalogInTriggerLevelSet(device->handle, level)) return false;
     if (!FDwfAnalogInTriggerConditionSet(device->handle, condition)) return false;
     if (!FDwfAnalogInTriggerPositionSet(device->handle, position)) return false;
+
+    if (!FDwfAnalogInTriggerLengthConditionSet(device->handle, triglenTimeout)) return false;
+    if (!FDwfAnalogInTriggerLengthSet(device->handle, 0.00005)) return false;
+
+
     //if (!FDwfAnalogInTriggerFilterSet(device->handle, filterAverage)) return false;
 
     device->triggered_measurement_started = false;
