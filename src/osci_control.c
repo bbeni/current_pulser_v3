@@ -66,13 +66,19 @@ bool osc_shift_screen_setup(struct Osc_Device* device, double** data_out, int re
     if (!FDwfAnalogInBufferSizeSet(device->handle, *n_samples_out)) return false;
     if (!FDwfAnalogInAcquisitionModeSet(device->handle, acqmodeScanScreen)) return false;
 
-    double* data1;
-    data1 = malloc(sizeof(*data1) * *n_samples_out * n_channels);
-    memset(data1, 0x0, sizeof(*data1) * *n_samples_out * n_channels);
-    *data_out = data1;
+    double* data;
+    data = malloc(sizeof(*data) * *n_samples_out * n_channels);
+    if (!data) return false;
+    memset(data, 0x0, sizeof(*data) * *n_samples_out * n_channels);
+
+    *data_out = data;
 
     // start
-    if (!FDwfAnalogInConfigure(device->handle, 0, true)) return false;
+    if (!FDwfAnalogInConfigure(device->handle, 0, true)) {
+        free(data);
+        return false;
+    }
+
     return true;
 }
 
@@ -116,13 +122,18 @@ bool osc_triggered_setup(struct Osc_Device* device, double** data_out, int reque
     if (!FDwfAnalogInAcquisitionModeSet(device->handle, acqmodeSingle)) return false;
 
     double* data;
-    data = malloc(sizeof(*data) * *n_samples_out);
-    memset(data, 0x0, sizeof(*data) * *n_samples_out);
+    data = malloc(sizeof(*data) * *n_samples_out * n_channels);
+    if (!data) return false;
+    memset(data, 0x0, sizeof(*data) * *n_samples_out * n_channels);
 
     *data_out = data;
 
     // start
-    if (!FDwfAnalogInConfigure(device->handle, 0, true)) return false;
+    if (!FDwfAnalogInConfigure(device->handle, 0, true)) {
+        free(data);
+        return false;
+    }
+
     return true;
 }
 
@@ -210,8 +221,8 @@ bool oscilloscope_setup(struct Oscilloscope_State* state, const struct Oscillosc
     size_t n_interpol = 3000;
 
     state->t_data = malloc(sizeof(*state->t_data) * n_data);
-    state->display_t_data = malloc(sizeof(*state->display_t_data) * n_interpol);
-    state->display_data = malloc(sizeof(*state->display_t_data) * n_interpol);
+    state->display_t_data = malloc(sizeof(*state->display_t_data) * n_interpol * settings->n_channels);
+    state->display_data = malloc(sizeof(*state->display_t_data) * n_interpol * settings->n_channels);
 
     for (int i = 0; i < n_data; i++) {
         state->t_data[i] = state->t_min_data + i * state->step;
@@ -328,7 +339,7 @@ void oscilloscope_ui_draw(Mui_Rectangle area, float grid_pixel_unit, struct Osci
         }
     }
 
-    if (state->device_available || true) {
+    if (state->device_available) {
         if (mui_checkbox(&ui->trigger_armed_cb_state, trigger_label_text, trigger_checkbox_area)) {
             // checkbox toggeled
             bool triggered = ui->trigger_armed_cb_state.checked;
@@ -374,9 +385,6 @@ void oscilloscope_ui_draw(Mui_Rectangle area, float grid_pixel_unit, struct Osci
         state->display_t_data[i] = t_min + (t_max - t_min) * i / (state->n_display_data - 1);
     }
 
-    // TODO: mui: rename x_resamples to ..._out for consistency
-    // TODO: rename display to interpolated
-    //mma_spline_cubic_natural(state->display_t_data, state->data, state->n_data, state->display_data, state->display_t_data, state->n_display_data);
 
     struct Internal_Scaled_Offsetted_Data scaled_data_a;
     scaled_data_a.scale = ui->current_voltage_factor_chan_a;
@@ -388,8 +396,13 @@ void oscilloscope_ui_draw(Mui_Rectangle area, float grid_pixel_unit, struct Osci
     scaled_data_b.offset = ui->voltage_offset_chan_b;
     scaled_data_b.x = state->data + state->n_data;
 
+    // TODO: mui: rename x_resamples to ..._out for consistency
+    // TODO: rename display to interpolated
+    //mma_spline_cubic_natural(state->t_data, state->data, state->n_data, state->display_data, state->display_t_data, state->n_display_data);
+    //mma_spline_cubic_natural(state->t_data, state->data, state->n_data, state->display_data, state->display_t_data, state->n_display_data);
 
-    //gra_xy_plot_data_points(state->display_t_data, &scaled_display_data, (void*)&internal_scale_data, state->n_display_data, t_min, t_max, y_min, y_max, MUI_YELLOW, 2.0f, plot_rect);
+
+    //gra_xy_plot_data_points(state->display_t_data, &scaled_display_data, (void*)&internal_offset_scale_data, state->n_display_data, t_min, t_max, y_min, y_max, MUI_YELLOW, 2.0f, plot_rect);
     //if ( (state->t_max_data - state->t_min_data) / (t_max - t_min) * state->n_display_data / state->n_data > 5 ) {
         gra_xy_plot_data_points(state->t_data, &scaled_data_a, (void*)&internal_offset_scale_data, state->n_data, t_min, t_max, y_min, y_max, MUI_BLUE, 2.0f, plot_rect);
         gra_xy_plot_data_points(state->t_data, &scaled_data_b, (void*)&internal_offset_scale_data, state->n_data, t_min, t_max, y_min, y_max, MUI_GREEN, 2.0f, plot_rect);
