@@ -78,7 +78,7 @@ int main() {
     settings.trigger_channel = 0;
     settings.trigger_level = 0.008f;      // volts
     settings.trigger_position = 0.0008;  // in seconds
-    settings.trigger_timeout = 1e23;     // in seconds
+    settings.trigger_timeout = 10;     // in seconds
     settings.request_n_samples = 512;
     settings.n_channels = 2;
     settings.trigger_type = OSC_TRIGGER_TYPE_EDGE;
