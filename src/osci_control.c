@@ -300,8 +300,8 @@ void oscilloscope_ui_setup(struct Oscilloscope_Ui* oscilloscope_ui, const struct
     plot_args.grid_skip_y = 1;
     plot_args.x_left = -0.0002f;
     plot_args.x_right = 0.0018f;
-    plot_args.y_bot = -0.2f * pow(10.0, exponent);
-    plot_args.y_top = 0.8f * pow(10.0, exponent);
+    plot_args.y_bot = !ui_settings->do_plot_current ? -1.0f : -0.2f * pow(10.0, exponent);
+    plot_args.y_top = !ui_settings->do_plot_current ? 4.0f : 0.8f * pow(10.0, exponent);
     plot_args.x_label = "t [s]";
     plot_args.y_label = !ui_settings->do_plot_current ? "U [V]" : "I [A]";
     plot_args.thick_y_zero = true;

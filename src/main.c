@@ -88,7 +88,7 @@ int main() {
     oscilloscope_setup(&oscilloscope_state, &settings);
 
     struct Oscilloscope_Ui_Settings ui_settings = {0};
-    ui_settings.do_plot_current = false;
+    ui_settings.do_plot_current = true;
     ui_settings.current_voltage_factor_chan_a = CONFIG_CURRENT_VOLTAGE_FACTOR_CHANNEL_A;
     ui_settings.current_voltage_factor_chan_b = CONFIG_CURRENT_VOLTAGE_FACTOR_CHANNEL_B;
     ui_settings.voltage_offset_chan_a = CONFIG_VOLTAGE_OFFSET_CHANNEL_A;
@@ -96,7 +96,6 @@ int main() {
 
     struct Oscilloscope_Ui oscilloscope_ui_state = {0};
     oscilloscope_ui_setup(&oscilloscope_ui_state, &ui_settings, grid_pixel_unit);
-
 
     while (!mui_window_should_close())
     {
@@ -137,18 +136,17 @@ int main() {
         oscilloscope_ui_draw(oscilloscope_area, grid_pixel_unit, &oscilloscope_ui_state, &oscilloscope_state, &settings);
 
 
-
         // control panels
         Mui_Rectangle panel_1_area;
-        top_area = mui_cut_left(top_area, 6 * grid_pixel_unit, &panel_1_area);
+        top_area = mui_cut_left(top_area, 7 * grid_pixel_unit, &panel_1_area);
         top_area = mui_cut_left(top_area, 1 * grid_pixel_unit, NULL);
 
         Mui_Rectangle panel_2_area;
-        top_area = mui_cut_left(top_area, 6 * grid_pixel_unit, &panel_2_area);
+        top_area = mui_cut_left(top_area, 7 * grid_pixel_unit, &panel_2_area);
         top_area = mui_cut_left(top_area, 1 * grid_pixel_unit, NULL);
 
         Mui_Rectangle panel_3_area;
-        top_area = mui_cut_left(top_area, 6 * grid_pixel_unit, &panel_3_area);
+        top_area = mui_cut_left(top_area, 7 * grid_pixel_unit, &panel_3_area);
         top_area = mui_cut_left(top_area, 1 * grid_pixel_unit, NULL);
 
 
@@ -212,7 +210,6 @@ int main() {
             }
 
 
-
             power_supply_area = mui_cut_top(power_supply_area, 0.5f * grid_pixel_unit, NULL);
             Mui_Rectangle power_supply_title_area;
             power_supply_area = mui_cut_top(power_supply_area, 1 * grid_pixel_unit, &power_supply_title_area);
@@ -220,9 +217,9 @@ int main() {
             mui_label(&mui_protos_theme_g, "POWER SUPPLY", MUI_TEXT_ALIGN_LEFT, power_supply_title_area);
             mui_draw_rectangle_lines(power_supply_area, mui_protos_theme_g.border, 2.0f);
 
-            // divide into 2:3:1
+            // divide into 3:3:1
             Mui_Rectangle ui_label_rect;
-            power_supply_area = mui_cut_left(power_supply_area, 2 * grid_pixel_unit, &ui_label_rect);
+            power_supply_area = mui_cut_left(power_supply_area, 3 * grid_pixel_unit, &ui_label_rect);
             Mui_Rectangle ui_rect;
             Mui_Rectangle ps_status_rect = mui_cut_left(power_supply_area, 3 * grid_pixel_unit, &ui_rect);
 
@@ -260,9 +257,9 @@ int main() {
                 fake_current = 302;
             }
             char voltage_label[20];
-            snprintf(voltage_label, 20-1, "%.0f V", fake_voltage);
+            snprintf(voltage_label, 20, "%.0f V", fake_voltage);
             char current_label[20];
-            snprintf(current_label, 20-1, "%.0f mA", fake_current);
+            snprintf(current_label, 20, "%.0f mA", fake_current);
 
             mui_label(&mui_protos_theme_g, voltage_label, MUI_TEXT_ALIGN_RIGHT, u_rect);
             mui_label(&mui_protos_theme_g, current_label, MUI_TEXT_ALIGN_RIGHT, i_rect);
@@ -315,8 +312,8 @@ int main() {
             mui_label(&mui_protos_theme_g, "CAP BANK 1", MUI_TEXT_ALIGN_LEFT, cb1_title_area);
             mui_draw_rectangle_lines(cap_bank_1_area, mui_protos_theme_g.border, 2.0f);
 
-            // divide into 2:3:1
-            cap_bank_1_area = mui_cut_left(cap_bank_1_area, 2 * grid_pixel_unit, &cb1_labels_rect);
+            // divide into 3:3:1
+            cap_bank_1_area = mui_cut_left(cap_bank_1_area, 3 * grid_pixel_unit, &cb1_labels_rect);
             cb1_enable_rect = mui_cut_left(cap_bank_1_area, 3 * grid_pixel_unit, &cb1_set_and_status_rect);
 
             cb1_labels_rect = mui_cut_top(cb1_labels_rect, 0.3333333333f * grid_pixel_unit, NULL);
@@ -390,8 +387,8 @@ int main() {
             mui_label(&mui_protos_theme_g, "CAP BANK 2", MUI_TEXT_ALIGN_LEFT, cb2_title_area);
             mui_draw_rectangle_lines(cap_bank_2_area, mui_protos_theme_g.border, 2.0f);
 
-            // divide into 2:3:1
-            cap_bank_2_area = mui_cut_left(cap_bank_2_area, 2 * grid_pixel_unit, &cb2_labels_rect);
+            // divide into 3:3:1
+            cap_bank_2_area = mui_cut_left(cap_bank_2_area, 3 * grid_pixel_unit, &cb2_labels_rect);
             cb2_enable_rect = mui_cut_left(cap_bank_2_area, 3 * grid_pixel_unit, &cb2_set_and_status_rect);
 
             cb2_labels_rect = mui_cut_top(cb2_labels_rect, 0.3333333333f * grid_pixel_unit, NULL);
