@@ -184,9 +184,9 @@ struct Mui_Font {
     Font raylib_font;
 };
 
-Mui_Vector2 mui_measure_text(struct Mui_Font* font, const char *text, float font_size, float spacing, size_t start, size_t end) {
-    assert(start <= end);
-    char* t_cstr = uti_temp_strndup(&text[start], end - start);
+Mui_Vector2 mui_measure_text(const char *text, size_t text_start, size_t text_end, struct Mui_Font* font, float font_size, float spacing) {
+    assert(text_start <= text_end);
+    char* t_cstr = uti_temp_strndup(&text[text_start], text_end - text_start);
     Vector2 v = MeasureTextEx(font->raylib_font, t_cstr, font_size, spacing);
     return (Mui_Vector2) {
         .x = v.x,
@@ -203,17 +203,17 @@ struct Mui_Font *mui_load_font_ttf(void* ttf_data, int ttf_data_size, float font
     return font;
 }
 
-void mui_draw_text_line(struct Mui_Font* font, Mui_Vector2 pos, float letter_space, float letter_size, const char* text, Mui_Color color, size_t start, size_t end) {
-    char* t_cstr = uti_temp_strndup(&text[start], end - start);
-    DrawTextEx(font->raylib_font, t_cstr, RV2(pos), letter_size, letter_space, RCOLOR(color));
+void mui_draw_text_line(const char* text, size_t text_start, size_t text_end, struct Mui_Font* font, float letter_size, float spacing, Mui_Color color, Mui_Vector2 pos) {
+    char* t_cstr = uti_temp_strndup(&text[text_start], text_end - text_start);
+    DrawTextEx(font->raylib_font, t_cstr, RV2(pos), letter_size, spacing, RCOLOR(color));
 }
 
-void mui_draw_text_line_angle(struct Mui_Font* font, Mui_Vector2 pos, float letter_space, float letter_size, const char* text, Mui_Color color, size_t start, size_t end, float angle) {
-    char* t_cstr = uti_temp_strndup(&text[start], end - start);
-    Mui_Vector2 measure = mui_measure_text(font, text, letter_size, letter_space, start, end);
+void mui_draw_text_line_angle(const char* text, size_t text_start, size_t text_end, struct Mui_Font* font, float letter_size, float spacing, Mui_Color color, Mui_Vector2 pos, float angle) {
+    char* t_cstr = uti_temp_strndup(&text[text_start], text_end - text_start);
+    Mui_Vector2 measure = mui_measure_text(text, text_start, text_end, font, letter_size, spacing);
     Mui_Vector2 center;
     center.x = measure.x * 0.5f;
     center.y = measure.y * 0.5f;
-    DrawTextPro(font->raylib_font, t_cstr, RV2(pos), RV2(center), angle, letter_size, letter_space, RCOLOR(color));
+    DrawTextPro(font->raylib_font, t_cstr, RV2(pos), RV2(center), angle, letter_size, spacing, RCOLOR(color));
 }
 

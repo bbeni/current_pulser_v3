@@ -62,13 +62,13 @@ typedef struct {
 
     float font_size;
     float font_small_size;
-    float label_text_size;
-    float textinput_text_size;
+    float font_label_size;
+    float font_size_textinput;
 
     struct Mui_Font *font;
     struct Mui_Font *font_small;
-    struct Mui_Font *label_font;
-    struct Mui_Font *textinput_font;
+    struct Mui_Font *font_label;
+    struct Mui_Font *font_textinput;
 
     float corner_radius;
     float border_thickness;
@@ -308,10 +308,10 @@ void mui_draw_rectangle_rounded(Mui_Rectangle rect, float corner_radius, Mui_Col
 void mui_draw_rectangle_lines(Mui_Rectangle rect, Mui_Color color, float thickness);
 void mui_draw_rectangle_rounded_lines(Mui_Rectangle rect, float corner_radius, Mui_Color color, float thickness);
 
-Mui_Vector2 mui_measure_text(struct Mui_Font* font, const char *text, float font_size, float spacing, size_t start, size_t end);
 struct Mui_Font *mui_load_font_ttf(void* ttf_data, int ttf_data_size, float font_size);
-void mui_draw_text_line(struct Mui_Font* font, Mui_Vector2 pos, float letter_space, float letter_size, const char* text, Mui_Color color, size_t start, size_t end);
-void mui_draw_text_line_angle(struct Mui_Font* font, Mui_Vector2 pos, float letter_space, float letter_size, const char* text, Mui_Color color, size_t start, size_t end, float angle);
+Mui_Vector2 mui_measure_text(const char *text, size_t text_start, size_t text_end, struct Mui_Font* font, float font_size, float spacing);
+void mui_draw_text_line(const char* text, size_t text_start, size_t text_end, struct Mui_Font* font, float letter_size, float spacing, Mui_Color color, Mui_Vector2 pos);
+void mui_draw_text_line_angle(const char* text, size_t text_start, size_t text_end, struct Mui_Font* font, float letter_size, float spacing, Mui_Color color, Mui_Vector2 pos, float angle);
 
 #define MUI_LIGHTGRAY  (Mui_Color){ 200, 200, 200, 255 }   // Light Gray
 #define MUI_GRAY       (Mui_Color){ 130, 130, 130, 255 }   // Gray

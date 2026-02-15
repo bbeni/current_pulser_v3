@@ -10,42 +10,110 @@
 #include <errno.h>
 #include <assert.h>
 #include <ctype.h>
+#include <math.h>
 
 #include "uti.h"
 
 
-void uti_render_postfix_number(char* buffer, const size_t max_char_count, double number) {
+void uti_render_postfix_number(char* buffer, const size_t max_char_count, double number, int digits_after_comma) {
     double abs_number = number > 0.0 ? number : -number;
+
+    char fmt[26];
+    char fmt_base[] = "%%.%df %%s";
+    snprintf(fmt, 26, fmt_base, digits_after_comma);
 
     // if it is almost 0 just let it be
     if (abs_number < 1e-18) {
-        snprintf(buffer, max_char_count, "%.2f", number);
+        snprintf(buffer, max_char_count, fmt, number, "");
     } else if (abs_number < 1e-15) {
-        snprintf(buffer, max_char_count, "%.2fa", number * 1e18);
+        snprintf(buffer, max_char_count, fmt, number * 1e18, "a");
     } else if (abs_number < 1e-12) {
-        snprintf(buffer, max_char_count, "%.2ff", number * 1e15);
+        snprintf(buffer, max_char_count, fmt, number * 1e15, "f");
     } else if (abs_number < 1e-9) {
-        snprintf(buffer, max_char_count, "%.2fp", number * 1e12);
+        snprintf(buffer, max_char_count, fmt, number * 1e12, "p");
     } else if (abs_number < 1e-6) {
-        snprintf(buffer, max_char_count, "%.2fn", number * 1e9);
+        snprintf(buffer, max_char_count, fmt, number * 1e9, "n");
     } else if (abs_number < 1e-3) {
-        snprintf(buffer, max_char_count, "%.2fu", number * 1e6);
+        snprintf(buffer, max_char_count, fmt, number * 1e6, "u");
     } else if (abs_number < 1e0) {
-        snprintf(buffer, max_char_count, "%.2fm", number * 1e3);
+        snprintf(buffer, max_char_count, fmt, number * 1e3, "m");
     } else if (abs_number < 1e3) {
-        snprintf(buffer, max_char_count, "%.2f", number * 1e0);
+        snprintf(buffer, max_char_count, fmt, number * 1e0, "");
     } else if (abs_number < 1e6) {
-        snprintf(buffer, max_char_count, "%.2fk", number * 1e-3);
+        snprintf(buffer, max_char_count, fmt, number * 1e-3, "k");
     } else if (abs_number < 1e9) {
-        snprintf(buffer, max_char_count, "%.2fM", number * 1e-6);
+        snprintf(buffer, max_char_count, fmt, number * 1e-6, "M");
     } else if (abs_number < 1e12) {
-        snprintf(buffer, max_char_count, "%.2fG", number * 1e-9);
+        snprintf(buffer, max_char_count, fmt, number * 1e-9, "G");
     } else {
-        snprintf(buffer, max_char_count, "%.2fT", number * 1e-12);
+        snprintf(buffer, max_char_count, fmt, number * 1e-12, "T");
     }
 }
 
-// TODO: also implement postfix parsing
+const int postifixes_count_ = 11;
+const char postfixes_[] = "afpnum kMGT";
+const int zero_index_crossing = 6;
+
+// parse numbers of the form 10m 99k 123M 1.0 234 4e5 0.0001p 22f 5.55G
+// returns true if the number is sucessfully parsed
+bool uti_parse_number_postfixed(char* input, const size_t max_char_count, double* output) {
+    char* end;
+    double result = strtod(input, &end);
+    if (end == input) {
+        printf("ERROR: parsing '%s' as double is not possible\n", input);
+        printf("                ^\n");
+        return false;
+    }
+    size_t l = strlen(input);
+    if (l == 0) {
+        printf("ERROR: parsing empty string as double is not possible\n");
+        return false;
+    }
+    assert(l < max_char_count);
+
+    size_t found = 0;
+    double postfix_multiplier = 1.0;
+    while (l - (end - input) > 0) {
+        // only accept spaces after number or ...
+        if (isspace(*end)) {
+            end++;
+            continue;
+        }
+
+        bool failed = false;
+        if (found > 0) {
+            // we should have only one postfix and only spaces after the postfix
+            failed = true;
+        }
+
+        for (int i = 0; i < postifixes_count_; i++) {
+            if (*end == postfixes_[i]) {
+                found++;
+                postfix_multiplier = pow(10.0, (i - zero_index_crossing) * 3);
+                break;
+            }
+        }
+
+        if (failed || found != 1) {
+            printf("ERROR: parsing '%s' failed: not a valid SI-postfix like M, n, ...\n", input);
+            printf("                ");
+            for (int i = 0; i < end - input && i < 100; i++) {
+                printf(" ");
+            }
+            printf("^\n");
+            return false;
+        }
+        end++;
+    }
+
+    *output = result * postfix_multiplier;
+    return true;
+
+}
+
+
+// parse numbers of the form 1.0 234 4e5 0.0001
+// returns true if the number is sucessfully parsed
 bool uti_parse_number(char* input, const size_t max_char_count, double* output) {
     char* end;
     double result = strtod(input, &end);

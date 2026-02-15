@@ -8,8 +8,9 @@
 #include "stddef.h"
 
 // render 0.0001 -> 100u etc.
-void uti_render_postfix_number(char* buffer, const size_t max_char_count, double number);
+void uti_render_postfix_number(char* buffer, const size_t max_char_count, double number, int digits_after_comma);
 bool uti_parse_number(char* input, const size_t max_char_count, double* output);
+bool uti_parse_number_postfixed(char* input, const size_t max_char_count, double* output);
 
 // from https://stackoverflow.com/questions/656542/trim-a-string-in-c
 char* uti_ltrim(char* s);

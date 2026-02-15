@@ -18,14 +18,14 @@ Mui_Theme mui_protos_theme_dark_generate(float bg_hue, float bg_chroma) {
         .text         = _OKLCH(0.95f, bg_chroma, 243 + bg_hue),
         .text_muted   = _OKLCH(0.5f, bg_chroma, 243 + bg_hue),
         .border       = _OKLCH(0.45f, bg_chroma, 243 + bg_hue),
-        .primary      = _OKLCH(0.7f, bg_chroma + 0.1, 243 + bg_hue),
-        .primary_dark = _OKLCH(0.6f, bg_chroma + 0.1, 243 + bg_hue),
+        .primary      = _OKLCH(0.7f, bg_chroma + 0.1, 63 + bg_hue),
+        .primary_dark = _OKLCH(0.6f, bg_chroma + 0.1, 63 + bg_hue),
 
         .border_thickness = 2.0f,
-        .font_size = _FONT_HUGE,
+        .font_size = _FONT_MEDIUM,
         .font_small_size = _FONT_SMALL,
-        .label_text_size = _FONT_MEDIUM,
-        .textinput_text_size = _FONT_MEDIUM,
+        .font_label_size = _FONT_LARGE,
+        .font_size_textinput = _FONT_MEDIUM,
 
         .slider_thickness = 8.0f,
         .slider_wagon_width = 32.0f,
@@ -48,14 +48,14 @@ Mui_Theme mui_protos_theme_light_generate(float bg_hue, float bg_chroma) {
         .text         = _OKLCH(0.05f, bg_chroma, 243 + bg_hue),
         .text_muted   = _OKLCH(0.5f, bg_chroma, 243 + bg_hue),
         .border       = _OKLCH(0.55f, bg_chroma, 243 + bg_hue),
-        .primary      = _OKLCH(0.7f, bg_chroma+0.09, 243 + bg_hue),
-        .primary_dark = _OKLCH(0.6f, bg_chroma+0.09, 243 + bg_hue),
+        .primary      = _OKLCH(0.7f, bg_chroma+0.09, 63 + bg_hue),
+        .primary_dark = _OKLCH(0.6f, bg_chroma+0.09, 63 + bg_hue),
 
         .border_thickness = 2.0f,
         .font_size = _FONT_MEDIUM,
         .font_small_size = _FONT_SMALL,
-        .label_text_size = _FONT_MEDIUM,
-        .textinput_text_size = _FONT_MEDIUM,
+        .font_label_size = _FONT_LARGE,
+        .font_size_textinput = _FONT_MEDIUM,
 
         .slider_thickness = 8.0f,
         .slider_wagon_width = 32.0f,
@@ -92,12 +92,12 @@ bool mui_load_ttf_font_for_theme(const char *font_file, Mui_Theme* theme) {
 
     mui_font_catalog_g[mui_font_catalog_length_g    ] = mui_load_font_ttf(data, size, theme->font_size);
     mui_font_catalog_g[mui_font_catalog_length_g + 1] = mui_load_font_ttf(data, size, theme->font_small_size);
-    mui_font_catalog_g[mui_font_catalog_length_g + 2] = mui_load_font_ttf(data, size, theme->label_text_size);
-    mui_font_catalog_g[mui_font_catalog_length_g + 3] = mui_load_font_ttf(data, size, theme->textinput_text_size);
+    mui_font_catalog_g[mui_font_catalog_length_g + 2] = mui_load_font_ttf(data, size, theme->font_label_size);
+    mui_font_catalog_g[mui_font_catalog_length_g + 3] = mui_load_font_ttf(data, size, theme->font_size_textinput);
     theme->font =           mui_font_catalog_g[mui_font_catalog_length_g];
     theme->font_small =     mui_font_catalog_g[mui_font_catalog_length_g + 1];
-    theme->label_font =     mui_font_catalog_g[mui_font_catalog_length_g + 2];
-    theme->textinput_font = mui_font_catalog_g[mui_font_catalog_length_g + 3];
+    theme->font_label =     mui_font_catalog_g[mui_font_catalog_length_g + 2];
+    theme->font_textinput = mui_font_catalog_g[mui_font_catalog_length_g + 3];
     mui_font_catalog_length_g += 4;
 
     return true;
@@ -107,8 +107,8 @@ void mui_load_latest_fonts_for_theme(Mui_Theme *theme) {
     assert(mui_font_catalog_length_g >= 4);
     theme->font =           mui_font_catalog_g[mui_font_catalog_length_g - 4];
     theme->font_small =     mui_font_catalog_g[mui_font_catalog_length_g - 3];
-    theme->label_font =     mui_font_catalog_g[mui_font_catalog_length_g - 2];
-    theme->textinput_font = mui_font_catalog_g[mui_font_catalog_length_g - 1];
+    theme->font_label =     mui_font_catalog_g[mui_font_catalog_length_g - 2];
+    theme->font_textinput = mui_font_catalog_g[mui_font_catalog_length_g - 1];
 }
 
 Mui_Theme mui_protos_theme_g;

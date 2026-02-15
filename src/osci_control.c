@@ -422,11 +422,10 @@ void oscilloscope_ui_draw(Mui_Rectangle area, float grid_pixel_unit, struct Osci
         Mui_Vector2 pos = mui_center_of_rectangle(plot_rect);
         char * no_device_text = "Analog discovery oscilloscope not conneted.";
         size_t l = mui_text_len(no_device_text, strlen(no_device_text));
-        Mui_Vector2 measure = mui_measure_text(mui_protos_theme_g.label_font, no_device_text,
-             mui_protos_theme_g.label_text_size, 0.5f, 0, l);
+        Mui_Vector2 measure = mui_measure_text(no_device_text, 0, l, mui_protos_theme_g.font_label, mui_protos_theme_g.font_label_size, 0.5f);
         pos.x -= measure.x * 0.5f;
         pos.y -= measure.y * 0.5f;
-        mui_draw_text_line(mui_protos_theme_g.label_font, pos, 0.5f, mui_protos_theme_g.label_text_size, no_device_text, MUI_RED, 0, l);
+        mui_draw_text_line(no_device_text, 0, l, mui_protos_theme_g.font_label, mui_protos_theme_g.font_label_size, 0.5f, MUI_RED, pos);
     }
 
 

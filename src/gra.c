@@ -59,20 +59,21 @@ Mui_Rectangle gra_xy_plot_labels_and_grid(char* x_label, char* y_label, double x
 
     (void) y_label;
 
-    float label_text_size = mui_protos_theme_g.label_text_size;
+    float font_label_size = mui_protos_theme_g.font_label_size;
+    struct Mui_Font* font_label = mui_protos_theme_g.font_label;
 
     // make space for label
     Mui_Rectangle x_label_place;
-    Mui_Rectangle rest = mui_cut_bot(place, label_text_size, &x_label_place);
+    Mui_Rectangle rest = mui_cut_bot(place, font_label_size, &x_label_place);
     Mui_Rectangle y_label_place;
-    rest = mui_cut_left(rest, label_text_size, &y_label_place);
+    rest = mui_cut_left(rest, font_label_size, &y_label_place);
 
     size_t l = strlen(x_label);
-    Mui_Vector2 m = mui_measure_text(mui_protos_theme_g.label_font, x_label, label_text_size, 0.1f, 0, l);
+    Mui_Vector2 m = mui_measure_text(x_label, 0, l, font_label, font_label_size, 0.1f);
     Mui_Vector2 x_label_pos;
     x_label_pos.x = x_label_place.x + x_label_place.width/2 - m.x/2;
     x_label_pos.y = x_label_place.y;
-    mui_draw_text_line(mui_protos_theme_g.label_font, x_label_pos, 0.1f, label_text_size, x_label, _color_text(), 0, l);
+    mui_draw_text_line(x_label, 0, l, font_label, font_label_size, 0.1f, _color_text(), x_label_pos);
 
     Mui_Rectangle plot_area = rest;
     mui_draw_rectangle(plot_area, _color_bg());
@@ -117,7 +118,7 @@ void gra_xy_legend(char **labels, Mui_Color *colors, bool *mask, size_t n_labels
     }
     if (n_labels == 0) return;
     float legends_v_spacing = 0.1f;
-    float legends_size = mui_protos_theme_g.label_text_size;
+    float legends_size = mui_protos_theme_g.font_label_size;
     float legends_padding = 10.0f;
     float legend_spacing = 10.0f;
     Mui_Rectangle  legends_rect;
@@ -134,8 +135,7 @@ void gra_xy_legend(char **labels, Mui_Color *colors, bool *mask, size_t n_labels
         Mui_Vector2 pos;
         pos.x = legends_rect.x;
         pos.y = legends_rect.y + index * legends_size + index * legends_v_spacing;
-
-        mui_draw_text_line(mui_protos_theme_g.label_font, pos, 0.1f, legends_size, labels[i], colors[i], 0, strlen(labels[i]));
+        mui_draw_text_line(labels[i], 0, strlen(labels[i]), mui_protos_theme_g.font_label, legends_size, 0.1f, colors[i], pos);
         index++;
     }
 }
@@ -234,6 +234,9 @@ void _gridded_draw_tick_labels(Mui_Rectangle plot_area,
 
     char buffer[24];
 
+    struct Mui_Font* font = mui_protos_theme_g.font_small;
+    double font_size = mui_protos_theme_g.font_small_size;
+
     float x_a = plot_area.x;
     float x_b = plot_area.x + plot_area.width;
     float x = x_a + off_x;
@@ -241,11 +244,11 @@ void _gridded_draw_tick_labels(Mui_Rectangle plot_area,
     for (int i = 0; i < count_x && x <= x_b; i++) {
         snprintf(buffer, 24, fmt_x, x_left + i * (x_right - x_left) / (count_x - 1));
         size_t l = mui_text_len(buffer, strlen(buffer));
-        Mui_Vector2 text_measure = mui_measure_text(mui_protos_theme_g.font_small, buffer, mui_protos_theme_g.font_small_size, 0.0f, 0, l);
+        Mui_Vector2 text_measure = mui_measure_text(buffer, 0, l, font, font_size, 0.0f);
         Mui_Vector2 pos;
         pos.x = x - text_measure.x * 0.5f;
         pos.y = plot_area.y + plot_area.height + text_measure.y * 0.5f;
-        mui_draw_text_line(mui_protos_theme_g.font_small, pos, 0.0f, mui_protos_theme_g.font_small_size, buffer, _color_text(), 0, l);
+        mui_draw_text_line(buffer, 0, l, font, font_size, 0.0f, _color_text(), pos);
         x += step_x;
     }
 
@@ -256,11 +259,11 @@ void _gridded_draw_tick_labels(Mui_Rectangle plot_area,
     for (int i = 0; i < count_y && y <= y_b; i++) {
         snprintf(buffer, 24, fmt_y, y_top - i * (y_top - y_bot) / (count_y - 1));
         size_t l = mui_text_len(buffer, strlen(buffer));
-        Mui_Vector2 text_measure = mui_measure_text(mui_protos_theme_g.font_small, buffer, mui_protos_theme_g.font_small_size, 0.0f, 0, l);
+        Mui_Vector2 text_measure = mui_measure_text(buffer, 0, l, font, font_size, 0.0f);
         Mui_Vector2 pos;
         pos.y = y - text_measure.y * 0.5f;
         pos.x = plot_area.x - text_measure.x - text_measure.y * 0.5f;
-        mui_draw_text_line(mui_protos_theme_g.font_small, pos, 0.0f, mui_protos_theme_g.font_small_size, buffer, _color_text(), 0, l);
+        mui_draw_text_line(buffer, 0, l, font, font_size, 0.0f, _color_text(), pos);
         y += step_y;
     }
 
@@ -292,21 +295,19 @@ Mui_Rectangle gra_gridded_xy_base(struct Gra_Gridded_Base_Arguments* args, Mui_R
     float font_size = mui_protos_theme_g.font_size;
     {
         size_t l = mui_text_len(args->x_label, strlen(args->x_label));
-        Mui_Vector2 measure = mui_measure_text(font, args->x_label, font_size, 0.0f, 0, l);
-        // TODO: mui: refactor so that both functions start with the common arguments
+        Mui_Vector2 measure = mui_measure_text(args->x_label, 0, l, font, font_size, 0.0f);
         Mui_Vector2 pos = mui_center_of_rectangle(x_axis_rect);
         pos.x -= measure.x * 0.5f;
         pos.y -= measure.y * 0.5f;
-        mui_draw_text_line(font, pos, 0.0f, font_size, args->x_label, _color_border(), 0, l);
+        mui_draw_text_line(args->x_label, 0, l, font, font_size, 0.0f, _color_border(), pos);
     }
 
     {
         size_t l = mui_text_len(args->y_label, strlen(args->y_label));
-        Mui_Vector2 measure = mui_measure_text(font, args->y_label, font_size, 0.0f, 0, l);
-        // TODO: mui: refactor so that both functions start with the common arguments
+        Mui_Vector2 measure = mui_measure_text(args->y_label, 0, l, font, font_size, 0.0f);
         Mui_Vector2 pos = mui_center_of_rectangle(y_axis_rect);
         pos.x -= y_axis_rect.width * 0.5f - measure.y * 0.5f;
-        mui_draw_text_line_angle(font, pos, 0.0f, font_size, args->y_label, _color_border(), 0, l, -90.0f);
+        mui_draw_text_line_angle(args->y_label, 0, l, font, font_size, 0.0f, _color_border(), pos, -90.0f);
     }
 
     return rest;
