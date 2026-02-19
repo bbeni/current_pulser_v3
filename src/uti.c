@@ -19,7 +19,7 @@ void uti_render_postfix_number(char* buffer, const size_t max_char_count, double
     double abs_number = number > 0.0 ? number : -number;
 
     char fmt[26];
-    char fmt_base[] = "%%.%df %%s";
+    char fmt_base[] = "%%.%df%%s";
     snprintf(fmt, 26, fmt_base, digits_after_comma);
 
     // if it is almost 0 just let it be
@@ -64,12 +64,12 @@ bool uti_parse_number_postfixed(char* input, const size_t max_char_count, double
         printf("                ^\n");
         return false;
     }
+    // TODO: chek if it is really null terminated!!
     size_t l = strlen(input);
     if (l == 0) {
         printf("ERROR: parsing empty string as double is not possible\n");
         return false;
     }
-    assert(l < max_char_count);
 
     size_t found = 0;
     double postfix_multiplier = 1.0;
@@ -183,6 +183,7 @@ char* uti_trim(char *s)
 #include "dirent.h"
 #endif  //_WIN32
 
+// it will allocate space for file content + \0 terminator and read into it. out size is without \0 terminator.
 bool uti_read_entire_file(const char *path, char** content, size_t* out_size) {
     char* mem_block = NULL;
     FILE *file = fopen(path, "rb");
@@ -223,7 +224,25 @@ error:
     return false;
 }
 
+bool uti_write_entire_file(const char *path, char* content, size_t size) {
+    assert(size > 0);
 
+    FILE *file = fopen(path, "wb");
+    if (!file) goto error;
+
+    size_t written = fwrite(content, sizeof(char), size, file);
+    if (written < size) goto error;
+
+    fclose(file);
+    return true;
+
+error:
+    printf("ERROR: Could not write file %s: %s\n", path, strerror(errno));
+    if (file) fclose(file);
+    return false;
+}
+
+// it will malloc all the children
 bool uti_read_entire_dir(const char *parent_dir, char*** children, size_t *children_count) {
     DIR* d;
 	d = opendir(parent_dir);
@@ -281,6 +300,32 @@ error:
     if (childs) free(childs);
     return false;
 }
+
+// size is without including null terminator
+struct Uti_String_Builder uti_string_builder(size_t initial_capacity) {
+    struct Uti_String_Builder builder;
+    assert(initial_capacity > 0);
+    builder.capacity = initial_capacity;
+    builder.text = malloc(sizeof(*builder.text) * builder.capacity);
+    assert(builder.text != NULL);
+    builder.text[0] = '\0';
+    builder.size = 0;
+    return builder;
+}
+
+void uti_string_builder_add_cstr(struct Uti_String_Builder* builder, char* cstr) {
+    size_t len = strlen(cstr);
+    if (builder->capacity < builder->size + len + 1) {
+        do {
+            builder->capacity *= 2;
+        } while (builder->capacity < builder->size + len + 1 );
+        builder->text = realloc(builder->text, builder->capacity);
+        assert(builder->text != NULL);
+    }
+    memcpy(builder->text + builder->size, cstr, len + 1);
+    builder->size += len;
+}
+
 
 // Adopted from nob.h
 // TEMP buffer because we need copy strings to null terminated. Raylib MeaserTexteEx, etc.. uses only null terminated

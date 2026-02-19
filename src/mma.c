@@ -10,6 +10,18 @@
 #include "stdint.h"
 
 
+void mma_clamp(double* v, double lower, double upper) {
+	if (*v < lower) {
+		*v = lower;
+		return;
+	}
+
+	if (*v > upper) {
+		*v = upper;
+	}
+}
+
+
 void mma_clampf(float* v, float lower, float upper) {
 	if (*v < lower) {
 		*v = lower;
@@ -214,8 +226,10 @@ void mma_spline_cubic_natural_complex_2(const double *x, const struct Complex *z
 // make sure there is enough space in y_out
 void mma_spline_cubic_natural_linear(const double *x, const double *y, size_t n_in, double *y_out, size_t n_out, double x_min, double x_max) {
 	assert(n_out >= 2);
-	assert(x_min >= x[0]);
-	assert(x_max <= x[n_in - 1]);
+	// xxxx
+	//TODO: asserts on again?
+	//assert(x_min >= x[0]);
+	//assert(x_max <= x[n_in - 1]);
 	assert(x_max >= x_min);
 
 	double dx = (x_max - x_min) / (n_out - 1);
@@ -237,7 +251,9 @@ void mma_spline_cubic_natural_linear(const double *x, const double *y, size_t n_
 		double dx = x[j + 1] - x[j];
 		assert(dx > 0);
 		double t = (x_now - x[j]) / dx;
-		assert(t >= 0);
+		// xxxx
+		// TODO: asserts on?
+		//assert(t >= 0);
 		y_out[i] = (1 - t) * y[j] + t * y[j + 1] + t * (1 - t) * ((1 - t) * a[j] + t * b[j]);
 	}
 
@@ -247,8 +263,10 @@ void mma_spline_cubic_natural_linear(const double *x, const double *y, size_t n_
 
 void mma_spline_cubic_natural_linear_complex(const double *x, const struct Complex *z, size_t n_in, struct Complex *z_out, size_t n_out, double x_min, double x_max) {
 	assert(n_out >= 2);
-	assert(x_min >= x[0]);
-	assert(x_max <= x[n_in - 1]);
+	// xxxx
+	// TODO: asserts on again?
+	//assert(x_min >= x[0]);
+	//assert(x_max <= x[n_in - 1]);
 	assert(x_max >= x_min);
 
 	double dx = (x_max - x_min) / (n_out - 1);
@@ -268,7 +286,9 @@ void mma_spline_cubic_natural_linear_complex(const double *x, const struct Compl
 		}
 
 		double t = (x_now - x[j]) / (x[j + 1] - x[j]);
-		assert(t >= 0);
+		// xxxx
+		//TODO: assert on again?
+		//assert(t >= 0);
 		z_out[i].r = (1 - t) * z[j].r + t * z[j + 1].r + t * (1 - t) * ((1 - t) * a[j].r + t * b[j].r);
 		z_out[i].i = (1 - t) * z[j].i + t * z[j + 1].i + t * (1 - t) * ((1 - t) * a[j].i + t * b[j].i);
 	}

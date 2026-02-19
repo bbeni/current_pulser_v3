@@ -17,9 +17,18 @@ char* uti_ltrim(char* s);
 char* uti_rtrim(char* s);
 char* uti_trim(char* s);
 
-// allocate space for file content + \0 terminator and read into it. out size is without \0 terminator.
 bool uti_read_entire_file(const char *path, char** content, size_t* out_size);
 bool uti_read_entire_dir(const char *parent_dir, char*** children, size_t *children_count);
+bool uti_write_entire_file(const char *path, char* content, size_t size);
+
+struct Uti_String_Builder {
+    char* text;
+    size_t size;
+    size_t capacity;
+};
+
+struct Uti_String_Builder uti_string_builder(size_t initial_capacity);
+void uti_string_builder_add_cstr(struct Uti_String_Builder* builder, char* cstr);
 
 // Adopted from nob.h:
 // TEMP buffer because we need copy strings to null terminated. Raylib MeaserTexteEx, etc.. uses only null terminated

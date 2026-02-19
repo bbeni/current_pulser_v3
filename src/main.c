@@ -69,6 +69,10 @@ int main() {
     float fake_charging_time_stamp_cb1 = -1000.0f;
     float fake_charging_time_stamp_cb2 = -1000.0f;
 
+    Mui_Number_Input_State voltage_1_set_state = mui_number_input_state(0);
+    Mui_Number_Input_State voltage_2_set_state = mui_number_input_state(0);
+
+
     // osci
 
     struct Oscilloscope_Settings settings;
@@ -247,13 +251,13 @@ int main() {
             if (cb1_status == CHARGE) {
                 float t = 1 - fake_cb1_cooldown / fake_charging_time_seconds;
                 mma_clampf(&t, 0.0f, 1.0f);
-                fake_voltage = 1654 * t;
+                fake_voltage = voltage_1_set_state.parsed_number * t;
                 fake_current = 296;
             }
             if (cb2_status == CHARGE) {
                 float t = 1 - fake_cb2_cooldown / fake_charging_time_seconds;
                 mma_clampf(&t, 0.0f, 1.0f);
-                fake_voltage = 1654 * t;
+                fake_voltage = voltage_2_set_state.parsed_number * t;
                 fake_current = 302;
             }
             char voltage_label[20];
@@ -329,9 +333,11 @@ int main() {
 
             mui_draw_rectangle_lines(cb1_set_rect, mui_protos_theme_g.border, 2.0f);
             mui_draw_rectangle_lines(cb1_status_rect, mui_protos_theme_g.border, 2.0f);
-            mui_label(&mui_protos_theme_g, "1'654 V", MUI_TEXT_ALIGN_RIGHT, cb1_set_rect);
+            if (mui_number_input(&voltage_1_set_state, cb1_set_rect, CONFIG_MIN_VOLTAGE, CONFIG_MAX_VOLTAGE)) {
+                // TODO update voltage
+            }
             mui_n_status_label(&mui_protos_theme_g, STATUS_NAMES[cb1_status], STATUS_COLORS, 4, cb1_status, MUI_TEXT_ALIGN_RIGHT, cb1_status_rect);
-            mui_label(&mui_protos_theme_g, "SET", MUI_TEXT_ALIGN_CENTER, label_set_rect);
+            mui_label(&mui_protos_theme_g, "SET (V)", MUI_TEXT_ALIGN_CENTER, label_set_rect);
             mui_label(&mui_protos_theme_g, "STATUS", MUI_TEXT_ALIGN_CENTER, label_status_rect);
 
             float ps_status_radius = grid_pixel_unit * 0.33333333f;
@@ -404,9 +410,11 @@ int main() {
 
             mui_draw_rectangle_lines(cb2_set_rect, mui_protos_theme_g.border, 2.0f);
             mui_draw_rectangle_lines(cb2_status_rect, mui_protos_theme_g.border, 2.0f);
-            mui_label(&mui_protos_theme_g, "1'654 V", MUI_TEXT_ALIGN_RIGHT, cb2_set_rect);
+            if (mui_number_input(&voltage_2_set_state, cb2_set_rect, CONFIG_MIN_VOLTAGE, CONFIG_MAX_VOLTAGE)) {
+                // TODO change setpoint
+            }
             mui_n_status_label(&mui_protos_theme_g, STATUS_NAMES[cb2_status], STATUS_COLORS, 4, cb2_status, MUI_TEXT_ALIGN_RIGHT, cb2_status_rect);
-            mui_label(&mui_protos_theme_g, "SET", MUI_TEXT_ALIGN_CENTER, label_set_rect);
+            mui_label(&mui_protos_theme_g, "SET (V)", MUI_TEXT_ALIGN_CENTER, label_set_rect);
             mui_label(&mui_protos_theme_g, "STATUS", MUI_TEXT_ALIGN_CENTER, label_status_rect);
 
             float ps_status_radius = grid_pixel_unit * 0.33333333f;

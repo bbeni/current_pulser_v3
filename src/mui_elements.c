@@ -555,7 +555,9 @@ size_t _internal_get_cursor_by_position(Mui_Vector2 pos, char* text, size_t* sta
 
 
 // return true if the value changed
-bool mui_number_input(Mui_Number_Input_State *state, Mui_Rectangle place) {
+bool mui_number_input(Mui_Number_Input_State *state, Mui_Rectangle place, double input_min, double input_max) {
+
+    assert(input_min < input_max);
 
     Mui_Theme *theme = state->theme;
     if (theme == NULL) {
@@ -587,6 +589,8 @@ bool mui_number_input(Mui_Number_Input_State *state, Mui_Rectangle place) {
             if (success) {
                 selector_2 = state->text_length;
                 selector_1 = state->text_length;
+                if (state->parsed_number < input_min) state->parsed_number = input_min;
+                if (state->parsed_number > input_max) state->parsed_number = input_max;
             }
         }
 
@@ -686,6 +690,11 @@ bool mui_number_input(Mui_Number_Input_State *state, Mui_Rectangle place) {
                 }
             }
         }
+
+        if (mui_is_key_pressed(MUI_KEY_A) && (mui_is_key_down(MUI_KEY_LEFT_CONTROL) || mui_is_key_down(MUI_KEY_RIGHT_CONTROL))) {
+            selector_1 = 0;
+            selector_2 = state->text_length;
+        }
     }
 
     state->text_selectable_state.selector_1 = selector_1;
@@ -702,20 +711,20 @@ bool mui_number_input(Mui_Number_Input_State *state, Mui_Rectangle place) {
     if (state->parsed_valid && state->parsed) {
         uti_render_postfix_number(state->text, MUI_NUMBER_INPUT_MAX_INPUT_SIZE, state->parsed_number, 3);
         state->text_length = strlen(state->text);
-        mui_text_selectable(&state->text_selectable_state, state->text, place);
+        mui_text_selectable(&state->text_selectable_state, state->text, MUI_TEXT_ALIGN_RIGHT, place);
         state->parsed = false;
         number_changed = true;
     } else {
-        mui_text_selectable(&state->text_selectable_state, state->text, place);
+        mui_text_selectable(&state->text_selectable_state, state->text, MUI_TEXT_ALIGN_RIGHT, place);
     }
 
     // cursor draw
     if (state->active && selector_1 == selector_2) {
         Mui_Rectangle rect_cursor;
-        rect_cursor.x = place.x + ceil(font_size / 6);
-        rect_cursor.y = place.y + padding;
+        rect_cursor.x = place.x;
+        rect_cursor.y = place.y;
         rect_cursor.height = font_size;
-        rect_cursor.width = font_size / 11;
+        rect_cursor.width = font_size / 12;
 
         Mui_Vector2 measure = mui_measure_text(state->text, 0, selector_1, font, font_size, 0.1f);
         rect_cursor.x += measure.x;
@@ -761,7 +770,7 @@ size_t _internal_get_cursor_by_position(Mui_Vector2 pos, char* text, size_t* sta
 }
 
 
-void mui_text_selectable(Mui_Text_Selectable_State* state, char* text, Mui_Rectangle place) {
+void mui_text_selectable(Mui_Text_Selectable_State* state, char* text, MUI_TEXT_ALIGN_FLAGS text_align, Mui_Rectangle place) {
     Mui_Theme *theme = &mui_protos_theme_g;
     float font_size = theme->font_size_textinput;
     Mui_Color text_color = theme->text;
@@ -769,7 +778,7 @@ void mui_text_selectable(Mui_Text_Selectable_State* state, char* text, Mui_Recta
 
     size_t total_length = strlen(text);
     mui_draw_rectangle(place, theme->bg_light);
-    place = mui_shrink(place, ceil(font_size / 6));
+
 
     //
     // segent into text lines
@@ -916,6 +925,7 @@ void mui_text_selectable(Mui_Text_Selectable_State* state, char* text, Mui_Recta
         mui_draw_text_line(text, line_start, line_end, font, font_size, 0.1f, text_color, pos);
     }
 }
+
 
 void mui_textinput(Mui_Textinput_State *state, const char *hint, Mui_Rectangle place) {
 

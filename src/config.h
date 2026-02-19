@@ -8,6 +8,9 @@ const double CONFIG_VOLTAGE_OFFSET_CHANNEL_B = 0.0014;
 
 const float CONFIG_REARM_COOLDOWN_SECONDS = 90.0f;
 
+const float CONFIG_MAX_VOLTAGE = 2000.0f;
+const float CONFIG_MIN_VOLTAGE = 0.0f;
+
 
 
 #endif // CONFIG_H_
