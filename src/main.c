@@ -14,6 +14,7 @@
 #include "uti.h"
 
 #include "osci_control.h"
+#include "pulser_control.h"
 
 #include "config.h"
 
@@ -33,9 +34,9 @@
 
 int main() {
 
-    int grid_w = 26;
+    int grid_w = 28;
     int grid_h = 23;
-    int grid_pixel_unit = 30;
+    int grid_pixel_unit = 28;
 
     int w, h;
     w = grid_w * grid_pixel_unit;
@@ -58,19 +59,23 @@ int main() {
     const Mui_Color STATUS_COLORS[4] = {MUI_GRAY, MUI_ORANGE, MUI_GREEN, MUI_RED};
 
     int standby_status = 0;
-    int charging_status = 0;
-    int cb1_status = 0;
-    int cb2_status = 0;
+    int charging_status = OFF;
+    int cb1_status = OFF;
+    int cb2_status = OFF;
+    int cb1_enable_status = OFF;
+    int cb2_enable_status = OFF;
 
     const float REARM_COOLDOWN_SECONDS = CONFIG_REARM_COOLDOWN_SECONDS;
     float rearm_needed_time_stamp = -1000.0f;
 
-    const float fake_charging_time_seconds = 10.0f;
-    float fake_charging_time_stamp_cb1 = -1000.0f;
-    float fake_charging_time_stamp_cb2 = -1000.0f;
+    Mui_Number_Input_State voltage_1_set_state = mui_number_input_state(100);
+    Mui_Number_Input_State voltage_2_set_state = mui_number_input_state(100);
 
-    Mui_Number_Input_State voltage_1_set_state = mui_number_input_state(0);
-    Mui_Number_Input_State voltage_2_set_state = mui_number_input_state(0);
+
+    // pulser and hv supply
+
+    if (!pulser_init()) return 1;
+    if (!pulser_hv_supply_init()) return 1;
 
 
     // osci
@@ -142,48 +147,67 @@ int main() {
 
         // control panels
         Mui_Rectangle panel_1_area;
-        top_area = mui_cut_left(top_area, 7 * grid_pixel_unit, &panel_1_area);
+        top_area = mui_cut_left(top_area, 8 * grid_pixel_unit, &panel_1_area);
         top_area = mui_cut_left(top_area, 1 * grid_pixel_unit, NULL);
 
         Mui_Rectangle panel_2_area;
-        top_area = mui_cut_left(top_area, 7 * grid_pixel_unit, &panel_2_area);
+        top_area = mui_cut_left(top_area, 8 * grid_pixel_unit, &panel_2_area);
         top_area = mui_cut_left(top_area, 1 * grid_pixel_unit, NULL);
 
         Mui_Rectangle panel_3_area;
-        top_area = mui_cut_left(top_area, 7 * grid_pixel_unit, &panel_3_area);
+        top_area = mui_cut_left(top_area, 8 * grid_pixel_unit, &panel_3_area);
         top_area = mui_cut_left(top_area, 1 * grid_pixel_unit, NULL);
 
 
         // LOGIC
+
+        if (charging_status == CHARGE) {
+            pulser_update_charge_banks(voltage_1_set_state.parsed_number, CONFIG_TARGET_CHARGING_CURRENT, voltage_2_set_state.parsed_number, CONFIG_TARGET_CHARGING_CURRENT);
+            if (pulser_get_charging_state() == CHARGE_STATE_BANK_1_ERROR || pulser_get_charging_state() == CHARGE_STATE_BANK_2_ERROR) {
+                charging_status = ERROR;
+            }
+            if (pulser_get_charging_state() == CHARGE_STATE_BANK_2_SUCCESS) {
+                charging_status = READY;
+            }
+        }
+
+        // pulser to ui translation
+
+        switch(pulser_get_charging_state()) {
+            case CHARGE_STATE_BANK_1_CHARGING:
+            case CHARGE_STATE_BANK_1_WAITING_FOR_MEASUREMENT:
+            cb1_status = CHARGE;
+            break;
+            case CHARGE_STATE_BANK_1_SUCCESS:
+            cb1_status = READY;
+            break;
+            case CHARGE_STATE_BANK_1_ERROR:
+            cb1_status = ERROR;
+            break;
+            case CHARGE_STATE_BANK_2_CHARGING:
+            case CHARGE_STATE_BANK_2_WAITING_FOR_MEASUREMENT:
+            cb2_status = CHARGE;
+            break;
+            case CHARGE_STATE_BANK_2_SUCCESS:
+            cb2_status = READY;
+            break;
+            case CHARGE_STATE_BANK_2_ERROR:
+            cb2_status = ERROR;
+            break;
+            case CHARGE_STATE_READY_FOR_CHARGING:
+            //cb1_status = OFF;
+            //cb2_status = OFF;
+            break;
+            default:
+                assert(false && "overflow CHARGE_STATE");
+            break;
+        }
+
+        cb1_enable_status = pulser_pin_state.enable ? OFF : READY;
+        cb2_enable_status = pulser_pin_state.enable ? OFF : READY;
+
+
         bool rearmed = mui_get_time() > rearm_needed_time_stamp + REARM_COOLDOWN_SECONDS;
-
-        // fake simulate charging
-        float fake_cb1_cooldown = fake_charging_time_stamp_cb1 - mui_get_time() + fake_charging_time_seconds;
-        if (fake_cb1_cooldown < 0) {
-            if (cb1_status == CHARGE) {
-                cb1_status = READY;
-                cb2_status = CHARGE;
-                fake_charging_time_stamp_cb2 = mui_get_time();
-            }
-        }
-        float fake_cb2_cooldown = fake_charging_time_stamp_cb2 - mui_get_time() + fake_charging_time_seconds;
-        if (fake_cb2_cooldown < 0) {
-            if (cb1_status == READY) {
-                if (cb2_status == CHARGE) {
-                    cb2_status = READY;
-                }
-            }
-        }
-
-
-        if (cb1_status == OFF && cb2_status == OFF) {
-            charging_status = OFF;
-        } else if (cb1_status == READY && cb2_status == READY) {
-            charging_status = READY;
-        } else {
-            charging_status = CHARGE;
-        }
-
         float rearm_cooldown = rearm_needed_time_stamp - mui_get_time() + REARM_COOLDOWN_SECONDS;
         if (rearm_cooldown < 0 && (charging_status == OFF || charging_status == READY) ) {
             standby_status = READY;
@@ -209,6 +233,7 @@ int main() {
                 if (charging_status == READY) {
                     cb1_status = OFF;
                     cb2_status = OFF;
+                    charging_status = OFF;
                     rearm_needed_time_stamp = mui_get_time();
                 }
             }
@@ -221,7 +246,7 @@ int main() {
             mui_label(&mui_protos_theme_g, "POWER SUPPLY", MUI_TEXT_ALIGN_LEFT, power_supply_title_area);
             mui_draw_rectangle_lines(power_supply_area, mui_protos_theme_g.border, 2.0f);
 
-            // divide into 3:3:1
+            // divide into 3:3:2
             Mui_Rectangle ui_label_rect;
             power_supply_area = mui_cut_left(power_supply_area, 3 * grid_pixel_unit, &ui_label_rect);
             Mui_Rectangle ui_rect;
@@ -245,25 +270,13 @@ int main() {
             mui_draw_rectangle_lines(u_rect, mui_protos_theme_g.border, 2.0f);
             mui_draw_rectangle_lines(i_rect, mui_protos_theme_g.border, 2.0f);
 
-            // fake power supply
-            float fake_voltage = 0;
-            float fake_current = 0;
-            if (cb1_status == CHARGE) {
-                float t = 1 - fake_cb1_cooldown / fake_charging_time_seconds;
-                mma_clampf(&t, 0.0f, 1.0f);
-                fake_voltage = voltage_1_set_state.parsed_number * t;
-                fake_current = 296;
-            }
-            if (cb2_status == CHARGE) {
-                float t = 1 - fake_cb2_cooldown / fake_charging_time_seconds;
-                mma_clampf(&t, 0.0f, 1.0f);
-                fake_voltage = voltage_2_set_state.parsed_number * t;
-                fake_current = 302;
-            }
+            double real_voltage = pulser_hv_supply_sense_voltage();
+            double real_current = pulser_hv_supply_sense_current();
+
             char voltage_label[20];
-            snprintf(voltage_label, 20, "%.0f V", fake_voltage);
+            snprintf(voltage_label, 20, "%.0f V", real_voltage);
             char current_label[20];
-            snprintf(current_label, 20, "%.0f mA", fake_current);
+            snprintf(current_label, 20, "%.0f mA", real_current);
 
             mui_label(&mui_protos_theme_g, voltage_label, MUI_TEXT_ALIGN_RIGHT, u_rect);
             mui_label(&mui_protos_theme_g, current_label, MUI_TEXT_ALIGN_RIGHT, i_rect);
@@ -288,9 +301,9 @@ int main() {
             // LOGIC
             if (mui_n_status_button(&charge_button_state, "CHARGE", STATUS_COLORS, 4, charging_status, charge_button_area)) {
                 if (rearmed && charging_status == OFF) {
-                    cb1_status = CHARGE;
-                    fake_charging_time_stamp_cb1 = mui_get_time();
-                    assert(cb2_status == OFF);
+                    pulser_prepare_charging();
+                    charging_status = CHARGE;
+
                     oscilloscope_change_mode(&oscilloscope_state, &oscilloscope_ui_state, &settings, true);
                     oscilloscope_ui_state.trigger_armed_cb_state.checked = true;
                 }
@@ -342,7 +355,7 @@ int main() {
 
             float ps_status_radius = grid_pixel_unit * 0.33333333f;
             Mui_Vector2 ps_status_center = mui_center_of_rectangle(cb1_enable_rect);
-            mui_draw_circle(ps_status_center, ps_status_radius, STATUS_COLORS[READY]);
+            mui_draw_circle(ps_status_center, ps_status_radius, STATUS_COLORS[cb1_enable_status]);
 
             mui_cut_bot(mui_cut_bot(cb1_enable_rect, 0.33333f * grid_pixel_unit, NULL), 1 * grid_pixel_unit, &cb1_status_label_rect);
             mui_label(&mui_protos_theme_g, "EN", MUI_TEXT_ALIGN_CENTER, cb1_status_label_rect);
@@ -366,12 +379,14 @@ int main() {
 
             if (mui_n_status_button(&fire_button_state, "FIRE", STATUS_COLORS, 4, fire_status, fire_button_area)) {
                 if (fire_status == READY) {
+                    pulser_do_fire();
+                    fire_status = OFF;
                     cb1_status = OFF;
                     cb2_status = OFF;
+                    charging_status = OFF;
                     rearm_needed_time_stamp = mui_get_time();
                 }
             }
-
 
 
             Mui_Rectangle cb2_title_area;
@@ -419,7 +434,7 @@ int main() {
 
             float ps_status_radius = grid_pixel_unit * 0.33333333f;
             Mui_Vector2 ps_status_center = mui_center_of_rectangle(cb2_enable_rect);
-            mui_draw_circle(ps_status_center, ps_status_radius, STATUS_COLORS[READY]);
+            mui_draw_circle(ps_status_center, ps_status_radius, STATUS_COLORS[cb2_enable_status]);
 
             mui_cut_bot(mui_cut_bot(cb2_enable_rect, 0.33333f * grid_pixel_unit, NULL), 1 * grid_pixel_unit, &cb2_status_label_rect);
             mui_label(&mui_protos_theme_g, "EN", MUI_TEXT_ALIGN_CENTER, cb2_status_label_rect);

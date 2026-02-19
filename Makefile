@@ -50,9 +50,11 @@ COMMON_SRCS := \
     $(SRC_DIR)/uti.c \
     $(SRC_DIR)/mma.c \
     $(SRC_DIR)/osci_control.c \
+    $(SRC_DIR)/pulser_control.c \
     $(SRC_DIR)/mui_core.c \
     $(SRC_DIR)/mui_looks.c \
     $(SRC_DIR)/mui_elements.c \
+    $(SRC_DIR)/pulser_platform_gpio.c \
     $(SRC_DIR)/mui_platform_raylib.c
 
 OBJS_MAIN := $(patsubst $(SRC_DIR)/%.c, $(BUILD_DIR)/%.o, $(SRC_DIR)/main.c $(COMMON_SRCS))

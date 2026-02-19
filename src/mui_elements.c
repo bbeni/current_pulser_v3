@@ -380,7 +380,7 @@ bool mui_n_status_button(Mui_Button_State *state, const char* text, const Mui_Co
 
     float outline_thickness = 2.0f;
 
-    mui_draw_rectangle_rounded(place, theme->corner_radius - 0.25f * theme->corner_radius, bg);
+    mui_draw_rectangle_rounded(place, theme->corner_radius + outline_thickness, bg);
     mui_draw_rectangle_rounded_lines(mui_shrink(place, outline_thickness), theme->corner_radius, theme->border, outline_thickness);
 
     Mui_Color text_color = mui_interpolate_color(theme->text, theme->primary, state->hover_t);
