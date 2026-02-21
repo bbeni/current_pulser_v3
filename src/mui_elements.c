@@ -581,7 +581,6 @@ bool mui_number_input(Mui_Number_Input_State *state, Mui_Rectangle place, double
     }
 
     if (state->active) {
-
         if (mui_is_key_pressed(MUI_KEY_ENTER) || mui_is_key_pressed_repeat(MUI_KEY_ENTER)) {
             bool success = uti_parse_number_postfixed(state->text, MUI_NUMBER_INPUT_MAX_INPUT_SIZE, &state->parsed_number);
             state->parsed = true;
@@ -697,8 +696,10 @@ bool mui_number_input(Mui_Number_Input_State *state, Mui_Rectangle place, double
         }
     }
 
+
     state->text_selectable_state.selector_1 = selector_1;
     state->text_selectable_state.selector_2 = selector_2;
+
 
     // draw text
     const float padding = 5.0f;
@@ -708,7 +709,8 @@ bool mui_number_input(Mui_Number_Input_State *state, Mui_Rectangle place, double
 
     place = mui_shrink(place, padding);
     bool number_changed = false;
-    if (state->parsed_valid && state->parsed) {
+    if (state->parsed_valid && state->parsed)
+    {
         uti_render_postfix_number(state->text, MUI_NUMBER_INPUT_MAX_INPUT_SIZE, state->parsed_number, 3);
         state->text_length = strlen(state->text);
         mui_text_selectable(&state->text_selectable_state, state->text, MUI_TEXT_ALIGN_RIGHT, place);
@@ -777,8 +779,11 @@ void mui_text_selectable(Mui_Text_Selectable_State* state, char* text, MUI_TEXT_
     struct Mui_Font* font = theme->font_textinput;
 
     size_t total_length = strlen(text);
-    mui_draw_rectangle(place, theme->bg_light);
+    // clamp selectors to text length
+    state->selector_1 = min(state->selector_1, total_length);
+    state->selector_2 = min(state->selector_2, total_length);
 
+    mui_draw_rectangle(place, theme->bg_light);
 
     //
     // segent into text lines

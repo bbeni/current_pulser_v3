@@ -42,7 +42,7 @@ int main() {
     w = grid_w * grid_pixel_unit;
     h = grid_h * grid_pixel_unit;
 
-    mui_open_window(w, h, 0, 0, "Current Pulser V3 Controller", 1.0f, MUI_WINDOW_RESIZEABLE | MUI_WINDOW_UNDECORATED, NULL);
+    mui_open_window(w, h, 0, grid_pixel_unit, "Current Pulser V3 Controller", 1.0f, MUI_WINDOW_DEFAULT, NULL);
     mui_init_themes(0, 0, false, "resources/font/NimbusSans-Regular.ttf");
 
 
@@ -119,8 +119,8 @@ int main() {
         Mui_Rectangle whole_screen = mui_rectangle(0, 0, w, h);
 
         const float decoration_height = grid_pixel_unit;
-        Mui_Rectangle menu_bar_area = mui_window_decoration(decoration_height, true, true, true, true, true, whole_screen);
-        Mui_Rectangle screen = mui_cut_top(whole_screen, decoration_height, NULL);
+        Mui_Rectangle menu_bar_area; //= mui_window_decoration(decoration_height, true, true, true, true, true, whole_screen);
+        Mui_Rectangle screen = mui_cut_top(whole_screen, decoration_height, &menu_bar_area);
         mui_label(&mui_protos_theme_g, "PULSER V3 CONTROL", MUI_TEXT_ALIGN_DEFAULT, menu_bar_area);
 
         Mui_Rectangle work_area = mui_shrink(screen, grid_pixel_unit);
@@ -358,7 +358,7 @@ int main() {
             mui_draw_circle(ps_status_center, ps_status_radius, STATUS_COLORS[cb1_enable_status]);
 
             mui_cut_bot(mui_cut_bot(cb1_enable_rect, 0.33333f * grid_pixel_unit, NULL), 1 * grid_pixel_unit, &cb1_status_label_rect);
-            mui_label(&mui_protos_theme_g, "EN", MUI_TEXT_ALIGN_CENTER, cb1_status_label_rect);
+            mui_label(&mui_protos_theme_g, "DIS", MUI_TEXT_ALIGN_CENTER, cb1_status_label_rect);
         }
 
         //
@@ -437,7 +437,7 @@ int main() {
             mui_draw_circle(ps_status_center, ps_status_radius, STATUS_COLORS[cb2_enable_status]);
 
             mui_cut_bot(mui_cut_bot(cb2_enable_rect, 0.33333f * grid_pixel_unit, NULL), 1 * grid_pixel_unit, &cb2_status_label_rect);
-            mui_label(&mui_protos_theme_g, "EN", MUI_TEXT_ALIGN_CENTER, cb2_status_label_rect);
+            mui_label(&mui_protos_theme_g, "DIS", MUI_TEXT_ALIGN_CENTER, cb2_status_label_rect);
 
         }
 

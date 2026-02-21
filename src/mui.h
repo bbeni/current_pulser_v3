@@ -247,13 +247,14 @@ bool mui_load_ttf_font_for_theme(const char *font_file, Mui_Theme* theme);
 //
 
 typedef enum {
+    MUI_WINDOW_DEFAULT = 0x0,
     MUI_WINDOW_FULLSCREEN = 0x1,
     MUI_WINDOW_BORDERLESS = 0x2,
     MUI_WINDOW_RESIZEABLE = 0x4,
     MUI_WINDOW_HIDDEN = 0x8,
     MUI_WINDOW_MINIMIZED = 0x10,
     MUI_WINDOW_MAXIMIZED = 0x20,
-    MUI_WINDOW_FOCUSED = 0x40,
+    MUI_WINDOW_UNFOCUSED = 0x40,
     MUI_WINDOW_UNDECORATED = 0x80,
 } MUI_WINDOW_FLAGS;
 

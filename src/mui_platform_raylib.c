@@ -35,7 +35,7 @@ uint8_t mui_open_window(int w, int h, int pos_x, int pos_y, char* title, float o
         raylib_flags |= FLAG_WINDOW_MAXIMIZED;
     }
     if (0 < (flags & MUI_WINDOW_UNDECORATED)) raylib_flags |= FLAG_WINDOW_UNDECORATED;
-    if (0 == (flags & MUI_WINDOW_FOCUSED)) raylib_flags |= FLAG_WINDOW_UNFOCUSED;
+    if (0 < (flags & MUI_WINDOW_UNFOCUSED)) raylib_flags |= FLAG_WINDOW_UNFOCUSED;
 
     SetConfigFlags(raylib_flags);
     InitWindow(w, h, title);
