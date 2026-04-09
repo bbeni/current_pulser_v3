@@ -163,28 +163,6 @@ int main() {
         // LOGIC
 
         if (charging_status == CHARGE) {
-            // TODO make this check inside number setting code
-            // this is also prone to errors as cursor is not updated here
-            if (!voltage_1_set_state.parsed_valid) {
-                Mui_Number_Input_State* state = &voltage_1_set_state;
-                bool success = uti_parse_number_postfixed(state->text, MUI_NUMBER_INPUT_MAX_INPUT_SIZE, &state->parsed_number);
-                state->parsed = true;
-                state->parsed_valid = success;
-                if (success) {
-                    if (state->parsed_number < CONFIG_MIN_VOLTAGE) state->parsed_number = CONFIG_MIN_VOLTAGE;
-                    if (state->parsed_number > CONFIG_MAX_VOLTAGE) state->parsed_number = CONFIG_MAX_VOLTAGE;
-                }
-            }
-            if (!voltage_2_set_state.parsed_valid) {
-                Mui_Number_Input_State* state = &voltage_2_set_state;
-                bool success = uti_parse_number_postfixed(state->text, MUI_NUMBER_INPUT_MAX_INPUT_SIZE, &state->parsed_number);
-                state->parsed = true;
-                state->parsed_valid = success;
-                if (success) {
-                    if (state->parsed_number < CONFIG_MIN_VOLTAGE) state->parsed_number = CONFIG_MIN_VOLTAGE;
-                    if (state->parsed_number > CONFIG_MAX_VOLTAGE) state->parsed_number = CONFIG_MAX_VOLTAGE;
-                }
-            }
             pulser_update_charge_banks(voltage_1_set_state.parsed_number, CONFIG_TARGET_CHARGING_CURRENT, voltage_2_set_state.parsed_number, CONFIG_TARGET_CHARGING_CURRENT);
             if (pulser_get_charging_state() == CHARGE_STATE_BANK_1_ERROR || pulser_get_charging_state() == CHARGE_STATE_BANK_2_ERROR) {
                 charging_status = ERROR;
