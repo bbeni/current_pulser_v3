@@ -277,7 +277,7 @@ int main() {
             char voltage_label[20];
             snprintf(voltage_label, 20, "%.0f V", real_voltage);
             char current_label[20];
-            snprintf(current_label, 20, "%.0f mA", real_current * 1000);
+            snprintf(current_label, 20, "%.0f mA", real_current);
 
             mui_label(&mui_protos_theme_g, voltage_label, MUI_TEXT_ALIGN_RIGHT, u_rect);
             mui_label(&mui_protos_theme_g, current_label, MUI_TEXT_ALIGN_RIGHT, i_rect);
