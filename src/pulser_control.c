@@ -104,7 +104,7 @@ void pulser_prepare_charging() {
 }
 
 
-// TODO remove me maybe
+// TODO remove me
 #ifdef FAKE_
 double fake_hv_voltage = 0.0;
 double fake_hv_current = 0.0;
@@ -152,7 +152,10 @@ bool pulser_update_charge_banks(double target_voltage_1, double target_current_1
         gpio_sleep(100);
         gpio_set_pin_state(pulser_raspberry_pi, PIN_CHARGE, 1);
         pulser_pin_state.charge = 1;
+        gpio_sleep(100);
         pulser_hv_supply_set_voltage_and_current(target_voltage_1, target_current_1);
+        gpio_sleep(100);
+        pulser_hv_supply_output_on();
         charge_state = CHARGE_STATE_BANK_1_CHARGING;
     break;
     case CHARGE_STATE_BANK_1_CHARGING:
@@ -165,7 +168,7 @@ bool pulser_update_charge_banks(double target_voltage_1, double target_current_1
             // wait for the relay
             gpio_sleep(100);
             // deactivate hv supply
-            pulser_hv_supply_set_voltage_and_current(0.0, 0.0);
+            pulser_hv_supply_output_off();
             charge_state = CHARGE_STATE_BANK_1_WAITING_FOR_MEASUREMENT;
         }
     break;
@@ -183,6 +186,7 @@ bool pulser_update_charge_banks(double target_voltage_1, double target_current_1
         }
     break;
     case CHARGE_STATE_BANK_1_ERROR:
+        pulser_hv_supply_output_off();
         return true;
     break;
     case CHARGE_STATE_BANK_1_SUCCESS:
@@ -192,8 +196,10 @@ bool pulser_update_charge_banks(double target_voltage_1, double target_current_1
         gpio_sleep(100);
         gpio_set_pin_state(pulser_raspberry_pi, PIN_CHARGE, 1);
         pulser_pin_state.charge = 1;
-        // TODO: add sleep
+        gpio_sleep(100);
         pulser_hv_supply_set_voltage_and_current(target_voltage_2, target_current_2);
+        gpio_sleep(100);
+        pulser_hv_supply_output_on();
         charge_state = CHARGE_STATE_BANK_2_CHARGING;
     break;
     case CHARGE_STATE_BANK_2_CHARGING:
@@ -206,7 +212,7 @@ bool pulser_update_charge_banks(double target_voltage_1, double target_current_1
             // wait for the relay
             gpio_sleep(100);
             // deactivate hv supply
-            pulser_hv_supply_set_voltage_and_current(0.0, 0.0);
+            pulser_hv_supply_output_off();
             charge_state = CHARGE_STATE_BANK_2_WAITING_FOR_MEASUREMENT;
         }
     break;
@@ -227,6 +233,7 @@ bool pulser_update_charge_banks(double target_voltage_1, double target_current_1
         return true;
     break;
     case CHARGE_STATE_BANK_2_ERROR:
+        pulser_hv_supply_output_off();
         return true;
     default:
         assert(false && "CHARGE_STATE overflow");

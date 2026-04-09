@@ -1,4 +1,8 @@
 #include "pulser_control.h"
+
+// TODO remove me
+#ifndef FAKE_
+
 #include <modbus.h>
 #include <errno.h>
 #include <stdio.h>
@@ -23,9 +27,6 @@
 // Global/Static Modbus context
 static modbus_t *ctx = NULL;
 
-/**
- * Helper: Convert 32-bit float to two 16-bit registers.
- */
 static void float_to_u16(float val, uint16_t *regs) {
     uint32_t i;
     memcpy(&i, &val, sizeof(i)); // Safe type punning
@@ -35,9 +36,6 @@ static void float_to_u16(float val, uint16_t *regs) {
     // expects Little-Endian word order (CDAB instead of ABCD).
 }
 
-/**
- * Helper: Convert two 16-bit registers to a 32-bit float.
- */
 static float u16_to_float(const uint16_t *regs) {
     uint32_t i = ((uint32_t)regs[0] << 16) | regs[1];
     float val;
@@ -46,21 +44,19 @@ static float u16_to_float(const uint16_t *regs) {
 }
 
 bool pulser_hv_supply_init() {
-    // Initialize Modbus RTU (Adjust port e.g. "COM3" for Windows, "/dev/ttyUSB0" for Linux)
     ctx = modbus_new_rtu("/dev/ttyUSB0", 9600, 'N', 8, 1);
+
     if (ctx == NULL) {
-        fprintf(stderr, "Unable to create the libmodbus context\n");
+        fprintf(stderr, "ERROR: Unable to create the libmodbus context\n");
         return false;
     }
 
-    // Set slave ID to 1 (Unit=1 in Python script)
     modbus_set_slave(ctx, 1);
 
-    // Set response timeout (similar to timeout=10 in Python)
     modbus_set_response_timeout(ctx, 10, 0);
 
     if (modbus_connect(ctx) == -1) {
-        fprintf(stderr, "Connection failed: %s\n", modbus_strerror(errno));
+        fprintf(stderr, "ERROR: Connection failed: %s\n", modbus_strerror(errno));
         modbus_free(ctx);
         ctx = NULL;
         return false;
@@ -68,14 +64,13 @@ bool pulser_hv_supply_init() {
 
     // 1. Enable Remote Control (Write Coil PC)
     if (modbus_write_bit(ctx, COIL_PC, TRUE) == -1) {
-        fprintf(stderr, "Failed to enable remote control.\n");
+        fprintf(stderr, "ERROR: Failed to enable remote control.\n");
         return false;
     }
 
     // 2. Setup initial safety limits based on python setup_power_supply()
-    // Set Current limit to 10 mA (0.01 A)
     uint16_t regs[2];
-    float_to_u16(0.01f, regs);
+    float_to_u16(0.180f, regs);
     modbus_write_registers(ctx, REG_IMAX, 2, regs);
     modbus_write_register(ctx, REG_CMD, CMD_SET_CURRENT);
 
@@ -103,6 +98,14 @@ void pulser_hv_supply_set_voltage_and_current(double voltage, double current) {
     modbus_write_registers(ctx, REG_VSET, 2, regs);
     // Send CMD to apply Voltage Set
     modbus_write_register(ctx, REG_CMD, CMD_SET_VOLTAGE);
+}
+
+void pulser_hv_supply_output_on() {
+    modbus_write_register(ctx, REG_CMD, 6);
+}
+
+void pulser_hv_supply_output_off() {
+    modbus_write_register(ctx, REG_CMD, 7);
 }
 
 double pulser_hv_supply_sense_voltage() {
@@ -142,3 +145,5 @@ void pulser_hv_supply_close() {
         ctx = NULL;
     }
 }
+
+#endif // FAKE_
