@@ -155,7 +155,7 @@ double pulser_hv_supply_sense_current() {
     return (double)u16_to_float(regs);
 }
 
-void pulser_hv_supply_close() {
+void pulser_hv_supply_destroy() {
 
     if (ctx != NULL) {
         modbus_close(ctx);
