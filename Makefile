@@ -28,7 +28,7 @@ else
     PLATFORM := LINUX
     RAYLIB_PATH := $(THIRDPARTY_DIR)/raylib-5.5-linux
     STATIC_LIBS := $(RAYLIB_PATH)/lib/libraylib.a
-    LDFLAGS_PLATFORM := -lGL -lm -lpthread -ldl -lrt -lX11 -lmodbus
+    LDFLAGS_PLATFORM := -lGL -lm -lpthread -ldl -lrt -lX11 -lmodbus -lgpiod
     EXT :=
 endif
 
