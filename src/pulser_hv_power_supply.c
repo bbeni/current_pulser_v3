@@ -77,17 +77,17 @@ bool pulser_hv_supply_init() {
     // TODO factor out
     float_to_u16(0.345f, regs);
     modbus_write_registers(ctx, REG_IMAX, 2, regs);
-    gpio_sleep(10);
-    modbus_write_register(ctx, REG_CMD, CMD_SET_CURRENT);
-    gpio_sleep(10);
+    gpio_sleep(1000);
+    send_cmd(CMD_SET_CURRENT);
+    gpio_sleep(1000);
 
     // Set Voltage limit to 2100 V
     // TODO factor out
     float_to_u16(2100.0f, regs);
     modbus_write_registers(ctx, REG_VMAX, 2, regs);
-    gpio_sleep(10);
-    modbus_write_register(ctx, REG_CMD, CMD_SET_VOLTAGE);
-    gpio_sleep(10);
+    gpio_sleep(1000);
+    send_cmd(CMD_SET_VOLTAGE);
+    gpio_sleep(1000);
 
     // TODO rename hv supply with model
     // TODO in general make explicit what hardware we are

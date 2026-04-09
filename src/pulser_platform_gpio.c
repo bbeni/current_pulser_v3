@@ -173,10 +173,11 @@ void gpio_set_pin_state(struct Gpio_Device* device, int pin, int state) {
     } else {
         printf("ERROR: pin not setup here %d\n", pin);
     }
+    printf("INFO: gpio_set_pin_state pin %d state %d\n", pin, state);
 }
 
 void gpio_sleep(uint32_t millis) {
-    uint64_t nanos = (millis * 1000000 );
+    uint64_t nanos = (millis * 1000000);
     struct timespec t;
     t.tv_sec  = nanos / 1000000000;
     t.tv_nsec = nanos % 1000000000;
