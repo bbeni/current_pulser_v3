@@ -177,8 +177,8 @@ bool pulser_update_charge_banks(double target_voltage_1, double target_current_1
         gpio_sleep(1000);
         // measure hv supply voltage
         double measured = pulser_hv_supply_sense_voltage();
-        // TODO: factor out 10 V value
-        if (measured >= 10.0) {
+        // TODO: factor out 1 V value
+        if (measured >= 1.0) {
             // TODO: enable weg
             charge_state = CHARGE_STATE_BANK_1_ERROR;
         } else {
@@ -221,8 +221,8 @@ bool pulser_update_charge_banks(double target_voltage_1, double target_current_1
         gpio_sleep(1000);
         // measure hv supply voltage
         double measured_volts = pulser_hv_supply_sense_voltage();
-        // TODO: factor out 10 V value
-        if (measured_volts >= 10.0) {
+        // TODO: factor out 1 V value
+        if (measured_volts >= 1.0) {
             // TODO: enable off
             charge_state = CHARGE_STATE_BANK_2_ERROR;
         } else {

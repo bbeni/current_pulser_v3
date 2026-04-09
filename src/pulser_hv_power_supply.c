@@ -47,7 +47,7 @@ bool pulser_hv_supply_init() {
     ctx = modbus_new_rtu("/dev/ttyUSB0", 9600, 'N', 8, 1);
 
     if (ctx == NULL) {
-        fprintf(stderr, "ERROR: Unable to create the libmodbus context\n");
+        printf("ERROR: Unable to create the libmodbus context\n");
         return false;
     }
 
@@ -56,7 +56,7 @@ bool pulser_hv_supply_init() {
     modbus_set_response_timeout(ctx, 10, 0);
 
     if (modbus_connect(ctx) == -1) {
-        fprintf(stderr, "ERROR: Connection failed: %s\n", modbus_strerror(errno));
+        printf("ERROR: Connection failed: %s\n", modbus_strerror(errno));
         modbus_free(ctx);
         ctx = NULL;
         return false;
@@ -64,7 +64,7 @@ bool pulser_hv_supply_init() {
 
     // 1. Enable Remote Control (Write Coil PC)
     if (modbus_write_bit(ctx, COIL_PC, TRUE) == -1) {
-        fprintf(stderr, "ERROR: Failed to enable remote control.\n");
+        printf("ERROR: Failed to enable remote control.\n");
         return false;
     }
 
@@ -78,6 +78,10 @@ bool pulser_hv_supply_init() {
     float_to_u16(2100.0f, regs);
     modbus_write_registers(ctx, REG_VMAX, 2, regs);
     modbus_write_register(ctx, REG_CMD, CMD_SET_VOLTAGE);
+
+    // TODO rename hv supply with model
+    // TODO in general make explicit what hardware we are
+    printf("INFO: hv supply init successful\n");
 
     return true;
 }
