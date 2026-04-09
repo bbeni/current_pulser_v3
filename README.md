@@ -5,8 +5,8 @@
 Paste this into a terminal inside the raspberry pi and press enter:
 
 ```console
-sudo apt-get install -y gpiod libgpiod-dev
-sudo apt-get install -y libx11-dev libxcursor-dev libxinerama-dev libxrandr-dev libxi-dev libasound2-dev mesa-common-dev libgl1-mesa-dev
+sudo apt update
+sudo apt-get install -y gpiod libgpiod-dev libmodbus-dev libx11-dev libxcursor-dev libxinerama-dev libxrandr-dev libxi-dev libasound2-dev mesa-common-dev libgl1-mesa-dev
 git clone --depth=1 --branch 5.5 https://github.com/raysan5/raylib/
 cd raylib/src/
 make PLATFORM=PLATFORM_DESKTOP GRAPHICS=GRAPHICS_API_OPENGL_21

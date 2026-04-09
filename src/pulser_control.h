@@ -38,6 +38,7 @@ void pulser_prepare_charging();
 //
 
 bool pulser_hv_supply_init();
+void pulser_hv_supply_close();
 void pulser_hv_supply_set_voltage_and_current(double voltage, double current);
 double pulser_hv_supply_sense_voltage();
 double pulser_hv_supply_sense_current();

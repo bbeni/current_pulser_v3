@@ -28,7 +28,7 @@ else
     PLATFORM := LINUX
     RAYLIB_PATH := $(THIRDPARTY_DIR)/raylib-5.5-linux
     STATIC_LIBS := $(RAYLIB_PATH)/lib/libraylib.a
-    LDFLAGS_PLATFORM := -lGL -lm -lpthread -ldl -lrt -lX11
+    LDFLAGS_PLATFORM := -lGL -lm -lpthread -ldl -lrt -lX11 -lmodbus
     EXT :=
 endif
 
@@ -46,22 +46,23 @@ RESOURCE_PACKER_C := resources/resource_packer.c
 
 # Files
 COMMON_SRCS := \
+    $(SRC_DIR)/osci_control.c \
+    $(SRC_DIR)/pulser_control.c \
+    $(SRC_DIR)/pulser_platform_gpio.c \
+    $(SRC_DIR)/pulser_hv_power_supply.c \
     $(SRC_DIR)/gra.c \
     $(SRC_DIR)/uti.c \
     $(SRC_DIR)/mma.c \
-    $(SRC_DIR)/osci_control.c \
-    $(SRC_DIR)/pulser_control.c \
     $(SRC_DIR)/mui_core.c \
     $(SRC_DIR)/mui_looks.c \
     $(SRC_DIR)/mui_elements.c \
-    $(SRC_DIR)/pulser_platform_gpio.c \
     $(SRC_DIR)/mui_platform_raylib.c
 
 OBJS_MAIN := $(patsubst $(SRC_DIR)/%.c, $(BUILD_DIR)/%.o, $(SRC_DIR)/main.c $(COMMON_SRCS))
 OBJS_OSCI := $(patsubst $(SRC_DIR)/%.c, $(BUILD_DIR)/%.o, $(SRC_DIR)/main_osci.c $(COMMON_SRCS))
 
 HEADER_DEPS := $(SRC_DIR)/config.h $(SRC_DIR)/mui.h $(SRC_DIR)/gra.h $(SRC_DIR)/uti.h $(SRC_DIR)/mma.h
-CFLAGS := -Wall -Wextra -Iinclude -I$(RAYLIB_PATH)/include -I$(THIRDPARTY_DIR) -I$(WAVEFORMS_SDK_PATH)/inc -ggdb
+CFLAGS := -Wall -Wextra -Iinclude -I$(RAYLIB_PATH)/include -I$(THIRDPARTY_DIR) -I$(WAVEFORMS_SDK_PATH)/inc -I/usr/include/modbus -ggdb
 LDFLAGS := $(STATIC_LIBS) -L$(RAYLIB_PATH)/lib -L$(WAVEFORMS_SDK_PATH)/lib/x64 -ldwf -lraylib  $(LDFLAGS_PLATFORM) -ggdb
 
 ifeq ($(PACK_RESOURCES), 1)
