@@ -75,7 +75,7 @@ bool pulser_hv_supply_init() {
 
     uint16_t regs[2];
     // TODO factor out
-    float_to_u16(0.345f, regs);
+    float_to_u16(345.0f, regs);
     modbus_write_registers(ctx, REG_IMAX, 2, regs);
     gpio_sleep(1000);
     send_cmd(CMD_SET_CURRENT);
