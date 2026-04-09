@@ -76,14 +76,22 @@ void pulser_do_reset() {
     gpio_set_pin_state(pulser_raspberry_pi, PIN_FIRE, 0);
     pulser_pin_state.fire = 0;
 
+    gpio_sleep(500);
+
     gpio_set_pin_state(pulser_raspberry_pi, PIN_SELECT, 0);
     pulser_pin_state.select = 0;
+
+    gpio_sleep(500);
 
     gpio_set_pin_state(pulser_raspberry_pi, PIN_ENABLE, 0);
     pulser_pin_state.enable = 0;
 
+    gpio_sleep(500);
+
     gpio_set_pin_state(pulser_raspberry_pi, PIN_CHARGE, 0);
     pulser_pin_state.charge = 0;
+
+    gpio_sleep(500);
 
     charge_state = CHARGE_STATE_READY_FOR_CHARGING;
 }
