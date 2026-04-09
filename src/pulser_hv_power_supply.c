@@ -43,6 +43,12 @@ static float u16_to_float(const uint16_t *regs) {
     return val;
 }
 
+void send_cmd() {
+    if (ctx == NULL) return;
+    uint16_t regs[1] = { cmd_value };
+    modbus_write_registers(ctx, REG_CMD, 1, regs);
+}
+
 bool pulser_hv_supply_init() {
     ctx = modbus_new_rtu("/dev/ttyUSB0", 9600, 'N', 8, 1);
 
@@ -71,13 +77,17 @@ bool pulser_hv_supply_init() {
     // TODO factor out
     float_to_u16(0.345f, regs);
     modbus_write_registers(ctx, REG_IMAX, 2, regs);
+    gpio_sleep(10);
     modbus_write_register(ctx, REG_CMD, CMD_SET_CURRENT);
+    gpio_sleep(10);
 
     // Set Voltage limit to 2100 V
     // TODO factor out
     float_to_u16(2100.0f, regs);
     modbus_write_registers(ctx, REG_VMAX, 2, regs);
+    gpio_sleep(10);
     modbus_write_register(ctx, REG_CMD, CMD_SET_VOLTAGE);
+    gpio_sleep(10);
 
     // TODO rename hv supply with model
     // TODO in general make explicit what hardware we are
@@ -93,22 +103,26 @@ void pulser_hv_supply_set_voltage_and_current(double voltage, double current) {
 
     float_to_u16((float)voltage, regs);
     modbus_write_registers(ctx, REG_VSET, 2, regs);
+    gpio_sleep(10);
     // Send CMD to apply Voltage Set
-    modbus_write_register(ctx, REG_CMD, CMD_SET_VOLTAGE);
+    send_cmd(CMD_SET_VOLTAGE);
+    gpio_sleep(10);
 
     float_to_u16((float)current, regs);
     modbus_write_registers(ctx, REG_ISET, 2, regs);
+    gpio_sleep(10);
     // Send CMD to apply Current Set
-    modbus_write_register(ctx, REG_CMD, CMD_SET_CURRENT);
+    send_cmd(CMD_SET_CURRENT);
+    gpio_sleep(10);
 
 }
 
 void pulser_hv_supply_output_on() {
-    modbus_write_register(ctx, REG_CMD, 6);
+    send_cmd(6);
 }
 
 void pulser_hv_supply_output_off() {
-    modbus_write_register(ctx, REG_CMD, 7);
+    send_cmd(7);
 }
 
 double pulser_hv_supply_sense_voltage() {
@@ -119,7 +133,7 @@ double pulser_hv_supply_sense_voltage() {
     // Read 2 holding registers starting at VS (0x0B00)
     int rc = modbus_read_registers(ctx, REG_VS, 2, regs);
     if (rc == -1) {
-        fprintf(stderr, "Failed to read voltage: %s\n", modbus_strerror(errno));
+        printf("ERROR: DSC Power Supply Failed to read voltage: %s\n", modbus_strerror(errno));
         return 0.0;
     }
 
@@ -134,7 +148,7 @@ double pulser_hv_supply_sense_current() {
     // Read 2 holding registers starting at IS (0x0B02)
     int rc = modbus_read_registers(ctx, REG_IS, 2, regs);
     if (rc == -1) {
-        fprintf(stderr, "Failed to read current: %s\n", modbus_strerror(errno));
+        printf("ERROR: DSC Power Supply Failed to read current: %s\n", modbus_strerror(errno));
         return 0.0;
     }
 
@@ -142,6 +156,7 @@ double pulser_hv_supply_sense_current() {
 }
 
 void pulser_hv_supply_close() {
+
     if (ctx != NULL) {
         modbus_close(ctx);
         modbus_free(ctx);
