@@ -189,7 +189,7 @@ int main() {
             if (pulser_get_charging_state() == CHARGE_STATE_BANK_1_ERROR || pulser_get_charging_state() == CHARGE_STATE_BANK_2_ERROR) {
                 charging_status = ERROR;
             }
-            if (pulser_get_charging_state() == CHARGE_STATE_BANK_2_SUCCESS) {
+            if (pulser_get_charging_state() == CHARGE_STATE_BANK_1_SUCCESS) {
                 charging_status = READY;
             }
         }
