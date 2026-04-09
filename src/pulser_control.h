@@ -2,6 +2,7 @@
 #define PULSER_CONTROL_H_
 
 #include <stdbool.h>
+#include <stdint.h>
 
 //
 // pulser inreface
@@ -55,7 +56,7 @@ bool gpio_init(Gpio_Device** device, const char* device_identifier);
 void gpio_close(Gpio_Device* device);
 bool gpio_configure_pin_output(Gpio_Device* device, int pin, int intial_state);
 void gpio_set_pin_state(Gpio_Device* device, int pin, int state);
-void gpio_sleep(int millis);
+void gpio_sleep(uint32_t millis);
 
 
 //

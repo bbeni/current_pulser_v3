@@ -32,14 +32,15 @@ void gpio_set_pin_state(struct Gpio_Device* device, int pin, int state) {
     printf("gpio_set_pin_state pin %d state %d\n", pin, state);
 }
 
-void gpio_sleep(int millis) {
+void gpio_sleep(uint32_t millis) {
     //Sleep(millis);
     usleep(millis * 1000);
-
 }
 
 #else // not windows so __LINUX__ ???
+
 #include <unistd.h>
+#include <time.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -172,8 +173,12 @@ void gpio_set_pin_state(struct Gpio_Device* device, int pin, int state) {
     }
 }
 
-void gpio_sleep(int millis) {
-    usleep(millis * 1000);
+void gpio_sleep(uint32_t millis) {
+    uint64_t nanos = (millis * 1000000 );
+    struct timespec t;
+    t.tv_sec  = nanos / 1000000000;
+    t.tv_nsec = nanos % 1000000000;
+    nanosleep(&t, NULL);
 }
 
 #endif //__linux__
