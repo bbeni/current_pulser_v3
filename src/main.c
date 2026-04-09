@@ -68,8 +68,8 @@ int main() {
     const float REARM_COOLDOWN_SECONDS = CONFIG_REARM_COOLDOWN_SECONDS;
     float rearm_needed_time_stamp = -1000.0f;
 
-    Mui_Number_Input_State voltage_1_set_state = mui_number_input_state(100);
-    Mui_Number_Input_State voltage_2_set_state = mui_number_input_state(100);
+    Mui_Number_Input_State voltage_1_set_state = mui_number_input_state(200);
+    Mui_Number_Input_State voltage_2_set_state = mui_number_input_state(200);
 
 
     // pulser and hv supply
