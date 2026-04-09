@@ -149,8 +149,8 @@ bool pulser_update_charge_banks(double target_voltage_1, double target_current_1
     case CHARGE_STATE_READY_FOR_CHARGING:
         // TODO: enable ON
 
-        // select bank 1
-        gpio_set_pin_state(pulser_raspberry_pi, PIN_SELECT, 0);
+        // select bank 2
+        gpio_set_pin_state(pulser_raspberry_pi, PIN_SELECT, 1);
         pulser_pin_state.select = 0;
         gpio_sleep(100);
         gpio_set_pin_state(pulser_raspberry_pi, PIN_CHARGE, 1);
@@ -193,8 +193,8 @@ bool pulser_update_charge_banks(double target_voltage_1, double target_current_1
         return true;
     break;
     case CHARGE_STATE_BANK_2_SUCCESS:
-        // select bank 2
-        gpio_set_pin_state(pulser_raspberry_pi, PIN_SELECT, 1);
+        // select bank 1
+        gpio_set_pin_state(pulser_raspberry_pi, PIN_SELECT, 0);
         pulser_pin_state.select = 1;
         gpio_sleep(100);
         gpio_set_pin_state(pulser_raspberry_pi, PIN_CHARGE, 1);
