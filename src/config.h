@@ -11,7 +11,7 @@ const float CONFIG_REARM_COOLDOWN_SECONDS = 90.0f;
 const float CONFIG_MAX_VOLTAGE = 2000.0f;
 const float CONFIG_MIN_VOLTAGE = 0.0f;
 
-const float CONFIG_TARGET_CHARGING_CURRENT = 321.0f; // Ampere
+const float CONFIG_TARGET_CHARGING_CURRENT = 123.0f; // mA
 
 
 #endif // CONFIG_H_
