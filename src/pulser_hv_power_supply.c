@@ -1,5 +1,6 @@
 #include "pulser_control.h"
 #include <modbus.h>
+#include <errno.h>
 #include <stdio.h>
 #include <stdint.h>
 #include <string.h>

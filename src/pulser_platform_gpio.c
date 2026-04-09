@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdbool.h>
 #include <string.h>
+#include "pulser_control.h"
 
 #ifndef _WIN
 // stub implementation
