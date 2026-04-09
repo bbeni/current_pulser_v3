@@ -151,12 +151,12 @@ bool pulser_update_charge_banks(double target_voltage_1, double target_current_1
 
         // select bank 2
         gpio_set_pin_state(pulser_raspberry_pi, PIN_SELECT, 1);
-        pulser_pin_state.select = 0;
+        pulser_pin_state.select = 1;
         gpio_sleep(100);
         gpio_set_pin_state(pulser_raspberry_pi, PIN_CHARGE, 1);
         pulser_pin_state.charge = 1;
         gpio_sleep(100);
-        pulser_hv_supply_set_voltage_and_current(target_voltage_1, target_current_1);
+        pulser_hv_supply_set_voltage_and_current(target_voltage_2, target_current_2);
         gpio_sleep(100);
         pulser_hv_supply_output_on();
         charge_state = CHARGE_STATE_BANK_2_CHARGING;
@@ -165,7 +165,7 @@ bool pulser_update_charge_banks(double target_voltage_1, double target_current_1
         // update charging process
         double measured_voltage = pulser_hv_supply_sense_voltage();
         // TODO add small reserve voltage
-        if (measured_voltage > target_voltage_1) {
+        if (measured_voltage > target_voltage_2) {
             gpio_set_pin_state(pulser_raspberry_pi, PIN_CHARGE, 0);
             pulser_pin_state.charge = 0;
             // wait for the relay
@@ -176,14 +176,14 @@ bool pulser_update_charge_banks(double target_voltage_1, double target_current_1
         }
     break;
     case CHARGE_STATE_BANK_2_WAITING_FOR_MEASUREMENT:
-        // wait 1 second
-        gpio_sleep(1000);
+        // wait 2 second
+        gpio_sleep(2000);
         // measure hv supply voltage
         double measured = pulser_hv_supply_sense_voltage();
         // TODO: factor out 1 V value
         if (measured >= 1.0) {
-            // TODO: enable weg
             charge_state = CHARGE_STATE_BANK_2_ERROR;
+            gpio_set_pin_state(pulser_raspberry_pi, PIN_ENABLE, 0);
         } else {
             charge_state = CHARGE_STATE_BANK_2_SUCCESS;
         }
@@ -193,14 +193,15 @@ bool pulser_update_charge_banks(double target_voltage_1, double target_current_1
         return true;
     break;
     case CHARGE_STATE_BANK_2_SUCCESS:
+        // Here is the start of Bank 1
         // select bank 1
         gpio_set_pin_state(pulser_raspberry_pi, PIN_SELECT, 0);
-        pulser_pin_state.select = 1;
+        pulser_pin_state.select = 0;
         gpio_sleep(100);
         gpio_set_pin_state(pulser_raspberry_pi, PIN_CHARGE, 1);
         pulser_pin_state.charge = 1;
         gpio_sleep(100);
-        pulser_hv_supply_set_voltage_and_current(target_voltage_2, target_current_2);
+        pulser_hv_supply_set_voltage_and_current(target_voltage_1, target_current_1);
         gpio_sleep(100);
         pulser_hv_supply_output_on();
         charge_state = CHARGE_STATE_BANK_1_CHARGING;
@@ -209,7 +210,7 @@ bool pulser_update_charge_banks(double target_voltage_1, double target_current_1
         // update charging process
         double voltage = pulser_hv_supply_sense_voltage();
         // TODO: add safty margin
-        if (voltage > target_voltage_2) {
+        if (voltage > target_voltage_1) {
             gpio_set_pin_state(pulser_raspberry_pi, PIN_CHARGE, 0);
             pulser_pin_state.charge = 0;
             // wait for the relay
@@ -220,14 +221,14 @@ bool pulser_update_charge_banks(double target_voltage_1, double target_current_1
         }
     break;
     case CHARGE_STATE_BANK_1_WAITING_FOR_MEASUREMENT:
-        // wait 1 second
-        gpio_sleep(1000);
+        // wait 2 second
+        gpio_sleep(2000);
         // measure hv supply voltage
         double measured_volts = pulser_hv_supply_sense_voltage();
         // TODO: factor out 1 V value
         if (measured_volts >= 1.0) {
-            // TODO: enable off
             charge_state = CHARGE_STATE_BANK_1_ERROR;
+            gpio_set_pin_state(pulser_raspberry_pi, PIN_ENABLE, 0);
         } else {
             charge_state = CHARGE_STATE_BANK_1_SUCCESS;
         }
