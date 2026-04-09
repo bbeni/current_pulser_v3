@@ -2,9 +2,10 @@
 #include <stdbool.h>
 #include <string.h>
 
-#ifndef WINDOWS
+#ifndef _WIN
 // stub implementation
-#include <Windows.h>
+//#include <Windows.h>
+#include <unistd.h>
 
 bool gpio_init(struct Gpio_Device** device, const char* device_identifier) {
     (void) device;
@@ -31,7 +32,9 @@ void gpio_set_pin_state(struct Gpio_Device* device, int pin, int state) {
 }
 
 void gpio_sleep(int millis) {
-    Sleep(millis);
+    //Sleep(millis);
+    usleep(millis * 1000);
+
 }
 
 #else // not windows so __LINUX__ ???
@@ -47,13 +50,14 @@ struct Gpio_Device {
     struct gpiod_chip *chip;
     #define LINES_LEN 256
     struct gpiod_line *lines_array[LINES_LEN];
-}
+};
 
 
 // initializes the gpio device (opaque)
 // error message is stored inside device
 // device_identifier is "gpiochip4" for raspberry 4 or 5 for example
 bool gpio_init(struct Gpio_Device** device, const char* device_identifier) {
+    /*
 
     struct Gpio_Device* dev_;
     dev_ = malloc(sizeof(*dev_));
@@ -73,22 +77,24 @@ bool gpio_init(struct Gpio_Device** device, const char* device_identifier) {
         snprintf(dev_->last_err_msg, ERROR_LEN, err_msg, device_identifier);
         return false;
     }
-
+    */
     return true;
 }
 
 void gpio_close(struct Gpio_Device* device) {
+    /*
     for (int i = 0; i < LINES_LEN; i++) {
         if (device->lines_array[i] != NULL) {
             gpiod_line_release(device->lines_array[i]);
         }
     }
     gpiod_chip_close(device->chip);
+*/
 }
 
 // intital_state can be LOW or HIGH
-bool gpio_configure_pin_output(struct Gpio_Device* device, int pin, int intial_state) {
-
+bool gpio_configure_pin_output(struct Gpio_Device* device, int pin, int initial_state) {
+ /*
     assert(pin < LINES_LEN && "increase LINES_LEN it is a static array!");
 
     if (device->lines_array[pin]) {
@@ -101,25 +107,29 @@ bool gpio_configure_pin_output(struct Gpio_Device* device, int pin, int intial_s
         }
     }
 
-    if (gpiod_line_request_output(device->lines_array[pin], CONSUMER, inital_state) < 0) {
+    if (gpiod_line_request_output(device->lines_array[pin], CONSUMER, initial_state) < 0) {
         char err_msg[] = "Failed to reques the pin '%d' as an output";
         printf(err_msg, pin);
         snprintf(device->last_err_msg, ERROR_LEN, err_msg, pin);
         return false;
     }
+    */
+    return true;
 }
 
 // set the pin to the value of state
 void gpio_set_pin_state(struct Gpio_Device* device, int pin, int state) {
 
+/*
     assert(pin < LINES_LEN && "increase LINES_LEN it is a static array!");
 
     if (device->lines_array[pin]) {
         // TODO: error check
-        gpiod_line_set_value(dev)
+        // gpiod_line_request_set_value(device->lines_array[pin], 0, state);
     } else {
         printf("ERROR: pin not setup here %d", pin);
     }
+*/
 }
 
 void gpio_sleep(int millis) {

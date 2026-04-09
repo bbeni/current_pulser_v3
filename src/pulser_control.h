@@ -36,6 +36,7 @@ void pulser_prepare_charging();
 //
 // high voltage supply interface
 //
+// see modbus python script. manual of power supply
 
 bool pulser_hv_supply_init();
 void pulser_hv_supply_close();

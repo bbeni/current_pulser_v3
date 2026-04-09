@@ -108,6 +108,7 @@ int main() {
 
     while (!mui_window_should_close())
     {
+        gpio_sleep(100);
         mui_update_core();
 
         w = mui_screen_width();

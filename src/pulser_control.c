@@ -140,6 +140,8 @@ bool pulser_update_charge_banks(double target_voltage_1, double target_current_1
     switch (charge_state) {
 
     case CHARGE_STATE_READY_FOR_CHARGING:
+        // TODO: enable ON
+
         // select bank 1
         gpio_set_pin_state(pulser_raspberry_pi, PIN_SELECT, 0);
         pulser_pin_state.select = 0;
@@ -152,6 +154,7 @@ bool pulser_update_charge_banks(double target_voltage_1, double target_current_1
     case CHARGE_STATE_BANK_1_CHARGING:
         // update charging process
         double measured_voltage = pulser_hv_supply_sense_voltage();
+        // TODO add small reserve voltage
         if (measured_voltage > target_voltage_1) {
             gpio_set_pin_state(pulser_raspberry_pi, PIN_CHARGE, 0);
             pulser_pin_state.charge = 0;
@@ -169,6 +172,7 @@ bool pulser_update_charge_banks(double target_voltage_1, double target_current_1
         double measured = pulser_hv_supply_sense_voltage();
         // TODO: factor out 10 V value
         if (measured >= 10.0) {
+            // TODO: enable weg
             charge_state = CHARGE_STATE_BANK_1_ERROR;
         } else {
             charge_state = CHARGE_STATE_BANK_1_SUCCESS;
@@ -184,12 +188,14 @@ bool pulser_update_charge_banks(double target_voltage_1, double target_current_1
         gpio_sleep(100);
         gpio_set_pin_state(pulser_raspberry_pi, PIN_CHARGE, 1);
         pulser_pin_state.charge = 1;
+        // TODO: add sleep
         pulser_hv_supply_set_voltage_and_current(target_voltage_2, target_current_2);
         charge_state = CHARGE_STATE_BANK_2_CHARGING;
     break;
     case CHARGE_STATE_BANK_2_CHARGING:
         // update charging process
         double voltage = pulser_hv_supply_sense_voltage();
+        // TODO: add safty margin
         if (voltage > target_voltage_2) {
             gpio_set_pin_state(pulser_raspberry_pi, PIN_CHARGE, 0);
             pulser_pin_state.charge = 0;
@@ -207,6 +213,7 @@ bool pulser_update_charge_banks(double target_voltage_1, double target_current_1
         double measured_volts = pulser_hv_supply_sense_voltage();
         // TODO: factor out 10 V value
         if (measured_volts >= 10.0) {
+            // TODO: enable off
             charge_state = CHARGE_STATE_BANK_2_ERROR;
         } else {
             charge_state = CHARGE_STATE_BANK_2_SUCCESS;
