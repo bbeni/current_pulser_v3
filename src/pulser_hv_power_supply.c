@@ -43,7 +43,7 @@ static float u16_to_float(const uint16_t *regs) {
     return val;
 }
 
-void send_cmd() {
+void send_cmd(uint16_t cmd_value) {
     if (ctx == NULL) return;
     uint16_t regs[1] = { cmd_value };
     modbus_write_registers(ctx, REG_CMD, 1, regs);
