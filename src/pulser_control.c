@@ -104,6 +104,8 @@ void pulser_prepare_charging() {
 }
 
 
+// TODO remove me maybe
+#ifdef FAKE_
 double fake_hv_voltage = 0.0;
 double fake_hv_current = 0.0;
 double fake_hv_voltage_setpoint = 0.0;
@@ -131,6 +133,8 @@ double pulser_hv_supply_sense_voltage() {
 double pulser_hv_supply_sense_current() {
     return fake_hv_current;
 }
+
+#endif // FAKE_
 
 
 
