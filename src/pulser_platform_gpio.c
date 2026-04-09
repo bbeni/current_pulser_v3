@@ -3,9 +3,13 @@
 #include <string.h>
 #include "pulser_control.h"
 
-#ifndef _WIN
-// stub implementation
-//#include <Windows.h>
+#ifdef _WIN32
+
+// !!!
+// stub implementation on windows
+// !!!
+
+#include <Windows.h>
 
 bool gpio_init(struct Gpio_Device** device, const char* device_identifier) {
     (void) device;
@@ -32,8 +36,7 @@ void gpio_set_pin_state(struct Gpio_Device* device, int pin, int state) {
 }
 
 void gpio_sleep(uint32_t millis) {
-    //Sleep(millis);
-    exit(111);
+    Sleep(millis);
 }
 
 #else // not windows so __LINUX__ ???
