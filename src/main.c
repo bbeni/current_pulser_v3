@@ -448,6 +448,7 @@ int main() {
 
     oscilloscope_destroy(&oscilloscope_state);
     mui_close_window();
+    pulser_hv_supply_destroy();
 
     return 0;
 }

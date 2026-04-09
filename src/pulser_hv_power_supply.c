@@ -137,6 +137,8 @@ double pulser_hv_supply_sense_voltage() {
         return 0.0;
     }
 
+    printf("INFO: DSC Power Supply voltage = %f\n", u16_to_float(regs));
+
     return (double)u16_to_float(regs);
 }
 
@@ -151,6 +153,8 @@ double pulser_hv_supply_sense_current() {
         printf("ERROR: DSC Power Supply Failed to read current: %s\n", modbus_strerror(errno));
         return 0.0;
     }
+
+    printf("INFO: DSC Power Supply current = %f\n", u16_to_float(regs));
 
     return (double)u16_to_float(regs);
 }
