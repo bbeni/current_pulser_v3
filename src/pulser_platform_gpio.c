@@ -6,7 +6,6 @@
 #ifndef _WIN
 // stub implementation
 //#include <Windows.h>
-#include <unistd.h>
 
 bool gpio_init(struct Gpio_Device** device, const char* device_identifier) {
     (void) device;
@@ -34,7 +33,7 @@ void gpio_set_pin_state(struct Gpio_Device* device, int pin, int state) {
 
 void gpio_sleep(uint32_t millis) {
     //Sleep(millis);
-    usleep(millis * 1000);
+    exit(111);
 }
 
 #else // not windows so __LINUX__ ???
