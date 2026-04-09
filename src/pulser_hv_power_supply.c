@@ -47,7 +47,7 @@ bool pulser_hv_supply_init() {
     ctx = modbus_new_rtu("/dev/ttyUSB0", 9600, 'N', 8, 1);
 
     if (ctx == NULL) {
-        printf("ERROR: Unable to create the libmodbus context\n");
+        printf("ERROR: DSC Power Supply unable to create the libmodbus context\n");
         return false;
     }
 
@@ -56,32 +56,32 @@ bool pulser_hv_supply_init() {
     modbus_set_response_timeout(ctx, 10, 0);
 
     if (modbus_connect(ctx) == -1) {
-        printf("ERROR: Connection failed: %s\n", modbus_strerror(errno));
+        printf("ERROR: DSC Power Supply connection failed: %s\n", modbus_strerror(errno));
         modbus_free(ctx);
         ctx = NULL;
         return false;
     }
 
-    // 1. Enable Remote Control (Write Coil PC)
-    if (modbus_write_bit(ctx, COIL_PC, TRUE) == -1) {
-        printf("ERROR: Failed to enable remote control.\n");
+    if (modbus_write_bit(ctx, COIL_PC, true) == -1) {
+        printf("ERROR: DSC Power Supply failed to enable remote control.\n");
         return false;
     }
 
-    // 2. Setup initial safety limits based on python setup_power_supply()
     uint16_t regs[2];
-    float_to_u16(0.180f, regs);
+    // TODO factor out
+    float_to_u16(0.345f, regs);
     modbus_write_registers(ctx, REG_IMAX, 2, regs);
     modbus_write_register(ctx, REG_CMD, CMD_SET_CURRENT);
 
     // Set Voltage limit to 2100 V
+    // TODO factor out
     float_to_u16(2100.0f, regs);
     modbus_write_registers(ctx, REG_VMAX, 2, regs);
     modbus_write_register(ctx, REG_CMD, CMD_SET_VOLTAGE);
 
     // TODO rename hv supply with model
     // TODO in general make explicit what hardware we are
-    printf("INFO: hv supply init successful\n");
+    printf("INFO: DSC Power Supply connected successful\n");
 
     return true;
 }
@@ -91,17 +91,16 @@ void pulser_hv_supply_set_voltage_and_current(double voltage, double current) {
 
     uint16_t regs[2];
 
-    // 1. Set the Current (ISET)
+    float_to_u16((float)voltage, regs);
+    modbus_write_registers(ctx, REG_VSET, 2, regs);
+    // Send CMD to apply Voltage Set
+    modbus_write_register(ctx, REG_CMD, CMD_SET_VOLTAGE);
+
     float_to_u16((float)current, regs);
     modbus_write_registers(ctx, REG_ISET, 2, regs);
     // Send CMD to apply Current Set
     modbus_write_register(ctx, REG_CMD, CMD_SET_CURRENT);
 
-    // 2. Set the Voltage (VSET)
-    float_to_u16((float)voltage, regs);
-    modbus_write_registers(ctx, REG_VSET, 2, regs);
-    // Send CMD to apply Voltage Set
-    modbus_write_register(ctx, REG_CMD, CMD_SET_VOLTAGE);
 }
 
 void pulser_hv_supply_output_on() {
