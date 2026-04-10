@@ -359,7 +359,6 @@ double internal_offset_scale_data(size_t i, struct Internal_Scaled_Offsetted_Dat
 void oscilloscope_ui_draw(Mui_Rectangle area, float grid_pixel_unit, struct Oscilloscope_Ui* ui, struct Oscilloscope_State* state, const struct Oscilloscope_Settings* settings) {
     Mui_Rectangle scope_settings_area;
     Mui_Rectangle trigger_checkbox_area;
-    Mui_Rectangle save_csv_button_area;
     Mui_Rectangle up_button_area;
     Mui_Rectangle down_button_area;
 
@@ -370,7 +369,6 @@ void oscilloscope_ui_draw(Mui_Rectangle area, float grid_pixel_unit, struct Osci
     scope_settings_area = mui_cut_right(scope_settings_area, 1.0f * grid_pixel_unit, NULL);
     scope_settings_area = mui_cut_top(scope_settings_area, 1.0f * grid_pixel_unit, &trigger_checkbox_area);
     scope_settings_area = mui_cut_top(scope_settings_area, 1.0f * grid_pixel_unit, NULL);
-    scope_settings_area = mui_cut_top(scope_settings_area, 1.0f * grid_pixel_unit, &save_csv_button_area);
 
     scope_settings_area = mui_cut_top(scope_settings_area, 2.5f * grid_pixel_unit, NULL);
     scope_settings_area = mui_cut_top(scope_settings_area, 1.0f * grid_pixel_unit, &up_button_area);
@@ -402,7 +400,6 @@ void oscilloscope_ui_draw(Mui_Rectangle area, float grid_pixel_unit, struct Osci
             bool triggered = ui->trigger_armed_cb_state.checked;
             oscilloscope_change_mode(state, ui, settings, triggered);
         }
-        mui_button(&ui->save_csv_btn_state, "Save CSV", save_csv_button_area);
     }
 
     char* label_inc = ui->do_plot_current?  "A/div inc" : "V/div inc";
@@ -466,6 +463,48 @@ void oscilloscope_ui_draw(Mui_Rectangle area, float grid_pixel_unit, struct Osci
 
 }
 
+void oscilloscope_save_csv(const char* path, struct Oscilloscope_State* state, struct Oscilloscope_Ui* ui) {
+    struct Uti_String_Builder s = uti_string_builder(1000);
+
+
+    assert(state->n_channels <= 2);
+    float scales[2];
+    float offsets[2];
+    bool convert_current = ui->do_plot_current;
+    scales[0] = convert_current ? ui->current_voltage_factor_chan_a : 1.0;
+    offsets[0] = ui->voltage_offset_chan_a;
+    scales[1] = convert_current ? ui->current_voltage_factor_chan_b : 1.0;
+    offsets[1] = ui->voltage_offset_chan_b;
+
+    char buffer[256];
+    // header
+    uti_string_builder_add_cstr(&s, "t(s),");
+    for (int i = 0; i < state->n_channels; i++) {
+        if (convert_current)
+            snprintf(buffer, 256, "V_%d(V)", i + 1);
+        else
+            snprintf(buffer, 256, "I_%d(A)", i + 1);
+        uti_string_builder_add_cstr(&s, buffer);
+        if (i != state->n_channels - 1) uti_string_builder_add_cstr(&s, ",");
+    }
+    uti_string_builder_add_cstr(&s, "\n");
+
+    // data
+    for (int j = 0; j < state->n_data; j++) {
+        for (int i = 0; i < state->n_channels; i++) {
+            float data_point = state->data[i * state->n_data + j] + offsets[i];
+            if (convert_current) {
+                data_point *= scales[i];
+            }
+            snprintf(buffer, 256, "%.6f", data_point);
+            uti_string_builder_add_cstr(&s, buffer);
+            if (i != state->n_channels - 1) uti_string_builder_add_cstr(&s, ",");
+        }
+        uti_string_builder_add_cstr(&s, "\n");
+    }
+
+    uti_write_entire_file(path, s.text, s.size);
+}
 
 void oscilloscope_ui_update(struct Oscilloscope_Ui* oscilloscope_ui, struct Oscilloscope_State* oscilloscope_state) {
     float trigger_armed_cooldown = oscilloscope_ui->TRIGGER_ARM_COOLDOWN + oscilloscope_ui->trigger_armed_timestamp - mui_get_time();
@@ -477,6 +516,8 @@ void oscilloscope_ui_update(struct Oscilloscope_Ui* oscilloscope_ui, struct Osci
             // TODO: use settings inted of state for n_channels etc..
             if (osc_triggered_update(&oscilloscope_state->device, trigger_armed_cooldown, oscilloscope_state->data, oscilloscope_state->n_data, oscilloscope_state->n_channels)) {
                 oscilloscope_ui->triggerd_data_aquired = true;
+                // save data
+                oscilloscope_save_csv("test.csv", oscilloscope_state, oscilloscope_ui);
             }
         }
     } else {

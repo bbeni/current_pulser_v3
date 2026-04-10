@@ -77,7 +77,6 @@ struct Oscilloscope_State {
 
 struct Oscilloscope_Ui {
     Mui_Checkbox_State trigger_armed_cb_state;
-    Mui_Button_State save_csv_btn_state;
     Mui_Button_State up_btn_state;
     Mui_Button_State down_btn_state;
 
@@ -126,6 +125,7 @@ void oscilloscope_change_mode(struct Oscilloscope_State* state, struct Oscillosc
 void oscilloscope_ui_draw(Mui_Rectangle area, float grid_pixel_unit, struct Oscilloscope_Ui* ui, struct Oscilloscope_State* state, const struct Oscilloscope_Settings* settings);
 void oscilloscope_ui_update(struct Oscilloscope_Ui* oscilloscope_ui, struct Oscilloscope_State* oscilloscope_state);
 void oscilloscope_destroy(struct Oscilloscope_State* oscilloscope_state);
+void oscilloscope_save_csv(const char* path, struct Oscilloscope_State* state, struct Oscilloscope_Ui* ui);
 
 
 #endif // OSCI_CONTROL_
