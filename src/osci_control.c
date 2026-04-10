@@ -432,13 +432,12 @@ void oscilloscope_ui_draw(Mui_Rectangle area, float grid_pixel_unit, struct Osci
     // filename display
     {
         const char* filename = ui->last_csv_filename;
-        Mui_Vector2 pos = mui_center_of_rectangle(plot_rect);
+        Mui_Vector2 pos;
         size_t l = mui_text_len(filename, strlen(filename));
         Mui_Vector2 measure = mui_measure_text(filename, 0, l, mui_protos_theme_g.font_label, mui_protos_theme_g.font_label_size, 0.5f);
-        pos.x -= measure.x * 0.5f;
-        pos.y -= measure.y * 0.5f;
         pos.x = plot_rect.x;
         pos.y = plot_rect.y;
+        pos.y -= measure.y * 1.2f;
         mui_draw_text_line(filename, 0, l, mui_protos_theme_g.font_label, mui_protos_theme_g.font_label_size, 0.5f, MUI_GRAY, pos);
     }
 
