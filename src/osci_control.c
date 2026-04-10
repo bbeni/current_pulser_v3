@@ -466,7 +466,6 @@ void oscilloscope_ui_draw(Mui_Rectangle area, float grid_pixel_unit, struct Osci
 void oscilloscope_save_csv(const char* path, struct Oscilloscope_State* state, struct Oscilloscope_Ui* ui) {
     struct Uti_String_Builder s = uti_string_builder(1000);
 
-
     assert(state->n_channels <= 2);
     float scales[2];
     float offsets[2];
@@ -516,7 +515,7 @@ void oscilloscope_generate_csv_filepath(char* buffer, size_t n, const char* data
     struct tm tm = *localtime(&t);
     snprintf(buffer, n, "mkdir -p %s/%d-%02d-%02d/", data_path, tm.tm_year + 1900, tm.tm_mon + 1, tm.tm_mday);
     system(buffer);
-    snprintf(buffer, n, "%s/%d-%02d-%02d-%02d%02d.csv", data_path, tm.tm_year + 1900, tm.tm_mon + 1, tm.tm_mday, tm.tm_hour, tm.tm_min);
+    snprintf(buffer, n, "%s/%d-%02d-%02d/%d-%02d-%02d-%02d%02d.csv", data_path, tm.tm_year + 1900, tm.tm_mon + 1, tm.tm_mday, tm.tm_year + 1900, tm.tm_mon + 1, tm.tm_mday, tm.tm_hour, tm.tm_min);
 }
 
 void oscilloscope_ui_update(struct Oscilloscope_Ui* oscilloscope_ui, struct Oscilloscope_State* oscilloscope_state, const char* data_path_csvs) {

@@ -88,7 +88,7 @@ int main() {
     settings.v_pk_to_pk = 5.0f;           // volts
     settings.trigger_mode = false;        // start in shift screen mode
     settings.trigger_channel = 0;         // the first one
-    settings.trigger_level = CONFIG_TRIGGER_LEVEL_CURRENT / CONFIG_CURRENT_VOLTAGE_FACTOR_CHANNEL_A;      // volts
+    settings.trigger_level = CONFIG_TRIGGER_LEVEL_AMPERE / CONFIG_CURRENT_VOLTAGE_FACTOR_CHANNEL_A;      // volts
     settings.trigger_position = 0.0008;   // in seconds
     settings.trigger_auto_timeout = 0.0f;  // in seconds, 0.0 for disabling it
     settings.trigger_length = 0.000001f;  // in seconds
