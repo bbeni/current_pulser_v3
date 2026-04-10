@@ -64,6 +64,7 @@ int main() {
     int cb2_status = OFF;
     int cb1_enable_status = OFF;
     int cb2_enable_status = OFF;
+    bool ready_for_arming = true;
 
     const float REARM_COOLDOWN_SECONDS = CONFIG_REARM_COOLDOWN_SECONDS;
     float rearm_needed_time_stamp = -1000.0f;
@@ -87,11 +88,11 @@ int main() {
     settings.v_pk_to_pk = 5.0f;           // volts
     settings.trigger_mode = false;        // start in shift screen mode
     settings.trigger_channel = 0;         // the first one
-    settings.trigger_level = 0.008f;      // volts
+    settings.trigger_level = CONFIG_TRIGGER_LEVEL_CURRENT / CONFIG_CURRENT_VOLTAGE_FACTOR_CHANNEL_A;      // volts
     settings.trigger_position = 0.0008;   // in seconds
-    settings.trigger_auto_timeout = 0.0;  // in seconds, 0.0 for disabling it
+    settings.trigger_auto_timeout = 0.0f;  // in seconds, 0.0 for disabling it
     settings.trigger_length = 0.000001f;  // in seconds
-    settings.trigger_type = OSC_TRIGGER_TYPE_TRANSITION;
+    settings.trigger_type = OSC_TRIGGER_TYPE_EDGE;
     settings.trigger_condition = OSC_TRIGGER_CONDITION_RISING_POSITIVE;
     struct Oscilloscope_State oscilloscope_state = {0};
     oscilloscope_setup(&oscilloscope_state, &settings);
@@ -235,6 +236,7 @@ int main() {
                     cb1_status = OFF;
                     cb2_status = OFF;
                     charging_status = OFF;
+                    pulser_do_reset();
                     rearm_needed_time_stamp = mui_get_time();
                 }
             }
@@ -304,9 +306,6 @@ int main() {
                 if (rearmed && charging_status == OFF) {
                     pulser_prepare_charging();
                     charging_status = CHARGE;
-
-                    oscilloscope_change_mode(&oscilloscope_state, &oscilloscope_ui_state, &settings, true);
-                    oscilloscope_ui_state.trigger_armed_cb_state.checked = true;
                 }
             }
 
@@ -376,6 +375,11 @@ int main() {
             int fire_status = OFF;
             if (charging_status == READY) {
                 fire_status = READY;
+                if (ready_for_arming) {
+                    oscilloscope_change_mode(&oscilloscope_state, &oscilloscope_ui_state, &settings, true);
+                    oscilloscope_ui_state.trigger_armed_cb_state.checked = true;
+                    ready_for_arming = false;
+                }
             }
 
             if (mui_n_status_button(&fire_button_state, "FIRE", STATUS_COLORS, 4, fire_status, fire_button_area)) {
@@ -385,6 +389,7 @@ int main() {
                     cb1_status = OFF;
                     cb2_status = OFF;
                     charging_status = OFF;
+                    ready_for_arming = true;
                     rearm_needed_time_stamp = mui_get_time();
                 }
             }
@@ -446,6 +451,7 @@ int main() {
         uti_temp_reset();
     }
 
+    pulser_do_reset();
     oscilloscope_destroy(&oscilloscope_state);
     mui_close_window();
     pulser_hv_supply_destroy();

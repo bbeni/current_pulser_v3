@@ -554,6 +554,8 @@ void mui_textinput_multiline(Mui_Textinput_Multiline_State *state, const char *h
 size_t _internal_get_cursor_by_position(Mui_Vector2 pos, char* text, size_t* start_cursor, size_t* end_cursor, size_t n_lines, struct Mui_Font* font, float font_size, Mui_Rectangle place);
 
 
+
+
 // return true if the value changed
 bool mui_number_input(Mui_Number_Input_State *state, Mui_Rectangle place, double input_min, double input_max) {
 

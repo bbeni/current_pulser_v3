@@ -129,7 +129,8 @@ bool osc_triggered_setup(struct Osc_Device* device, double** data_out, int reque
     double* data;
     data = malloc(sizeof(*data) * *n_samples_out * n_channels);
     if (!data) return false;
-    memset(data, 0x0, sizeof(*data) * *n_samples_out * n_channels);
+    //TODO delete me
+    //memset(data, 0x0, sizeof(*data) * *n_samples_out * n_channels);
 
     *data_out = data;
 
@@ -174,11 +175,11 @@ bool osc_triggered_arm_trigger(struct Osc_Device* device, double auto_time_out, 
     TRIGLEN triglen;
     FDwfAnalogInTriggerLengthConditionInfo(device->handle, &triglencond);
     FDwfAnalogInTriggerLengthConditionGet(device->handle, &triglen);
-    printf("Trigger condigion info: cond: %d                 triglen:%d\n", triglencond, triglen);
+    printf("Trigger condigion info: cond: %d triglen:%d\n", triglencond, triglen);
 
     FDwfAnalogInTriggerLengthInfo(device->handle, &mi, &ma, &steps);
     FDwfAnalogInTriggerLengthGet(device->handle, &tlevel);
-    printf("Trigger length info: min: %f max: %f steps: %f      lenth: %f\n\n", mi, ma, steps, tlevel);
+    printf("Trigger length info: min: %f max: %f steps: %f lenth: %f\n\n", mi, ma, steps, tlevel);
 
     FILTER filter;
 
