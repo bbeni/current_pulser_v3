@@ -441,11 +441,6 @@ void oscilloscope_ui_draw(Mui_Rectangle area, float grid_pixel_unit, struct Osci
         mui_draw_text_line(filename, 0, l, mui_protos_theme_g.font_label, mui_protos_theme_g.font_label_size, 0.5f, MUI_GRAY, pos);
     }
 
-    // legend
-    char* labels[] = {"I_1", "I_2"};
-    Mui_Color colors[] = {MUI_BLUE, MUI_GREEN};
-    bool mask[] = {true, true};
-    gra_xy_legend(labels, colors, mask, 2, plot_rect);
 
     double t_min = ui->plot_args.x_left;
     double t_max = ui->plot_args.x_right;
@@ -478,6 +473,27 @@ void oscilloscope_ui_draw(Mui_Rectangle area, float grid_pixel_unit, struct Osci
         gra_xy_plot_data_points(state->t_data, &scaled_data_a, (void*)&internal_offset_scale_data, state->n_data, t_min, t_max, y_min, y_max, MUI_BLUE, 2.0f, plot_rect);
         gra_xy_plot_data_points(state->t_data, &scaled_data_b, (void*)&internal_offset_scale_data, state->n_data, t_min, t_max, y_min, y_max, MUI_GREEN, 2.0f, plot_rect);
     //}
+
+    // legend
+    double max_ia = 0;
+    double max_ib = 0;
+    for (int index = 0; index < state->n_data; index++) {
+        double ia = internal_offset_scale_data(index, &scaled_data_a);
+        double ib = internal_offset_scale_data(index, &scaled_data_b);
+        if (ia > max_ia) {max_ia = ia;}
+        if (ib > max_ib) {max_ib = ib;}
+    }
+
+    char label_a[52];
+    char label_b[52];
+    snprintf(label_a, 52, "I_1 (I_max = %.1f A)", max_ia);
+    snprintf(label_b, 52, "I_2 (I_max = %.1f A)", max_ib);
+
+    char* labels[] = {label_a, label_b};
+    Mui_Color colors[] = {MUI_BLUE, MUI_GREEN};
+    bool mask[] = {true, true};
+    gra_xy_legend(labels, colors, mask, 2, plot_rect);
+
 
 }
 
