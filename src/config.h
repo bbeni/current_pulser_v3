@@ -15,5 +15,6 @@ const float CONFIG_MIN_VOLTAGE = 0.0f;
 
 const float CONFIG_TARGET_CHARGING_CURRENT = 200.0f; // mA
 
+const char CONFIG_DATA_PATH[] = "~/Documents/current_pulser_data";
 
 #endif // CONFIG_H_

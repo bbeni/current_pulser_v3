@@ -8,6 +8,7 @@
 #include "stdlib.h"
 #include "string.h"
 #include "assert.h"
+#include "time.h"
 
 #include "dwf.h"
 
@@ -15,7 +16,7 @@
 #include "uti.h"
 
 #include "osci_control.h"
-
+#include "config.h"
 
 void osc_print_last_error() {
     char szError[512];
@@ -477,20 +478,24 @@ void oscilloscope_save_csv(const char* path, struct Oscilloscope_State* state, s
     offsets[1] = ui->voltage_offset_chan_b;
 
     char buffer[256];
-    // header
+
+    // csv header
     uti_string_builder_add_cstr(&s, "t(s),");
     for (int i = 0; i < state->n_channels; i++) {
-        if (convert_current)
-            snprintf(buffer, 256, "V_%d(V)", i + 1);
-        else
+        if (convert_current) {
             snprintf(buffer, 256, "I_%d(A)", i + 1);
+        } else {
+            snprintf(buffer, 256, "V_%d(V)", i + 1);
+        }
         uti_string_builder_add_cstr(&s, buffer);
         if (i != state->n_channels - 1) uti_string_builder_add_cstr(&s, ",");
     }
     uti_string_builder_add_cstr(&s, "\n");
 
-    // data
+    // csv data
     for (int j = 0; j < state->n_data; j++) {
+        snprintf(buffer, 256, "%.6f,", state->t_data[j]);
+        uti_string_builder_add_cstr(&s, buffer);
         for (int i = 0; i < state->n_channels; i++) {
             float data_point = state->data[i * state->n_data + j] + offsets[i];
             if (convert_current) {
@@ -506,6 +511,15 @@ void oscilloscope_save_csv(const char* path, struct Oscilloscope_State* state, s
     uti_write_entire_file(path, s.text, s.size);
 }
 
+
+void oscilloscope_generate_csv_filepath(char* buffer, size_t n) {
+    time_t t = time(NULL);
+    struct tm tm = *localtime(&t);
+    snprintf(buffer, n, "mkdir -p %s/%d-%02d-%02d/", CONFIG_DATA_PATH, tm.tm_year + 1900, tm.tm_mon + 1, tm.tm_mday);
+    system(buffer);
+    snprintf(buffer, n, "%s/%d-%02d-%02d-%02d%02d.csv", CONFIG_DATA_PATH, tm.tm_year + 1900, tm.tm_mon + 1, tm.tm_mday, tm.tm_hour, tm.tm_min);
+}
+
 void oscilloscope_ui_update(struct Oscilloscope_Ui* oscilloscope_ui, struct Oscilloscope_State* oscilloscope_state) {
     float trigger_armed_cooldown = oscilloscope_ui->TRIGGER_ARM_COOLDOWN + oscilloscope_ui->trigger_armed_timestamp - mui_get_time();
 
@@ -517,7 +531,9 @@ void oscilloscope_ui_update(struct Oscilloscope_Ui* oscilloscope_ui, struct Osci
             if (osc_triggered_update(&oscilloscope_state->device, trigger_armed_cooldown, oscilloscope_state->data, oscilloscope_state->n_data, oscilloscope_state->n_channels)) {
                 oscilloscope_ui->triggerd_data_aquired = true;
                 // save data
-                oscilloscope_save_csv("test.csv", oscilloscope_state, oscilloscope_ui);
+                char filename[256];
+                oscilloscope_generate_csv_filepath(filename, 256);
+                oscilloscope_save_csv(filename, oscilloscope_state, oscilloscope_ui);
             }
         }
     } else {
