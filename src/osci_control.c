@@ -286,6 +286,7 @@ void oscilloscope_ui_setup(struct Oscilloscope_Ui* oscilloscope_ui, const struct
     oscilloscope_ui->voltage_offset_chan_a = ui_settings->voltage_offset_chan_a;
     oscilloscope_ui->voltage_offset_chan_b = ui_settings->voltage_offset_chan_b;
     oscilloscope_ui->do_plot_current = ui_settings->do_plot_current;
+    oscilloscope_ui->last_csv_filename[0] = 0;
 
     double a_exp = ceil(log10(ui_settings->current_voltage_factor_chan_a));
     double b_exp = ceil(log10(ui_settings->current_voltage_factor_chan_b));
@@ -426,8 +427,24 @@ void oscilloscope_ui_draw(Mui_Rectangle area, float grid_pixel_unit, struct Osci
         mui_draw_text_line(no_device_text, 0, l, mui_protos_theme_g.font_label, mui_protos_theme_g.font_label_size, 0.5f, MUI_RED, pos);
     }
 
-
     if (!state->device_available) return;
+
+    // filename display
+    {
+        const char* filename = ui->last_csv_filename;
+        Mui_Vector2 pos = mui_center_of_rectangle(plot_rect);
+        size_t l = mui_text_len(filename, strlen(filename));
+        Mui_Vector2 measure = mui_measure_text(filename, 0, l, mui_protos_theme_g.font_label, mui_protos_theme_g.font_label_size, 0.5f);
+        pos.x -= measure.x * 0.5f;
+        pos.y -= measure.y * 0.5f;
+        mui_draw_text_line(filename, 0, l, mui_protos_theme_g.font_label, mui_protos_theme_g.font_label_size, 0.5f, MUI_YELLOW, pos);
+    }
+
+    // legend
+    const char* labels[] = {"I_1", "I_2"};
+    const Mui_Color colors[] = {MUI_BLUE, MUI_GREEN};
+    const bool mask[] = {true, true};
+    gra_xy_legend(labels, colors, mask, 2, plot_rect);
 
     double t_min = ui->plot_args.x_left;
     double t_max = ui->plot_args.x_right;

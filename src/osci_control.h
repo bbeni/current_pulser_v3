@@ -82,6 +82,7 @@ struct Oscilloscope_Ui {
 
     float trigger_armed_timestamp;
     bool triggerd_data_aquired;
+    char last_csv_filename[256];
 
     float TRIGGER_ARM_COOLDOWN;
 
