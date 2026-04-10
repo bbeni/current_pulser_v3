@@ -16,7 +16,6 @@
 #include "uti.h"
 
 #include "osci_control.h"
-#include "config.h"
 
 void osc_print_last_error() {
     char szError[512];
@@ -512,15 +511,15 @@ void oscilloscope_save_csv(const char* path, struct Oscilloscope_State* state, s
 }
 
 
-void oscilloscope_generate_csv_filepath(char* buffer, size_t n) {
+void oscilloscope_generate_csv_filepath(char* buffer, size_t n, const char* data_path) {
     time_t t = time(NULL);
     struct tm tm = *localtime(&t);
-    snprintf(buffer, n, "mkdir -p %s/%d-%02d-%02d/", CONFIG_DATA_PATH, tm.tm_year + 1900, tm.tm_mon + 1, tm.tm_mday);
+    snprintf(buffer, n, "mkdir -p %s/%d-%02d-%02d/", data_path, tm.tm_year + 1900, tm.tm_mon + 1, tm.tm_mday);
     system(buffer);
-    snprintf(buffer, n, "%s/%d-%02d-%02d-%02d%02d.csv", CONFIG_DATA_PATH, tm.tm_year + 1900, tm.tm_mon + 1, tm.tm_mday, tm.tm_hour, tm.tm_min);
+    snprintf(buffer, n, "%s/%d-%02d-%02d-%02d%02d.csv", data_path, tm.tm_year + 1900, tm.tm_mon + 1, tm.tm_mday, tm.tm_hour, tm.tm_min);
 }
 
-void oscilloscope_ui_update(struct Oscilloscope_Ui* oscilloscope_ui, struct Oscilloscope_State* oscilloscope_state) {
+void oscilloscope_ui_update(struct Oscilloscope_Ui* oscilloscope_ui, struct Oscilloscope_State* oscilloscope_state, const char* data_path_csvs) {
     float trigger_armed_cooldown = oscilloscope_ui->TRIGGER_ARM_COOLDOWN + oscilloscope_ui->trigger_armed_timestamp - mui_get_time();
 
     if (!oscilloscope_state->device_available) return;

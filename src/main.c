@@ -143,7 +143,7 @@ int main() {
         mui_draw_rectangle_lines(time_series_area, mui_protos_theme_g.border, 2.0f);
         //gra_xy_plot_labels_and_grid("t [ms]", "I [kA]", -0.2f, 1.2f, -5, 15, 0.2f, 5, true, oscilloscope_area);
 
-        oscilloscope_ui_update(&oscilloscope_ui_state, &oscilloscope_state);
+        oscilloscope_ui_update(&oscilloscope_ui_state, &oscilloscope_state, CONFIG_DATA_PATH);
         oscilloscope_ui_draw(oscilloscope_area, grid_pixel_unit, &oscilloscope_ui_state, &oscilloscope_state, &settings);
 
 

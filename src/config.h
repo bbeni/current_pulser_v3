@@ -1,6 +1,11 @@
 #ifndef CONFIG_H_
 #define CONFIG_H_
 
+// Configuration of hard coded values
+// For this to have an effect recompile the program
+// This file must only be included once in main.c
+// TODO make it dynamic settings in the UI with sensible defaults
+
 const double CONFIG_CURRENT_VOLTAGE_FACTOR_CHANNEL_A = 6072.0;
 const double CONFIG_CURRENT_VOLTAGE_FACTOR_CHANNEL_B = 6048.0;
 const double CONFIG_VOLTAGE_OFFSET_CHANNEL_A = 0.0084;

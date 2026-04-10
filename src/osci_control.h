@@ -123,7 +123,7 @@ bool oscilloscope_setup(struct Oscilloscope_State* state, const struct Oscillosc
 void oscilloscope_ui_setup(struct Oscilloscope_Ui* oscilloscope_ui, const struct Oscilloscope_Ui_Settings* ui_settings, float grid_pixels_unit);
 void oscilloscope_change_mode(struct Oscilloscope_State* state, struct Oscilloscope_Ui* ui, const struct Oscilloscope_Settings* settings, bool triggered);
 void oscilloscope_ui_draw(Mui_Rectangle area, float grid_pixel_unit, struct Oscilloscope_Ui* ui, struct Oscilloscope_State* state, const struct Oscilloscope_Settings* settings);
-void oscilloscope_ui_update(struct Oscilloscope_Ui* oscilloscope_ui, struct Oscilloscope_State* oscilloscope_state);
+void oscilloscope_ui_update(struct Oscilloscope_Ui* oscilloscope_ui, struct Oscilloscope_State* oscilloscope_state, const char* data_path_csvs);
 void oscilloscope_destroy(struct Oscilloscope_State* oscilloscope_state);
 
 void oscilloscope_generate_csv_filepath(char* buffer, size_t n);

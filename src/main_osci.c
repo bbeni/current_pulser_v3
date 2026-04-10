@@ -38,8 +38,7 @@ int main() {
     {
         mui_update_core();
 
-        oscilloscope_ui_update(&oscilloscope_ui_state, &oscilloscope_state);
-
+        oscilloscope_ui_update(&oscilloscope_ui_state, &oscilloscope_state, "./osci_data");
 
         w = mui_screen_width();
         h = mui_screen_height();
