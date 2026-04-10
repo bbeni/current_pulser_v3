@@ -531,7 +531,7 @@ void oscilloscope_ui_update(struct Oscilloscope_Ui* oscilloscope_ui, struct Osci
                 oscilloscope_ui->triggerd_data_aquired = true;
                 // save data
                 char filename[256];
-                oscilloscope_generate_csv_filepath(filename, 256);
+                oscilloscope_generate_csv_filepath(filename, 256, data_path_csvs);
                 oscilloscope_save_csv(filename, oscilloscope_state, oscilloscope_ui);
             }
         }

@@ -126,7 +126,7 @@ void oscilloscope_ui_draw(Mui_Rectangle area, float grid_pixel_unit, struct Osci
 void oscilloscope_ui_update(struct Oscilloscope_Ui* oscilloscope_ui, struct Oscilloscope_State* oscilloscope_state, const char* data_path_csvs);
 void oscilloscope_destroy(struct Oscilloscope_State* oscilloscope_state);
 
-void oscilloscope_generate_csv_filepath(char* buffer, size_t n);
+void oscilloscope_generate_csv_filepath(char* buffer, size_t n, const char* data_path);
 void oscilloscope_save_csv(const char* path, struct Oscilloscope_State* state, struct Oscilloscope_Ui* ui);
 
 
