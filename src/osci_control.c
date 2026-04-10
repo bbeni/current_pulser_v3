@@ -441,9 +441,9 @@ void oscilloscope_ui_draw(Mui_Rectangle area, float grid_pixel_unit, struct Osci
     }
 
     // legend
-    const char* labels[] = {"I_1", "I_2"};
-    const Mui_Color colors[] = {MUI_BLUE, MUI_GREEN};
-    const bool mask[] = {true, true};
+    char* labels[] = {"I_1", "I_2"};
+    Mui_Color colors[] = {MUI_BLUE, MUI_GREEN};
+    bool mask[] = {true, true};
     gra_xy_legend(labels, colors, mask, 2, plot_rect);
 
     double t_min = ui->plot_args.x_left;
@@ -546,9 +546,8 @@ void oscilloscope_ui_update(struct Oscilloscope_Ui* oscilloscope_ui, struct Osci
             if (osc_triggered_update(&oscilloscope_state->device, trigger_armed_cooldown, oscilloscope_state->data, oscilloscope_state->n_data, oscilloscope_state->n_channels)) {
                 oscilloscope_ui->triggerd_data_aquired = true;
                 // save data
-                char filename[256];
-                oscilloscope_generate_csv_filepath(filename, 256, data_path_csvs);
-                oscilloscope_save_csv(filename, oscilloscope_state, oscilloscope_ui);
+                oscilloscope_generate_csv_filepath(oscilloscope_ui->last_csv_filename, 256, data_path_csvs);
+                oscilloscope_save_csv(oscilloscope_ui->last_csv_filename, oscilloscope_state, oscilloscope_ui);
             }
         }
     } else {
