@@ -309,12 +309,19 @@ int main() {
             float ps_status_radius = grid_pixel_unit * 0.33333333f;
             Mui_Vector2 ps_status_center = mui_center_of_rectangle(ps_status_rect);
 
-            Mui_Color ps_status_color = MUI_GRAY;
-            if (hv_supply_on) ps_status_color = MUI_GREEN;
-            mui_draw_circle(ps_status_center, ps_status_radius, ps_status_color);
+            if (hv_supply_on) {
+                mui_draw_circle(ps_status_center, ps_status_radius, MUI_GREEN);
+            } else {
+                mui_draw_circle(ps_status_center, ps_status_radius, MUI_GRAY);
+            }
+
             Mui_Rectangle ps_status_label_rect;
             mui_cut_bot(mui_cut_bot(ps_status_rect, 0.33333f * grid_pixel_unit, NULL), 1 * grid_pixel_unit, &ps_status_label_rect);
-            mui_label(&mui_protos_theme_g, "ON", MUI_TEXT_ALIGN_CENTER, ps_status_label_rect);
+            if (hv_supply_on) {
+                mui_label(&mui_protos_theme_g, "ON", MUI_TEXT_ALIGN_CENTER, ps_status_label_rect);
+            } else {
+                mui_label(&mui_protos_theme_g, "OFF", MUI_TEXT_ALIGN_CENTER, ps_status_label_rect);
+            }
         }
 
         //
