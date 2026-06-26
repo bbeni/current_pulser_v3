@@ -50,19 +50,22 @@ void send_cmd(uint16_t cmd_value) {
 }
 
 bool pulser_hv_supply_init() {
-    ctx = modbus_new_rtu("/dev/ttyUSB0", 9600, 'N', 8, 1);
 
     if (ctx == NULL) {
-        printf("ERROR: DSC Power Supply unable to create the libmodbus context\n");
-        return false;
+        ctx = modbus_new_rtu("/dev/ttyUSB0", 9600, 'N', 8, 1);
+        if (ctx == NULL) {
+            printf("ERROR: DSC Power Supply unable to create the libmodbus context\n");
+            return false;
+        }
+
+        modbus_set_slave(ctx, 1);
+        modbus_set_response_timeout(ctx, 0, 100000); // 100 ms
     }
 
-    modbus_set_slave(ctx, 1);
-
-    modbus_set_response_timeout(ctx, 0, 100000); // 100 ms
 
     if (modbus_connect(ctx) == -1) {
         printf("ERROR: DSC Power Supply connection failed: %s\n", modbus_strerror(errno));
+        modbus_close(ctx);
         modbus_free(ctx);
         ctx = NULL;
         return false;
