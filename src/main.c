@@ -246,7 +246,7 @@ int main() {
                     }
                 }
             } else {
-                mui_label(&mui_protos_theme_g.text_muted, "Turn on pulser and/or HV supply!", MUI_TEXT_ALIGN_LEFT || MUI_TEXT_ALIGN_MID, standby_button_area);
+                mui_label(&mui_protos_theme_g, "Turn on pulser and/or HV supply!", MUI_TEXT_ALIGN_LEFT || MUI_TEXT_ALIGN_MID, standby_button_area);
             }
 
 

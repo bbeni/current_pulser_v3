@@ -43,6 +43,7 @@ void pulser_hv_supply_destroy();
 void pulser_hv_supply_set_voltage_and_current(double voltage, double current);
 void pulser_hv_supply_output_on();
 void pulser_hv_supply_output_off();
+bool pulser_hv_supply_is_on();
 double pulser_hv_supply_sense_voltage();
 double pulser_hv_supply_sense_current();
 
