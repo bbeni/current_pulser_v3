@@ -74,9 +74,9 @@ int main() {
 
 
     // pulser and hv supply
-
     if (!pulser_init()) return 1;
-    if (!pulser_hv_supply_init()) return 1;
+    bool need_retry_hv_supply_init = false;
+    if (!pulser_hv_supply_init()) need_retry_hv_supply_init = true;
 
 
     // osci
@@ -110,6 +110,12 @@ int main() {
     while (!mui_window_should_close())
     {
 
+        if (need_retry_hv_supply_init) {
+            if (pulser_hv_supply_init()) {
+                need_retry_hv_supply_init = false;
+            }
+        }
+
         bool hv_supply_on = pulser_hv_supply_is_on();
 
         gpio_sleep(100);
@@ -125,8 +131,9 @@ int main() {
 
         const float decoration_height = grid_pixel_unit;
         Mui_Rectangle menu_bar_area; //= mui_window_decoration(decoration_height, true, true, true, true, true, whole_screen);
-        Mui_Rectangle screen = mui_cut_top(whole_screen, decoration_height, &menu_bar_area);
-        mui_label(&mui_protos_theme_g, "PULSER V3 CONTROL", MUI_TEXT_ALIGN_DEFAULT, menu_bar_area);
+        //Mui_Rectangle screen = mui_cut_top(whole_screen, decoration_height, &menu_bar_area);
+        Mui_Rectangle screen = whole_screen;
+        //mui_label(&mui_protos_theme_g, "PULSER V3 CONTROL", MUI_TEXT_ALIGN_DEFAULT, menu_bar_area);
 
         Mui_Rectangle work_area = mui_shrink(screen, grid_pixel_unit);
 

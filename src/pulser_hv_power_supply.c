@@ -59,7 +59,7 @@ bool pulser_hv_supply_init() {
 
     modbus_set_slave(ctx, 1);
 
-    modbus_set_response_timeout(ctx, 10, 0);
+    modbus_set_response_timeout(ctx, 0, 100000); // 100 ms
 
     if (modbus_connect(ctx) == -1) {
         printf("ERROR: DSC Power Supply connection failed: %s\n", modbus_strerror(errno));
