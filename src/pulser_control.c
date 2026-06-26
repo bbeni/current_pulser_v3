@@ -176,12 +176,12 @@ bool pulser_update_charge_banks(double target_voltage_1, double target_current_1
         }
     break;
     case CHARGE_STATE_BANK_2_WAITING_FOR_MEASUREMENT:
-        // wait 2 second
-        gpio_sleep(2000);
+        // wait some time to discharge HV supply (milli seconds)
+        gpio_sleep((int)(2 * target_voltage_2));
         // measure hv supply voltage
         double measured = pulser_hv_supply_sense_voltage();
-        // TODO: factor out 1 V value
-        if (measured >= 1.0) {
+        // TODO: factor out 5 V value
+        if (measured >= 5.0) {
             charge_state = CHARGE_STATE_BANK_2_ERROR;
             gpio_set_pin_state(pulser_raspberry_pi, PIN_ENABLE, 0);
         } else {
@@ -221,12 +221,12 @@ bool pulser_update_charge_banks(double target_voltage_1, double target_current_1
         }
     break;
     case CHARGE_STATE_BANK_1_WAITING_FOR_MEASUREMENT:
-        // wait 2 second
-        gpio_sleep(2000);
+        // wait some time to discharge HV supply (milli seconds)
+        gpio_sleep((int)(2 * target_voltage_1));
         // measure hv supply voltage
         double measured_volts = pulser_hv_supply_sense_voltage();
-        // TODO: factor out 1 V value
-        if (measured_volts >= 1.0) {
+        // TODO: factor out 5 V value
+        if (measured_volts >= 5.0) {
             charge_state = CHARGE_STATE_BANK_1_ERROR;
             gpio_set_pin_state(pulser_raspberry_pi, PIN_ENABLE, 0);
         } else {

@@ -294,14 +294,14 @@ void oscilloscope_ui_setup(struct Oscilloscope_Ui* oscilloscope_ui, const struct
 
     struct Gra_Gridded_Base_Arguments plot_args;
     plot_args.grid_unit_pixels = grid_pixels_unit;
-    plot_args.grid_w = 18;
+    plot_args.grid_w = 20;
     plot_args.grid_h = 12;
     plot_args.grid_left_axis_off = 2;
     plot_args.grid_bot_axis_off = 2;
     plot_args.grid_skip_x = 1;
     plot_args.grid_skip_y = 1;
     plot_args.x_left = -0.0002f;
-    plot_args.x_right = 0.0018f;
+    plot_args.x_right = 0.0016f;
     plot_args.y_bot = !ui_settings->do_plot_current ? -1.0f : -0.2f * pow(10.0, exponent);
     plot_args.y_top = !ui_settings->do_plot_current ? 4.0f : 0.8f * pow(10.0, exponent);
     plot_args.x_label = "t [s]";
@@ -375,8 +375,8 @@ void oscilloscope_ui_draw(Mui_Rectangle area, float grid_pixel_unit, struct Osci
     scope_settings_area = mui_cut_top(scope_settings_area, 1.0f * grid_pixel_unit, &up_button_area);
     scope_settings_area = mui_cut_top(scope_settings_area, 0.5f * grid_pixel_unit, NULL);
     scope_settings_area = mui_cut_top(scope_settings_area, 1.0f * grid_pixel_unit, &down_button_area);
-    down_button_area = mui_cut_right(down_button_area, 2.0f * grid_pixel_unit, NULL);
-    up_button_area = mui_cut_right(up_button_area, 2.0f * grid_pixel_unit, NULL);
+    down_button_area = mui_cut_right(down_button_area, 1.0f * grid_pixel_unit, NULL);
+    up_button_area = mui_cut_right(up_button_area, 1.0f * grid_pixel_unit, NULL);
 
 
     float trigger_armed_cooldown = ui->TRIGGER_ARM_COOLDOWN + ui->trigger_armed_timestamp - mui_get_time();
