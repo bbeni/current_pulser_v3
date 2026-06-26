@@ -109,6 +109,9 @@ int main() {
 
     while (!mui_window_should_close())
     {
+
+        bool hv_supply_on = pulser_hv_supply_is_on();
+
         gpio_sleep(100);
         mui_update_core();
 
@@ -231,14 +234,19 @@ int main() {
                 snprintf(standby_label, 20-1, "STANDBY");
             }
 
-            if (mui_n_status_button(&standby_button_state, standby_label, STATUS_COLORS, 4, standby_status, standby_button_area)) {
-                if (charging_status == READY) {
-                    cb1_status = OFF;
-                    cb2_status = OFF;
-                    charging_status = OFF;
-                    pulser_do_reset();
-                    rearm_needed_time_stamp = mui_get_time();
+
+            if (hv_supply_on) {
+                if (mui_n_status_button(&standby_button_state, standby_label, STATUS_COLORS, 4, standby_status, standby_button_area)) {
+                    if (charging_status == READY) {
+                        cb1_status = OFF;
+                        cb2_status = OFF;
+                        charging_status = OFF;
+                        pulser_do_reset();
+                        rearm_needed_time_stamp = mui_get_time();
+                    }
                 }
+            } else {
+                mui_label(&mui_protos_theme_g.text_muted, "Turn on pulser and/or HV supply!", MUI_TEXT_ALIGN_LEFT || MUI_TEXT_ALIGN_MID, standby_button_area);
             }
 
 
@@ -273,13 +281,18 @@ int main() {
             mui_draw_rectangle_lines(u_rect, mui_protos_theme_g.border, 2.0f);
             mui_draw_rectangle_lines(i_rect, mui_protos_theme_g.border, 2.0f);
 
-            double real_voltage = pulser_hv_supply_sense_voltage();
-            double real_current = pulser_hv_supply_sense_current();
-
             char voltage_label[20];
-            snprintf(voltage_label, 20, "%.0f V", real_voltage);
             char current_label[20];
-            snprintf(current_label, 20, "%.0f mA", real_current);
+            if (hv_supply_on) {
+                double real_voltage = pulser_hv_supply_sense_voltage();
+                double real_current = pulser_hv_supply_sense_current();
+                snprintf(voltage_label, 20, "%.0f V", real_voltage);
+                snprintf(current_label, 20, "%.0f mA", real_current);
+            } else {
+                snprintf(voltage_label, 20, "off");
+                snprintf(current_label, 20, "off");
+            }
+
 
             mui_label(&mui_protos_theme_g, voltage_label, MUI_TEXT_ALIGN_RIGHT, u_rect);
             mui_label(&mui_protos_theme_g, current_label, MUI_TEXT_ALIGN_RIGHT, i_rect);
@@ -301,11 +314,13 @@ int main() {
             Mui_Rectangle charge_button_area;
             Mui_Rectangle cap_bank_1_area = mui_cut_top(panel_2_area, 1 * grid_pixel_unit, &charge_button_area);
 
-            // LOGIC
-            if (mui_n_status_button(&charge_button_state, "CHARGE", STATUS_COLORS, 4, charging_status, charge_button_area)) {
-                if (rearmed && charging_status == OFF) {
-                    pulser_prepare_charging();
-                    charging_status = CHARGE;
+            if (hv_supply_on) {
+                // LOGIC
+                if (mui_n_status_button(&charge_button_state, "CHARGE", STATUS_COLORS, 4, charging_status, charge_button_area)) {
+                    if (rearmed && charging_status == OFF) {
+                        pulser_prepare_charging();
+                        charging_status = CHARGE;
+                    }
                 }
             }
 
@@ -382,15 +397,18 @@ int main() {
                 }
             }
 
-            if (mui_n_status_button(&fire_button_state, "FIRE", STATUS_COLORS, 4, fire_status, fire_button_area)) {
-                if (fire_status == READY) {
-                    pulser_do_fire();
-                    fire_status = OFF;
-                    cb1_status = OFF;
-                    cb2_status = OFF;
-                    charging_status = OFF;
-                    ready_for_arming = true;
-                    rearm_needed_time_stamp = mui_get_time();
+            if (hv_supply_on) {
+
+                if (mui_n_status_button(&fire_button_state, "FIRE", STATUS_COLORS, 4, fire_status, fire_button_area)) {
+                    if (fire_status == READY) {
+                        pulser_do_fire();
+                        fire_status = OFF;
+                        cb1_status = OFF;
+                        cb2_status = OFF;
+                        charging_status = OFF;
+                        ready_for_arming = true;
+                        rearm_needed_time_stamp = mui_get_time();
+                    }
                 }
             }
 

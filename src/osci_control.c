@@ -307,8 +307,8 @@ void oscilloscope_ui_setup(struct Oscilloscope_Ui* oscilloscope_ui, const struct
     plot_args.x_label = "t [s]";
     plot_args.y_label = !ui_settings->do_plot_current ? "U [V]" : "I [A]";
     plot_args.thick_y_zero = true;
-    plot_args.tick_x_label_fmt = "%.6f";
-    plot_args.tick_y_label_fmt = "%.2f";
+    plot_args.tick_x_label_fmt = "%.4f";
+    plot_args.tick_y_label_fmt = "%.0f";
     oscilloscope_ui->plot_args = plot_args;
 
 }
@@ -486,8 +486,8 @@ void oscilloscope_ui_draw(Mui_Rectangle area, float grid_pixel_unit, struct Osci
 
     char label_a[52];
     char label_b[52];
-    snprintf(label_a, 52, "I_1 (I_max = %.1f A)", max_ia);
-    snprintf(label_b, 52, "I_2 (I_max = %.1f A)", max_ib);
+    snprintf(label_a, 52, "I_1 (I_max = %.0f A)", max_ia);
+    snprintf(label_b, 52, "I_2 (I_max = %.0f A)", max_ib);
 
     char* labels[] = {label_a, label_b};
     Mui_Color colors[] = {MUI_BLUE, MUI_GREEN};

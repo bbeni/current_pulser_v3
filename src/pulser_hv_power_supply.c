@@ -126,6 +126,22 @@ void pulser_hv_supply_output_off() {
     send_cmd(7);
 }
 
+bool pulser_hv_supply_is_on() {
+    if (ctx == NULL) return false;
+
+    // make it more responsive
+    struct timeval old_timeout;
+    struct timeval fast_timeout = { .tv_sec = 0, .tv_usec = 100000 }; // 100 ms
+    modbus_get_response_timeout(ctx, &old_timeout);
+    modbus_set_response_timeout(ctx, &fast_timeout);
+
+    // just try to read a random value if it fails we are off.
+    uint16_t reg;
+    int rc = modbus_read_registers(ctx, REG_VS, 1, &reg);
+    modbus_set_response_timeout(ctx, &old_timeout);
+    if (rc == -1) return false;
+}
+
 double pulser_hv_supply_sense_voltage() {
     if (ctx == NULL) return 0.0;
 

@@ -176,8 +176,8 @@ bool pulser_update_charge_banks(double target_voltage_1, double target_current_1
         }
     break;
     case CHARGE_STATE_BANK_2_WAITING_FOR_MEASUREMENT:
-        // wait some time to discharge HV supply (milli seconds)
-        gpio_sleep((int)(2 * target_voltage_2));
+        // wait some time to discharge HV supply (milliseconds)
+        gpio_sleep((int)(2 * target_voltage_2 + 200));
         // measure hv supply voltage
         double measured = pulser_hv_supply_sense_voltage();
         // TODO: factor out 5 V value
@@ -221,8 +221,8 @@ bool pulser_update_charge_banks(double target_voltage_1, double target_current_1
         }
     break;
     case CHARGE_STATE_BANK_1_WAITING_FOR_MEASUREMENT:
-        // wait some time to discharge HV supply (milli seconds)
-        gpio_sleep((int)(2 * target_voltage_1));
+        // wait some time to discharge HV supply (milliseconds)
+        gpio_sleep((int)(2 * target_voltage_1 + 200));
         // measure hv supply voltage
         double measured_volts = pulser_hv_supply_sense_voltage();
         // TODO: factor out 5 V value
