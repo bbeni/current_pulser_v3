@@ -1,5 +1,7 @@
 # Current Pulser V3 Controller
 
+![](./current_pulser_ui.png "Current Pulser Preview")
+
 ## Compile Rapberry Pi
 
 Paste this into a terminal inside the raspberry pi and press enter:
